@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var cool = require('cool-ascii-faces');
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -11,6 +12,10 @@ app.set('view engine', 'ejs');
 
 app.get('/', function(request, response) {
   response.render('pages/index');
+});
+
+app.get('/cool', function(request, response) {
+	  response.send(cool());
 });
 
 app.listen(app.get('port'), function() {
