@@ -1,3 +1,5 @@
+Note I use a nested repo. I cloned the backbone git repo into this repo.
+
 # node-js-getting-started
 
 A barebones Node.js app using [Express 4](http://expressjs.com/).
