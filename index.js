@@ -1,19 +1,19 @@
 var express = require('express');
 var app = express();
-var env = process.env.NODE_ENV || 'production';
+//var env = process.env.NODE_ENV || 'production';
 var distDir = __dirname + '/modern-backbone-starterkit/dist/'
 
 // from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
-var forceSsl = function (req, res, next) {
-   if (req.headers['x-forwarded-proto'] !== 'https') {
-     return res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
-   }
-   return next();
-};
-
-if (env === 'production') {
-    app.use(forceSsl);
-}
+//var forceSsl = function (req, res, next) {
+//   if (req.headers['x-forwarded-proto'] !== 'https') {
+//     return res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
+//   }
+//   return next();
+//};
+//
+//if (env === 'production') {
+//    app.use(forceSsl);
+//}
 
 app.set('port', (process.env.PORT || 5000));
 
