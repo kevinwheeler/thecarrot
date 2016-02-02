@@ -16,8 +16,9 @@ export default Backbone.Router.extend({
   },
 
   dashboard() {
-    var helloView = new HelloView().render();
-
+    var helloView = new HelloView({
+        el: $('<div class=".rwcHellowView"/>')
+    }).render();
     $('#js-app').empty().append(helloView.$el);
   },
 
