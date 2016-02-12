@@ -1,4 +1,10 @@
-Note I use a nested repo. I cloned the backbone git repo into this repo.
+##This section is for comments that weren't part of the repo when it was originally cloned from the heroku nodejs scaffold 
+
+#NOTE I use a nested repo. I cloned the backbone git repo into this repo.
+#NOTE: Remember to only use release commits. Building releases is a pain, so I only build and commit the dist files during release commits.
+
+
+## Currently, everything below this line came with the heroku nodejs scaffold.
 
 # node-js-getting-started
 
