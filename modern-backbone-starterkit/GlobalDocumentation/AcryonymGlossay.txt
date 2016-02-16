@@ -1,0 +1,1 @@
+rwc = reverse word counter

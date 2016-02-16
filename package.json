@@ -22,5 +22,8 @@
     "heroku",
     "express"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jscs": "^2.10.1"
+  }
 }

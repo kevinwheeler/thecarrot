@@ -17,7 +17,7 @@ export default Backbone.Router.extend({
 
   dashboard() {
     var mainViewInst = new MainView({
-        el: $('<div class=".rwcHellowView"/>')
+        el: $('<div class="rwcMainView"/>')
     }).render();
     $('#js-app').empty().append(mainViewInst.$el);
   },
@@ -29,5 +29,4 @@ export default Backbone.Router.extend({
 
     $('#js-app').empty().append(mainViewInst.$el);
   }
-
 });
