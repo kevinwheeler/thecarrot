@@ -4,11 +4,9 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from './heroTemplate.hbs';
-import TextGeneratorModel from '../models/textGeneratorModel';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
