@@ -181,15 +181,14 @@ th {
   font-size: 20px;
 }
 .rwcHeroView {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
   background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
   background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
   background-size: cover;
   color: #fff;
   position: relative;
 }
-.rwc-form-control {
+.rwc-hero-view-form-control {
   background: rgba(255,255,255,0.2) !important;
   color: #fff !important;
 }
@@ -201,4 +200,29 @@ th {
   -webkit-transform: translate(-50%, -50%);
       -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
+}
+.rwc-generated-text {
+  min-height: 100vh;
+  background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
+  background-size: cover;
+  color: #fff;
+  position: relative;
+  text-align: center;
+}
+.rwc-generated-text-container {
+  display: inline-block;
+  width: 80vw;
+  text-align: left;
+}
+.rwc-generated-text-label {
+  display: block;
+  padding-top: 10vh;
+  padding-bottom: 5vh;
+}
+.rwc-generated-text-text-area {
+  min-height: 70vh;
+  background: rgba(255,255,255,0.2) !important;
+  color: #fff !important;
+  resize: none;
 }

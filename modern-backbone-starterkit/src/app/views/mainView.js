@@ -19,7 +19,7 @@ export default Backbone.View.extend({
     let hv = new HeroView({el: $heroViewEl});
     this.views.push(hv);
 
-    let $generatedTextViewEl = $('<div class="rwcHeroView"/>');
+    let $generatedTextViewEl = $('<div class="rwc-generated-text"/>');
     this.$el.append($generatedTextViewEl);
     let gtv = new GeneratedTextView({el: $generatedTextViewEl});
     this.views.push(gtv);

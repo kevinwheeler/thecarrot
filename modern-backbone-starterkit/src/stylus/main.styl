@@ -3,21 +3,45 @@
 #js-app
   font-size 20px
 
+// begin styles for hero view and sub elements
 .rwcHeroView
-  height 100vh
-  width 100vw
-  background: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(/static/images/mathematics-989119.jpg);
+  min-height 100vh
+  background linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(/static/images/mathematics-989119.jpg);
   background-size cover
   color white
   position relative
 
-.rwc-form-control
-  background: rgba(255, 255, 255, .2) !important
+.rwc-hero-view-form-control
+  background rgba(255, 255, 255, .2) !important
   color: white !important
 
 .rwc-hero1-content
-  text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  text-align center;
+  position absolute;
+  top 50%;
+  left 50%;
+  transform translate(-50%, -50%);
+
+.rwc-generated-text
+  min-height 100vh
+  background linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(/static/images/mathematics-989119.jpg);
+  background-size cover
+  color white
+  position relative
+  text-align center
+
+.rwc-generated-text-container
+  display inline-block
+  width 80vw
+  text-align left
+
+.rwc-generated-text-label
+  display block
+  padding-top 10vh;
+  padding-bottom 5vh;
+
+.rwc-generated-text-text-area
+  min-height 70vh
+  background rgba(255, 255, 255, .2) !important
+  color white !important
+  resize none;
