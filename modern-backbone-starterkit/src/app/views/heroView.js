@@ -9,6 +9,10 @@ import TextGeneratorModel from '../models/textGeneratorModel';
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
 
+  events: {
+    'click .rwc-hero-go': 'submit'
+  },
+
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
@@ -21,6 +25,9 @@ export default Backbone.View.extend({
   render: function() {
     this.$el.html(this.template({name: 'dummy'}));
     return this;
+  },
+  submit: function(){
+    alert('sup');
   }
 
 });
