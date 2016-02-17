@@ -3,7 +3,6 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import TextGeneratorModel from '../models/textGeneratorModel';
 import template from './generatedTextTemplate.hbs';
 
 //export default Marionette.ItemView.extend({
@@ -15,7 +14,7 @@ export default Backbone.View.extend({
     //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
 
-    this.textGeneratorModelInst = new TextGeneratorModel();
+    this.textGeneratorModelInst = options.textGeneratorModelInst;
     this.listenTo(this.textGeneratorModelInst, 'change:generatedText', this.render);
     this.render();
   },
