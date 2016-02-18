@@ -27,15 +27,24 @@ export default Backbone.View.extend({
     return this;
   },
   submit: function(){
+    console.log("yo");
     let $numWordsOrLetters = $('.rwcNumWordsOrLetters').val();
     let $WordsOrLetters    = $('.rwcWordsOrLetters').val();
     let $rwcFromText = $('.rwcFromText').val();
     this.textGeneratorModelInst.set({
-        "numWordsOrLetters":  $numWordsOrLetters,
-        "wordsOrLetters":     $rwcFromText,
-        "fromText":    $rwcFromText,
-      }, {validate: true}
-    );
+      "numWordsOrLetters":  $numWordsOrLetters,
+      "wordsOrLetters":  $rwcFromText,
+      "fromText":  $rwcFromText
+    });
+    if (!this.textGeneratorModelInst.isValid()) {
+      this.displayError(this.textGeneratorModelInst.validationError);
+    }
+  },
+  displayError: function(error){
+    let $errorMessageContainer = this.$el.find('.rwc-js-error-message');
+    $errorMessageContainer.html(error);
+    $errorMessageContainer.removeClass('rwc-error-message-is-hidden');
+    $errorMessageContainer.addClass('rwc-error-message-is-visible');
   }
 
 });

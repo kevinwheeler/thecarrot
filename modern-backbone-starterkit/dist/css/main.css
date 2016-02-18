@@ -191,6 +191,9 @@ th {
 .rwc-hero-view-form-control {
   background: rgba(255,255,255,0.2) !important;
   color: #fff !important;
+  width: 200px !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 .rwc-hero1-content {
   text-align: center;
@@ -200,6 +203,16 @@ th {
   -webkit-transform: translate(-50%, -50%);
       -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
+  padding-bottom: 5vh;
+}
+.rwc-error-message {
+  margin-top: 5vh;
+}
+.rwc-error-message-is-hidden {
+  visibility: hidden;
+}
+.rwc-error-message-is-visible {
+  visibility: visible;
 }
 .rwc-generated-text {
   min-height: 100vh;
