@@ -186,7 +186,16 @@ th {
   background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
   background-size: cover;
   color: #fff;
-  position: relative;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+.rwc-hero-spacing1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 .rwc-hero-view-form-control {
   background: rgba(255,255,255,0.2) !important;
