@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
 
-import MainView from './views/mainView';
+import HomeView from './views/homeView';
 
 
 export default Backbone.Router.extend({
@@ -16,17 +16,17 @@ export default Backbone.Router.extend({
   },
 
   dashboard() {
-    var mainViewInst = new MainView({
-        el: $('<div class="rwcMainView"/>')
+    let homeViewInst = new HomeView({
+        el: $('<div class="rwc-home-view"/>')
     }).render();
-    $('#js-app').empty().append(mainViewInst.$el);
+    $('#js-app').empty().append(homeViewInst.$el);
   },
 
   about() {
-    var mainViewInst = new MainView({
-      template: _.template('Im the about page')
+    let aboutViewInst = new HomeView({
+      el: $('<div class="rwcMainView"/>')
     }).render();
 
-    $('#js-app').empty().append(mainViewInst.$el);
+    $('#js-app').empty().append(aboutViewInst.$el);
   }
 });
