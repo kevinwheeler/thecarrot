@@ -202,12 +202,18 @@ th {
 }
 .rwc-nav {
   width: 100%;
+  background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
+  background-size: cover;
+  -webkit-filter: saturate(300%);
+          filter: saturate(300%);
 }
 .rwc-nav-logo {
   color: rgba(255,255,255,0.15);
   padding-left: 5px;
 }
 .rwc-nav-logo:hover {
+  color: rgba(255,255,255,0.25);
   text-decoration: none;
 }
 .rwc-hero-spacing1 {

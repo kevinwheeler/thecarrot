@@ -28,7 +28,7 @@ export default Backbone.View.extend({
     this.$el.html(this.template({baseUrl: utils.baseUrl}));
     return this;
   },
-  submit: function(){
+  submit: function() {
     console.log("yo");
     let $numWordsOrLetters = $('.rwcNumWordsOrLetters').val();
     let $WordsOrLetters    = $('.rwcWordsOrLetters').val();

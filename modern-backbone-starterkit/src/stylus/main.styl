@@ -15,16 +15,24 @@
 
 .rwc-nav
   width: 100%
+  background linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(/static/images/mathematics-989119.jpg);
+  background-size cover
+  filter: saturate(300%)
 
 //.rwc-nav.rwc-mod-brighten
 //  background:rgba(255,255,255,0.025)
 
+logo-base-alpha = .15
+logo-hover-alpha = logo-base-alpha + .1
+
 .rwc-nav-logo
-  color: rgba(255, 255, 255, .15)
-  padding-left: 5px
+  color rgba(255, 255, 255, logo-base-alpha)
+  padding-left 5px
   //text-shadow: 0px 0px .1px white;
+
 .rwc-nav-logo:hover
-  text-decoration: none;
+  color rgba(255, 255, 255, logo-hover-alpha)
+  text-decoration none;
 
 .rwc-hero-spacing1
   flex-grow 1
