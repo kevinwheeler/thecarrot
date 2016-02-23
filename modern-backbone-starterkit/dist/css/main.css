@@ -200,6 +200,16 @@ th {
       -ms-flex-align: center;
           align-items: center;
 }
+.rwc-nav {
+  width: 100%;
+}
+.rwc-nav-logo {
+  color: rgba(255,255,255,0.15);
+  padding-left: 5px;
+}
+.rwc-nav-logo:hover {
+  text-decoration: none;
+}
 .rwc-hero-spacing1 {
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;

@@ -4,6 +4,7 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from './heroTemplate.hbs';
+import utils from '../utils/utils';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -23,7 +24,8 @@ export default Backbone.View.extend({
   },
   template: template,
   render: function() {
-    this.$el.html(this.template({name: 'dummy'}));
+    window.console.log("sup" + utils.baseUrl);
+    this.$el.html(this.template({baseUrl: utils.baseUrl}));
     return this;
   },
   submit: function(){
