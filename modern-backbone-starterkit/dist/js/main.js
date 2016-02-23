@@ -44,7 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("'use strict';\n\nvar _jquery = __webpack_require__(1);\n\nvar _jquery2 = _interopRequireDefault(_jquery);\n\nvar _backbone = __webpack_require__(2);\n\nvar _backbone2 = _interopRequireDefault(_backbone);\n\n__webpack_require__(4);\n\nvar _router = __webpack_require__(17);\n\nvar _router2 = _interopRequireDefault(_router);\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nvar router = new _router2.default();\n\n_backbone2.default.history.start();\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/app/main.js\n ** module id = 0\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/app/main.js?");
+	eval("'use strict';\n\nvar _jquery = __webpack_require__(1);\n\nvar _jquery2 = _interopRequireDefault(_jquery);\n\nvar _backbone = __webpack_require__(2);\n\nvar _backbone2 = _interopRequireDefault(_backbone);\n\n__webpack_require__(4);\n\nvar _router = __webpack_require__(17);\n\nvar _router2 = _interopRequireDefault(_router);\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nvar router = new _router2.default();\n\n_backbone2.default.history.start({ pushState: true });\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/app/main.js\n ** module id = 0\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/app/main.js?");
 
 /***/ },
 /* 1 */
