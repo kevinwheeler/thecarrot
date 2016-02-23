@@ -13,6 +13,13 @@ export default Backbone.Router.extend({
 
   initialize() {
     $('body').append('<div id="js-app"></div>');
+    // inspired by http://stackoverflow.com/questions/9328513/backbone-js-and-pushstate
+    let self = this;
+    $(document).on('click', 'a:not([data-bypass])', function (evt) {
+      let href = $(this).attr('href');
+      evt.preventDefault();
+      self.navigate(href, true);
+    });
   },
 
   dashboard() {
