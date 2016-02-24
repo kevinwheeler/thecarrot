@@ -2,6 +2,7 @@ import $ from 'jquery';
 import Backbone from 'backbone';
 
 import HomeView from './views/homeView';
+import AboutView from './views/aboutView';
 
 
 export default Backbone.Router.extend({
@@ -38,8 +39,8 @@ export default Backbone.Router.extend({
   },
 
   about() {
-    let aboutViewInst = new HomeView({
-      el: $('<div class="rwcMainView"/>')
+    let aboutViewInst = new AboutView({
+      el: $('<div class="rwc-about-view"/>')
     }).render();
 
     $('#js-app').empty().append(aboutViewInst.$el);
