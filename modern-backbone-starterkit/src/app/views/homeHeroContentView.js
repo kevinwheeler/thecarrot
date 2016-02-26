@@ -14,20 +14,13 @@ export default Backbone.View.extend({
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
-    let textGeneratorModel = new TextGeneratorModel();
-
-    let $homeHeroContentViewEl = $('<div class="rwc-home-view-hero-content-view"/>');
-    let hhcv = new homeHeroContentView({
-      el: $homeHeroContentViewEl,
-      'textGeneratorModel': textGeneratorModel
-    });
-    this.views.push(hhcv);
+    let textGeneratorModelInst = new TextGeneratorModel();
 
     let $heroViewEl = $('<div class="rwcHeroView"/>');
     this.$el.append($heroViewEl);
     let hv = new HeroView({
       el: $heroViewEl,
-      "contentView": hhcv
+      'textGeneratorModelInst': textGeneratorModelInst
     });
     this.views.push(hv);
 
@@ -35,7 +28,7 @@ export default Backbone.View.extend({
     this.$el.append($generatedTextViewEl);
     let gtv = new GeneratedTextView({
       el: $generatedTextViewEl,
-      'textGeneratorModel': textGeneratorModel
+      'textGeneratorModelInst': textGeneratorModelInst
     });
     this.views.push(gtv);
 

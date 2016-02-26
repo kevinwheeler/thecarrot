@@ -14,8 +14,8 @@ export default Backbone.View.extend({
     //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
 
-    this.textGeneratorModelInst = options.textGeneratorModelInst;
-    this.listenTo(this.textGeneratorModelInst, 'change:generatedText', this.render);
+    this.textGeneratorModel = options.textGeneratorModel;
+    this.listenTo(this.textGeneratorModel, 'change:generatedText', this.render);
     this.render();
   },
 
@@ -24,7 +24,7 @@ export default Backbone.View.extend({
   render: function() {
     this.$el.html(this.template({}));
     let $textArea = this.$el.find('.rwc-generated-text-text-area');
-    $textArea.val(this.textGeneratorModelInst.get('generatedText'));
+    $textArea.val(this.textGeneratorModel.get('generatedText'));
     return this;
   }
 
