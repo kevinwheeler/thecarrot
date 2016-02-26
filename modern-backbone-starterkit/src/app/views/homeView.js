@@ -5,8 +5,9 @@ import Backbone from 'backbone';
 
 import template from './template.hbs';
 import HeroView from './heroView.js';
+import HomeHeroContentView from './homeHeroContentView.js';
 import GeneratedTextView from './generatedTextView.js';
-import TextGeneratorModel from '../models/textGeneratorModel';
+import TextGeneratorModel from '../models/textGeneratorModel.js';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -17,7 +18,7 @@ export default Backbone.View.extend({
     let textGeneratorModel = new TextGeneratorModel();
 
     let $homeHeroContentViewEl = $('<div class="rwc-home-view-hero-content-view"/>');
-    let hhcv = new homeHeroContentView({
+    let hhcv = new HomeHeroContentView({
       el: $homeHeroContentViewEl,
       'textGeneratorModel': textGeneratorModel
     });

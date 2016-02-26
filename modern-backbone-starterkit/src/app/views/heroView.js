@@ -27,7 +27,7 @@ export default Backbone.View.extend({
     this.views = [];
 
     this.contentView = options.contentView;
-    this.views.append(this.contentView);
+    this.views.push(this.contentView);
 
     _.bindAll(this, 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     this.initialRender();
@@ -44,24 +44,6 @@ export default Backbone.View.extend({
     _.forEach(this.views, function(view){
       view.render();
     });
-  }//,
-  //submit: function() {
-  //  let $numWordsOrLetters = $('.rwcNumWordsOrLetters').val();
-  //  let $WordsOrLetters    = $('.rwcWordsOrLetters').val();
-  //  let $rwcFromText = $('.rwcFromText').val();
-  //  this.textGeneratorModel.set({
-  //    "numWordsOrLetters":  $numWordsOrLetters,
-  //    "wordsOrLetters":  $rwcFromText,
-  //    "fromText":  $rwcFromText
-  //  });
-  //  if (!this.textGeneratorModel.isValid()) {
-  //    this.displayError(this.textGeneratorModel.validationError);
-  //  }
-  //},
-  //displayError: function(error){
-  //  let $errorMessageContainer = this.$el.find('.rwc-js-error-message');
-  //  $errorMessageContainer.html(error);
-  //  $errorMessageContainer.removeClass('rwc-error-message-is-hidden');
-  //  $errorMessageContainer.addClass('rwc-error-message-is-visible');
-  //}
+  }
+
 });
