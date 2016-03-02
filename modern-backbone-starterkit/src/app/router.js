@@ -8,7 +8,7 @@ import AboutView from './views/aboutView';
 export default Backbone.Router.extend({
 
   routes: {
-    '': 'dashboard',
+    '': 'home',
     'about': 'about'
   },
 
@@ -31,18 +31,18 @@ export default Backbone.Router.extend({
     });
   },
 
-  dashboard() {
-    let homeViewInst = new HomeView({
-        el: $('<div class="rwc-home-view"/>')
-    }).render();
-    $('#js-app').empty().append(homeViewInst.$el);
-  },
-
   about() {
     let aboutViewInst = new AboutView({
       el: $('<div class="rwc-about-view"/>')
     }).render();
 
     $('#js-app').empty().append(aboutViewInst.$el);
+  },
+
+  home() {
+    let homeViewInst = new HomeView({
+      el: $('<div class="rwc-home-view"/>')
+    }).render();
+    $('#js-app').empty().append(homeViewInst.$el);
   }
 });

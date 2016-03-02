@@ -3,10 +3,9 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import template from './template.hbs';
 import HeroView from './heroView.js';
-import GeneratedTextView from './generatedTextView.js';
-import TextGeneratorModel from '../models/textGeneratorModel';
+import AboutHeroContentView from './aboutHeroContentView.js';
+
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -15,11 +14,18 @@ export default Backbone.View.extend({
     this.options = options;
     this.views = [];
 
+    // The content we are filling the hero with.
+    let $heroContentElForAboutView = $('<div class="rwc-home-view-hero-content-view"/>');
+    let ahcv = new AboutHeroContentView({
+      el: $heroContentElForAboutView,
+    });
+    this.views.push(ahcv);
+
     let $heroViewEl = $('<div class="rwcHeroView"/>');
     this.$el.append($heroViewEl);
     let hv = new HeroView({
-      el: $heroViewEl,
-      'textGeneratorModelInst': textGeneratorModelInst
+      "contentView": ahcv,
+      el: $heroViewEl
     });
     this.views.push(hv);
 
@@ -28,7 +34,6 @@ export default Backbone.View.extend({
     this.render();
   },
 
-  template: template,
   render: function() {
     _.forEach(this.views, function(view){
       view.render();

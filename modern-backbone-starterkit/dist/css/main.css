@@ -243,11 +243,22 @@ th {
 .rwc-nav-item-mod-align-right {
   float: right;
 }
-.rwc-nav-logo {
+.rwc-nav-logo-or-item,
+.rwc-nav-logo-or-item:visited {
   color: rgba(255,255,255,0.15);
 }
-.rwc-nav-logo:hover {
+.rwc-nav-logo-or-item:hover {
   color: rgba(255,255,255,0.25);
+}
+.rwc-nav-logo-or-item:focus,
+.rwc-nav-logo-or-item:active {
+  color: rgba(0,0,255,0.1);
+  outline: none;
+}
+.rwc-nav-logo-or-item:link,
+.rwc-nav-logo-or-item:visited,
+.rwc-nav-logo-or-item:hover,
+.rwc-nav-logo-or-item:active {
   text-decoration: none;
 }
 .rwc-hero-spacing1 {

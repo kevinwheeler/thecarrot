@@ -1,7 +1,7 @@
 /*
  The homeView creates a heroView. The heroView needs to be filled with content.
- That's what this view is. This view is the content that homeView wants to put in
- its heroView.
+ That's what this view/file that you are reading from right now is for. This view is
+ the content that aboutView wants to put in its heroView.
  */
 import $ from 'jquery';
 import _ from 'lodash';

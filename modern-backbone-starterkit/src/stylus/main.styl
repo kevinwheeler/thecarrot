@@ -41,13 +41,31 @@
 logo-base-alpha = .15
 logo-hover-alpha = logo-base-alpha + .1
 
-.rwc-nav-logo
+.rwc-nav-logo-or-item, .rwc-nav-logo-or-item:visited
   color rgba(255, 255, 255, logo-base-alpha)
   //text-shadow: 0px 0px .1px white;
 
-.rwc-nav-logo:hover
+.rwc-nav-logo-or-item:hover
   color rgba(255, 255, 255, logo-hover-alpha)
-  text-decoration none;
+
+.rwc-nav-logo-or-item:focus, .rwc-nav-logo-or-item:active
+  color rgba(0, 0, 255, .1)
+  outline none
+
+.rwc-nav-logo-or-item:link, .rwc-nav-logo-or-item:visited, .rwc-nav-logo-or-item:hover, .rwc-nav-logo-or-item:active
+  text-decoration none
+
+//.rwc-nav-logo:visited
+//  color rgba(255, 255, 255, logo-hover-alpha)
+//  text-decoration none;
+//
+//.rwc-nav-logo:hover
+//  color rgba(255, 255, 255, logo-hover-alpha)
+//  text-decoration none;
+//
+//.rwc-nav-logo:active
+//  color rgba(255, 255, 255, logo-hover-alpha)
+//  text-decoration none;
 
 .rwc-hero-spacing1
   flex-grow 1
