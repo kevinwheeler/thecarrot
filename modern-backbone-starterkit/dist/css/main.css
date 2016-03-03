@@ -182,8 +182,8 @@ th {
 }
 .rwcHeroView {
   min-height: 100vh;
-  background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
+  background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/japan-skyline/japan-217878.jpg");
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/japan-skyline/japan-217878.jpg");
   background-size: cover;
   background-attachment: center;
   color: #fff;
@@ -234,8 +234,8 @@ th {
   width: 100%;
   padding-left: 10px;
   padding-right: 10px;
-  background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
+  background: -webkit-linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("/static/images/japan-skyline/japan-217878.jpg");
+  background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("/static/images/japan-skyline/japan-217878.jpg");
   background-size: cover;
   -webkit-filter: saturate(300%);
           filter: saturate(300%);
@@ -299,6 +299,9 @@ th {
   -webkit-flex-basis: 40px;
       -ms-flex-preferred-size: 40px;
           flex-basis: 40px;
+}
+.rwc-hero-text1 {
+  color: rgba(255,255,255,0.7);
 }
 .rwc-hero-spacing3 {
   -webkit-box-flex: 1;
