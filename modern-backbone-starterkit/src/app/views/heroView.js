@@ -12,6 +12,8 @@ export default Backbone.View.extend({
     $contentContainer.append(this.contentView.$el);
   },
 
+  className: 'rwcHeroView',
+
   //events: {
   //  'click .rwc-hero-go': 'submit'
   //},
@@ -41,7 +43,7 @@ export default Backbone.View.extend({
   },
 
   renderAllSubViews: function() {
-    _.forEach(this.views, function(view){
+    _.forEach(this.views, function(view) {
       view.render();
     });
   }

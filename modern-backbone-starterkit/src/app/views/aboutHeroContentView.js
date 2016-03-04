@@ -13,6 +13,8 @@ import template from './aboutHeroContentTemplate.hbs';
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
 
+  className: 'rwc-home-view-hero-content-view', //TODO: change this to about-view instead of home view
+
   events: {
     'click .rwc-hero-go': 'submit'
   },

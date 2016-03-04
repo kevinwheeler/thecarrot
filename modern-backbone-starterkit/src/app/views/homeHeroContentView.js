@@ -21,6 +21,8 @@ export default Backbone.View.extend({
     this.render();
   },
 
+  className: 'rwc-home-view-hero-content-view',
+
   template: template,
 
   render: function() {

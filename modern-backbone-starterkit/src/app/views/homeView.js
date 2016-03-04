@@ -14,18 +14,12 @@ export default Backbone.View.extend({
     this.views = [];
 
     // The content we are filling the hero with.
-    let $homeHeroContentViewEl = $('<div class="rwc-home-view-hero-content-view"/>');
-    let hhcv = new HomeHeroContentView({
-      el: $homeHeroContentViewEl
-    });
-    this.views.push(hhcv);
+    let hhcv = new HomeHeroContentView();
 
-    let $heroViewEl = $('<div class="rwcHeroView"/>');
-    this.$el.append($heroViewEl);
     let hv = new HeroView({
       'contentView': hhcv,
-      el: $heroViewEl
     });
+    this.$el.append(hv.$el);
     this.views.push(hv);
 
    //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
@@ -33,12 +27,12 @@ export default Backbone.View.extend({
     this.render();
   },
 
+  className: 'rwc-home-view',
+
   render: function() {
     _.forEach(this.views, function(view){
       view.render();
     });
     return this;
   }
-
-
 });

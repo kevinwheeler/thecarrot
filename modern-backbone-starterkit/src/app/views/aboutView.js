@@ -6,27 +6,20 @@ import Backbone from 'backbone';
 import HeroView from './heroView.js';
 import AboutHeroContentView from './aboutHeroContentView.js';
 
-
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
 
     // The content we are filling the hero with.
-    let $heroContentElForAboutView = $('<div class="rwc-home-view-hero-content-view"/>');
-    let ahcv = new AboutHeroContentView({
-      el: $heroContentElForAboutView,
-    });
+    let ahcv = new AboutHeroContentView();
     this.views.push(ahcv);
 
-    let $heroViewEl = $('<div class="rwcHeroView"/>');
-    this.$el.append($heroViewEl);
     let hv = new HeroView({
       "contentView": ahcv,
-      el: $heroViewEl
     });
+    this.$el.append(hv.$el);
     this.views.push(hv);
 
    //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
@@ -34,12 +27,12 @@ export default Backbone.View.extend({
     this.render();
   },
 
+  className: 'rwc-about-view',
+
   render: function() {
     _.forEach(this.views, function(view){
       view.render();
     });
     return this;
   }
-
-
 });

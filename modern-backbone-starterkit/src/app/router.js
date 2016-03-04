@@ -4,7 +4,6 @@ import Backbone from 'backbone';
 import HomeView from './views/homeView';
 import AboutView from './views/aboutView';
 
-
 export default Backbone.Router.extend({
 
   routes: {
@@ -32,17 +31,12 @@ export default Backbone.Router.extend({
   },
 
   about() {
-    let aboutViewInst = new AboutView({
-      el: $('<div class="rwc-about-view"/>')
-    }).render();
-
+    let aboutViewInst = new AboutView().render();
     $('#js-app').empty().append(aboutViewInst.$el);
   },
 
   home() {
-    let homeViewInst = new HomeView({
-      el: $('<div class="rwc-home-view"/>')
-    }).render();
+    let homeViewInst = new HomeView().render();
     $('#js-app').empty().append(homeViewInst.$el);
   }
 });
