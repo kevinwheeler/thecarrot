@@ -5,6 +5,7 @@ import AboutHeroContentView from './views/aboutHeroContentView.js';
 import AboutView from './views/aboutView';
 import HeroView from './views/heroView.js';
 import HomeView from './views/homeView';
+import HomeHeroContentView from './views/homeHeroContentView.js';
 
 export default Backbone.Router.extend({
 
@@ -46,7 +47,15 @@ export default Backbone.Router.extend({
   },
 
   home() {
-    let homeViewInst = new HomeView().render();
+    // The content we are filling the hero with.
+    let hhcv = new HomeHeroContentView();
+
+    let hv = new HeroView({
+      'contentView': hhcv,
+    });
+    let homeViewInst = new HomeView({
+      'heroView': hv
+    }).render();
     $('#js-app').empty().append(homeViewInst.$el);
   }
 });

@@ -3,8 +3,6 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import HeroView from './heroView.js';
-import HomeHeroContentView from './homeHeroContentView.js';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -13,12 +11,7 @@ export default Backbone.View.extend({
     this.options = options;
     this.views = [];
 
-    // The content we are filling the hero with.
-    let hhcv = new HomeHeroContentView();
-
-    let hv = new HeroView({
-      'contentView': hhcv,
-    });
+    let hv = options.heroView;
     this.$el.append(hv.$el);
     this.views.push(hv);
 
