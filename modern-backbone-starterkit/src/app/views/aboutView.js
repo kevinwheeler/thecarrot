@@ -12,13 +12,12 @@ export default Backbone.View.extend({
     this.options = options;
     this.views = [];
 
-    // The content we are filling the hero with.
-    let ahcv = new AboutHeroContentView();
-    this.views.push(ahcv);
-
-    let hv = new HeroView({
-      "contentView": ahcv,
-    });
+    //let hv = new HeroView({
+    //  "contentView": ahcv,
+    //});
+    //this.$el.append(hv.$el);
+    //this.views.push(hv);
+    let hv = options.heroView;
     this.$el.append(hv.$el);
     this.views.push(hv);
 

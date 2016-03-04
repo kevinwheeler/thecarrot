@@ -1,8 +1,10 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
 
-import HomeView from './views/homeView';
+import AboutHeroContentView from './views/aboutHeroContentView.js';
 import AboutView from './views/aboutView';
+import HeroView from './views/heroView.js';
+import HomeView from './views/homeView';
 
 export default Backbone.Router.extend({
 
@@ -31,7 +33,15 @@ export default Backbone.Router.extend({
   },
 
   about() {
-    let aboutViewInst = new AboutView().render();
+    // The content we are filling the hero with.
+    let ahcv = new AboutHeroContentView();
+    let hv = new HeroView({
+      'contentView': ahcv,
+    });
+
+    let aboutViewInst = new AboutView({
+      'heroView': hv
+    }).render();
     $('#js-app').empty().append(aboutViewInst.$el);
   },
 
