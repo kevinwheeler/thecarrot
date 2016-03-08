@@ -18,6 +18,7 @@ var distDir = __dirname + '/modern-backbone-starterkit/dist/'
 app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static(distDir));
+//app.use('/', express.static(distDir + 'index.html'));
 
 // views is directory for all template files
 //app.set('views', __dirname + '/views');

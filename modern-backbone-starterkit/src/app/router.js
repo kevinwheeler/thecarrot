@@ -6,12 +6,16 @@ import AboutView from './views/aboutView';
 import HeroView from './views/heroView.js';
 import HomeView from './views/homeView';
 import HomeHeroContentView from './views/homeHeroContentView.js';
+import PropertiesView from './views/propertiesView.js';
+import PropertyModel from './models/propertyModel.js';
 
 export default Backbone.Router.extend({
 
+  // IMPORTANT: When you create a new route, make sure to add it server-side as well.
   routes: {
     '': 'home',
-    'about': 'about'
+    'about': 'about',
+    'properties': 'properties'
   },
 
   initialize() {
@@ -57,5 +61,17 @@ export default Backbone.Router.extend({
       'heroView': hv
     }).render();
     $('#js-app').empty().append(homeViewInst.$el);
+  },
+
+  properties() {
+    let property = new PropertyModel({
+      address: 'right behind you'
+    });
+    console.log('in prop view dog');
+    let pv = new PropertiesView({
+      propModel: property
+    }).render();
+
+    $('#js-app').empty().append(pv.$el);
   }
 });
