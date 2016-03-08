@@ -58,6 +58,7 @@ gulp.task('styles',function(cb) {
 gulp.task('serve', function() {
   $.connect.server({
     root: dist,
+    fallback: dist + 'index.html',
     port: port,
     livereload: {
       port: 35728
