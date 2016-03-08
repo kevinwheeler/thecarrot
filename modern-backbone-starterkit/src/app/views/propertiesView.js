@@ -21,8 +21,9 @@ export default Backbone.View.extend({
     _.forEach(this.views, function(view) {
       view.render();
     });
+    console.log("json coll: " + JSON.stringify(this.options.propertiesColl.toJSON()));
     this.$el.html(this.template({
-      prop: this.options.propModel.toJSON()
+      prop: JSON.stringify(this.options.propertiesColl.toJSON())
     }));
     return this;
   },

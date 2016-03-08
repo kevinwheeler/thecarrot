@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import PropertyModel from '../models/propertyModel';
 
-export default Backbone.Collect.extend({
+export default Backbone.Collection.extend({
   model: PropertyModel
 });

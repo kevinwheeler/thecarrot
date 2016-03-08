@@ -2,12 +2,13 @@ import $ from 'jquery';
 import Backbone from 'backbone';
 
 import AboutHeroContentView from './views/aboutHeroContentView.js';
-import AboutView from './views/aboutView';
+import AboutView from './views/aboutView.js';
 import HeroView from './views/heroView.js';
-import HomeView from './views/homeView';
+import HomeView from './views/homeView.js';
 import HomeHeroContentView from './views/homeHeroContentView.js';
 import PropertiesView from './views/propertiesView.js';
 import PropertyModel from './models/propertyModel.js';
+import PropertyCollection from './collections/propertyCollection.js';
 
 export default Backbone.Router.extend({
 
@@ -23,15 +24,14 @@ export default Backbone.Router.extend({
 
     var self = this;
 
-    $(document).on('click', 'a.rwc-dont-pageload', function (evt) {
+    $(document).on('click', 'a.rwc-dont-pageload', function(evt) {
       let href = $(this).attr('href');
-      let isRootRelativeUrl = (href.charAt(0) === '/') && (href.charAt(1) !== '/')
+      let isRootRelativeUrl = (href.charAt(0) === '/') && (href.charAt(1) !== '/');
       if (isRootRelativeUrl) {
         let urlWithoutLeadingSlash = href.slice(1, href.length);
         evt.preventDefault();
         self.navigate(urlWithoutLeadingSlash, true);
-      }
-      else {
+      } else {
         throw "'dont-pageload' links that aren't root relative aren't implemented right now.";
       }
     });
@@ -64,12 +64,17 @@ export default Backbone.Router.extend({
   },
 
   properties() {
-    let property = new PropertyModel({
-      address: 'right behind you'
-    });
-    console.log('in prop view dog');
+    let properties = [{
+      address: 'around the corner'
+    }, {
+      address: 'behind you'
+    }]
+    let propertiesColl = new PropertyCollection(properties);
+    //let propertyCollection = new PropertyModel({
+    //  address: 'right behind you'
+    //});
     let pv = new PropertiesView({
-      propModel: property
+      propertiesColl: propertiesColl
     }).render();
 
     $('#js-app').empty().append(pv.$el);
