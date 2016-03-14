@@ -6,9 +6,11 @@ import AboutView from './views/aboutView.js';
 import HeroView from './views/heroView.js';
 import HomeView from './views/homeView.js';
 import HomeHeroContentView from './views/homeHeroContentView.js';
+import MapView from './views/mapView.js';
 import PropertiesView from './views/propertiesView.js';
 import PropertyModel from './models/propertyModel.js';
 import PropertyCollection from './collections/propertyCollection.js';
+import ShoppingCenterCollection from './collections/ShoppingCenterCollection.js';
 
 export default Backbone.Router.extend({
 
@@ -16,7 +18,8 @@ export default Backbone.Router.extend({
   routes: {
     '': 'home',
     'about': 'about',
-    'properties': 'properties'
+    'properties': 'properties',
+    'map': 'map'
   },
 
   initialize() {
@@ -50,6 +53,39 @@ export default Backbone.Router.extend({
     $('#js-app').empty().append(aboutViewInst.$el);
   },
 
+  getProperties() {
+    return [{
+      name: 'CVS',
+      address: '3801 19th St, Lubbock, TX 79423',
+      latitude: 33.578188,
+      longitude: -101.897021
+    }, {
+      name: 'Verizon',
+      address: '5810 W Loop 289, Lubbock, TX 79424',
+      latitude: 33.541481,
+      longitude: -101.935755
+    }, {
+      name: "Lowe's",
+      address: '5725 19th St, Lubbock, TX 79407',
+      latitude: 33.576511,
+      longitude: -101.938837
+    }];
+  },
+
+  getShoppingCenters() {
+    //TODO add windsor creek, chateau, random piece of land on 34th.
+    return [{
+      name: 'Redbud Square',
+      address: '1150 Slide Rd, Lubbock, TX 79416'
+    }, {
+      name: 'The Quorum',
+      address: '5102 60th, Lubbock, TX 79414'
+    }, {
+      name: 'Frankford Shopping Center',
+      address: '5610 Frankford Ave, Lubbock, TX 79424'
+    }];
+  },
+
   home() {
     // The content we are filling the hero with.
     let hhcv = new HomeHeroContentView();
@@ -63,18 +99,37 @@ export default Backbone.Router.extend({
     $('#js-app').empty().append(homeViewInst.$el);
   },
 
+  map() {
+    // As of right now, this route is only here for development purposes so that I
+    // can test the map view
+
+    let properties = this.getProperties();
+    let shoppingCenters = this.getShoppingCenters();
+    let propertiesColl = new PropertyCollection(properties);//temp. changed it from a properties collection to a shopping center collection.
+    let shoppingCentersColl = new ShoppingCenterCollection(shoppingCenters);//temp. changed it from a properties collection to a shopping center collection.
+    let mv = new MapView({
+      propertiesColl: propertiesColl,
+      shoppingCentersColl: shoppingCentersColl
+    }).render();
+
+    $('#js-app').empty().append(mv.$el);
+
+  },
   properties() {
-    let properties = [{
-      address: 'around the corner'
-    }, {
-      address: 'behind you'
-    }]
+    // this whole route is for development only, to make sure I'm creating the collections
+    // correctly.
+
+    let properties = this.getProperties();
+    let shoppingCenters = this.getShoppingCenters();
+
     let propertiesColl = new PropertyCollection(properties);
+    let shoppingCentersColl = new ShoppingCenterCollection(shoppingCenters);
     //let propertyCollection = new PropertyModel({
     //  address: 'right behind you'
     //});
     let pv = new PropertiesView({
-      propertiesColl: propertiesColl
+      propertiesColl: propertiesColl,
+      shoppingCentersColl: shoppingCentersColl
     }).render();
 
     $('#js-app').empty().append(pv.$el);

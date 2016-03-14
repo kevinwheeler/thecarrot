@@ -10,27 +10,42 @@ import template from './propertiesTemplate.hbs';
 
 export default Backbone.View.extend({
 
+  initMap: function(propertiesColl, shoppingCentersColl) {
+    let map = new google.maps.Map(this.$el.get()[0], {
+      center: {lat: 33.563176, lng: -101.888109},
+      zoom: 13
+    });
+
+    propertiesColl.forEach(function(property){
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(property.get('latitude'), property.get('longitude')),
+        map: map,
+        title: 'Hello World!'
+      });
+      console.dir(property.toJSON());
+    });
+  },
+
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
+    this.initMap(options.propertiesColl, options.shoppingCentersColl);
 
     //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
     this.render();
   },
 
-  className: 'rwc-properties-view',
+  className: 'rwc-map-view',
 
   render: function() {
     _.forEach(this.views, function(view) {
       view.render();
     });
-    console.log("json coll: " + JSON.stringify(this.options.propertiesColl.toJSON()));
-    console.log("json options coll: " + JSON.stringify(this.options));
-    this.$el.html(this.template({
-      prop: JSON.stringify(this.options.propertiesColl.toJSON()),
-      shop: JSON.stringify(this.options.shoppingCentersColl.toJSON())
-    }));
+    //this.$el.html(this.template({
+    //  prop: JSON.stringify(this.options.propertiesColl.toJSON()),
+    //  shop: JSON.stringify(this.options.shoppingCentersColl.toJSON())
+    //}));
     return this;
   },
 

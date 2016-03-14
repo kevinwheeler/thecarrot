@@ -261,6 +261,9 @@ th {
 .rwc-nav-logo-or-item:active {
   text-decoration: none;
 }
+.rwc-map-view {
+  height: 100vh;
+}
 .rwc-hero-spacing1 {
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
