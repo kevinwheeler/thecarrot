@@ -10,6 +10,8 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     let $contentContainer = this.$('.rwc-hero-content');
     $contentContainer.append(this.contentView.$el);
+    let $nav = this.$('.rwc-nav-stub');
+    $nav.replaceWith(this.options.navView.$el);
   },
 
   className: 'rwcHeroView',
@@ -30,6 +32,9 @@ export default Backbone.View.extend({
 
     this.contentView = options.contentView;
     this.views.push(this.contentView);
+
+    this.navView = options.navView;
+    this.views.push(this.navView);
 
     _.bindAll(this, 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     this.initialRender();

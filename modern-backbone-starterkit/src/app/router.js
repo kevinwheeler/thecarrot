@@ -7,6 +7,7 @@ import HeroView from './views/heroView.js';
 import HomeView from './views/homeView.js';
 import HomeHeroContentView from './views/homeHeroContentView.js';
 import MapView from './views/mapView.js';
+import NavView from './views/navView.js';
 import PropertiesView from './views/propertiesView.js';
 import PropertyModel from './models/propertyModel.js';
 import PropertyCollection from './collections/propertyCollection.js';
@@ -27,6 +28,8 @@ export default Backbone.Router.extend({
 
     var self = this;
 
+    this.navView = new NavView();
+
     $(document).on('click', 'a.rwc-dont-pageload', function(evt) {
       let href = $(this).attr('href');
       let isRootRelativeUrl = (href.charAt(0) === '/') && (href.charAt(1) !== '/');
@@ -45,6 +48,7 @@ export default Backbone.Router.extend({
     let ahcv = new AboutHeroContentView();
     let hv = new HeroView({
       'contentView': ahcv,
+      'navView': this.navView
     });
 
     let aboutViewInst = new AboutView({
@@ -92,6 +96,7 @@ export default Backbone.Router.extend({
 
     let hv = new HeroView({
       'contentView': hhcv,
+      'navView': this.navView
     });
     let homeViewInst = new HomeView({
       'heroView': hv

@@ -369,6 +369,7 @@ th {
   -webkit-flex-basis: -webkit-calc(1em + 18px);
       -ms-flex-preferred-size: calc(1em + 18px);
           flex-basis: calc(1em + 18px);
+  text-align: center;
 }
 .rwc-hero-spacing7 {
   display: none;

@@ -16,13 +16,22 @@ export default Backbone.View.extend({
       zoom: 13
     });
 
-    propertiesColl.forEach(function(property){
-      var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(property.get('latitude'), property.get('longitude')),
+    propertiesColl.forEach(function(property) {
+      let marker = new google.maps.Marker({
+        animation: google.maps.Animation.DROP,
         map: map,
-        title: 'Hello World!'
+        position: new google.maps.LatLng(property.get('latitude'), property.get('longitude'))
+        //TODO add title field? (aka the pin's hover tooltip)
       });
-      console.dir(property.toJSON());
+
+      let infowindow = new google.maps.InfoWindow({
+        content: 'Sup'
+      });
+
+      marker.addListener('click', function() {
+        infowindow.open(map, marker);
+      });
+
     });
   },
 

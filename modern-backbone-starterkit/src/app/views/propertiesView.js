@@ -1,7 +1,3 @@
-// This whole view is for development purposes only, to make sure I'm creating
-// the properties collection and the shopping centers collection correctly.
-// It's gotten gacky in that it is called propertiesView but it also
-// displays shopping centers.
 import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
@@ -25,8 +21,6 @@ export default Backbone.View.extend({
     _.forEach(this.views, function(view) {
       view.render();
     });
-    console.log("json coll: " + JSON.stringify(this.options.propertiesColl.toJSON()));
-    console.log("json options coll: " + JSON.stringify(this.options));
     this.$el.html(this.template({
       prop: JSON.stringify(this.options.propertiesColl.toJSON()),
       shop: JSON.stringify(this.options.shoppingCentersColl.toJSON())
