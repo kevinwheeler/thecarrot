@@ -9,6 +9,10 @@ import template from './navTemplate.hbs';
 export default Backbone.View.extend({
   className: 'rwc-nav navbar',
 
+  collapse: function() {
+    this.$('#rwc-nav-collapse').collapse('hide');
+  },
+
   initialRender: function() {
     this.$el.html(this.template());
     let $navItemsStub = this.$('.nav-items-stub');

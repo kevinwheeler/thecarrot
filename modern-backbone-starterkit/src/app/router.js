@@ -7,6 +7,7 @@ import HeroView from './views/heroView.js';
 import HomeView from './views/homeView.js';
 import HomeHeroContentView from './views/homeHeroContentView.js';
 import MapView from './views/mapView.js';
+import MultiLevelNavItem from './views/multiLevelNavItemView.js';
 import NavView from './views/navView.js';
 import NavItemView from './views/navItemView.js';
 import PropertiesView from './views/propertiesView.js';
@@ -24,6 +25,10 @@ export default Backbone.Router.extend({
     'map': 'map'
   },
 
+  afterRoute() {
+    this.navView.collapse();
+  },
+
   initialize() {
     $('body').append('<div id="js-app"></div>');
 
@@ -38,10 +43,21 @@ export default Backbone.Router.extend({
 
     navItems.push(aboutNavItem);
 
-    let propertiesNavItem = new NavItemView({
-      href: '/properties',
-      urlText: 'Properties'
+    let property1NavItem = new NavItemView({
+      href: '/property1',
+      urlText: 'property1'
+    });
 
+    let property2NavItem = new NavItemView({
+      href: '/property2',
+      urlText: 'property2'
+    });
+
+    let propertyNavItems = [property1NavItem, property2NavItem];
+
+    let propertiesNavItem = new MultiLevelNavItem({
+      navItems: propertyNavItems,
+      text: 'Properties'
     });
 
     navItems.push(propertiesNavItem);
@@ -73,6 +89,7 @@ export default Backbone.Router.extend({
       'heroView': hv
     }).render();
     $('#js-app').empty().append(aboutViewInst.$el);
+    this.afterRoute();
   },
 
   getProperties() {
@@ -120,6 +137,7 @@ export default Backbone.Router.extend({
       'heroView': hv
     }).render();
     $('#js-app').empty().append(homeViewInst.$el);
+    this.afterRoute();
   },
 
   map() {
@@ -156,5 +174,6 @@ export default Backbone.Router.extend({
     }).render();
 
     $('#js-app').empty().append(pv.$el);
+    this.afterRoute();
   }
 });
