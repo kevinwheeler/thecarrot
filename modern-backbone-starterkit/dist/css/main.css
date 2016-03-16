@@ -240,12 +240,18 @@ th {
   -webkit-filter: saturate(300%);
           filter: saturate(300%);
 }
-.rwc-nav-item-mod-align-right {
-  float: right;
+button.navbar-toggle .icon-bar {
+  background-color: rgba(255,255,255,0.25);
+}
+button.navbar-toggle:hover .icon-bar {
+  background-color: rgba(255,255,255,0.35);
 }
 .rwc-nav-logo-or-item,
 .rwc-nav-logo-or-item:visited {
   color: rgba(255,255,255,0.15);
+}
+.rwc-nav-item-anchor:hover {
+  background: transparent !important;
 }
 .rwc-nav-logo-or-item:hover {
   color: rgba(255,255,255,0.25);
@@ -303,8 +309,11 @@ th {
       -ms-flex-preferred-size: 40px;
           flex-basis: 40px;
 }
-.rwc-hero-text1 {
+.rwc-about-hero-text1,
+.rwc-home-hero-text1,
+.rwc-home-hero-text2 {
   color: rgba(255,255,255,0.7);
+  text-align: center;
 }
 .rwc-hero-spacing3 {
   -webkit-box-flex: 1;
@@ -421,29 +430,4 @@ th {
 }
 .rwc-error-message-is-visible {
   display: block;
-}
-.rwc-generated-text {
-  min-height: 100vh;
-  background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/mathematics-989119.jpg");
-  background-size: cover;
-  color: #fff;
-  position: relative;
-  text-align: center;
-}
-.rwc-generated-text-container {
-  display: inline-block;
-  width: 80vw;
-  text-align: left;
-}
-.rwc-generated-text-label {
-  display: block;
-  padding-top: 10vh;
-  padding-bottom: 5vh;
-}
-.rwc-generated-text-text-area {
-  min-height: 70vh;
-  background: rgba(255,255,255,0.2) !important;
-  color: #fff !important;
-  resize: none;
 }

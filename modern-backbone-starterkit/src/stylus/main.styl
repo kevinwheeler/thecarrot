@@ -32,21 +32,35 @@
   background-size cover
   filter: saturate(300%)
 
+//.rwc-nav-list
+//  display: inline
+//
+//.rwc-nav-list-item
+//  display: inline
+
 //.rwc-nav.rwc-mod-brighten
 //  background:rgba(255,255,255,0.025)
 
-.rwc-nav-item-mod-align-right
-  float right
+//.rwc-nav-item-mod-align-right
+//  float right
 
-logo-base-alpha = .15
-logo-hover-alpha = logo-base-alpha + .1
+base-alpha = .15
+hover-alpha = base-alpha + .1
+
+button.navbar-toggle .icon-bar
+  background-color rgba(255, 255, 255, base-alpha + .1)
+
+button.navbar-toggle:hover .icon-bar
+  background-color rgba(255, 255, 255, hover-alpha + .1)
 
 .rwc-nav-logo-or-item, .rwc-nav-logo-or-item:visited
-  color rgba(255, 255, 255, logo-base-alpha)
+  color rgba(255, 255, 255, base-alpha)
   //text-shadow: 0px 0px .1px white;
+.rwc-nav-item-anchor:hover
+  background transparent !important
 
 .rwc-nav-logo-or-item:hover
-  color rgba(255, 255, 255, logo-hover-alpha)
+  color rgba(255, 255, 255, hover-alpha)
 
 .rwc-nav-logo-or-item:focus, .rwc-nav-logo-or-item:active
   color rgba(0, 0, 255, .1)
@@ -54,18 +68,6 @@ logo-hover-alpha = logo-base-alpha + .1
 
 .rwc-nav-logo-or-item:link, .rwc-nav-logo-or-item:visited, .rwc-nav-logo-or-item:hover, .rwc-nav-logo-or-item:active
   text-decoration none
-
-//.rwc-nav-logo:visited
-//  color rgba(255, 255, 255, logo-hover-alpha)
-//  text-decoration none;
-//
-//.rwc-nav-logo:hover
-//  color rgba(255, 255, 255, logo-hover-alpha)
-//  text-decoration none;
-//
-//.rwc-nav-logo:active
-//  color rgba(255, 255, 255, logo-hover-alpha)
-//  text-decoration none;
 
 .rwc-map-view
   height: 100vh
@@ -88,8 +90,9 @@ logo-hover-alpha = logo-base-alpha + .1
   flex-shrink 0
   flex-basis 40px
 
-.rwc-hero-text1
+.rwc-about-hero-text1, .rwc-home-hero-text1, .rwc-home-hero-text2
   color rgba(255, 255, 255, .7)
+  text-align center
 
 .rwc-hero-spacing3
   flex-grow 1
@@ -159,30 +162,5 @@ logo-hover-alpha = logo-base-alpha + .1
 
 .rwc-error-message-is-visible
   display block
-
 //end styles for hero view and sub elements
 
-//begin styles for generatedTextView
-.rwc-generated-text
-  min-height 100vh
-  background linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(/static/images/mathematics-989119.jpg);
-  background-size cover
-  color white
-  position relative
-  text-align center
-
-.rwc-generated-text-container
-  display inline-block
-  width 80vw
-  text-align left
-
-.rwc-generated-text-label
-  display block
-  padding-top 10vh;
-  padding-bottom 5vh;
-
-.rwc-generated-text-text-area
-  min-height 70vh
-  background rgba(255, 255, 255, .2) !important
-  color white !important
-  resize none;

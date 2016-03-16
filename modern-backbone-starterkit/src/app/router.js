@@ -8,6 +8,7 @@ import HomeView from './views/homeView.js';
 import HomeHeroContentView from './views/homeHeroContentView.js';
 import MapView from './views/mapView.js';
 import NavView from './views/navView.js';
+import NavItemView from './views/navItemView.js';
 import PropertiesView from './views/propertiesView.js';
 import PropertyModel from './models/propertyModel.js';
 import PropertyCollection from './collections/propertyCollection.js';
@@ -28,7 +29,24 @@ export default Backbone.Router.extend({
 
     var self = this;
 
-    this.navView = new NavView();
+    let navItems = [];
+
+    let aboutNavItem = new NavItemView({
+      href: '/about',
+      urlText: 'About'
+    });
+
+    navItems.push(aboutNavItem);
+
+    let propertiesNavItem = new NavItemView({
+      href: '/properties',
+      urlText: 'Properties'
+
+    });
+
+    navItems.push(propertiesNavItem);
+
+    this.navView = new NavView({navItems: navItems});
 
     $(document).on('click', 'a.rwc-dont-pageload', function(evt) {
       let href = $(this).attr('href');
