@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import 'slick';
 import Backbone from 'backbone';
 import 'bootstrap';
 

@@ -31,14 +31,8 @@ export default Backbone.Router.extend({
   },
 
   individualPropertyRoute() {
-    let ahcv = new AboutHeroContentView();
-    let hv = new HeroView({
-      'contentView': ahcv,
-      'navView': this.navView
-    });
-
     let aboutViewInst = new IndividualPropertyView({
-      'heroView': hv
+      'navView': this.navView
     }).render();
     $('#js-app').empty().append(aboutViewInst.$el);
     this.afterRoute();
@@ -113,6 +107,10 @@ export default Backbone.Router.extend({
     this.navView = this.createNavView();
     this.interceptInternalURLs();
     this.createDynamicRoutes(this.propertiesColl);
+    console.dir
+    console.dir("slick = ");
+    console.log($.prototype.slick);
+    console.log($("*").slick);
   },
 
   // Make sure when a user click's a link to somewhere else in our page it doesn't
