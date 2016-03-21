@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
-import 'bootstraptemp';
+import 'bootstrap';
 
 import Router from './router';
 
