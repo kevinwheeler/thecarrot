@@ -250,7 +250,7 @@ button.navbar-toggle:hover .icon-bar {
 .rwc-nav-logo-or-item:visited {
   color: rgba(255,255,255,0.15);
 }
-.rwc-nav-item-anchor:hover {
+.rwc-nav-item-anchor {
   background: transparent !important;
 }
 .rwc-nav-logo-or-item:hover {

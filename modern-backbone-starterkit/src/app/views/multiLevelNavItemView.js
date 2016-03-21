@@ -16,12 +16,11 @@ export default Backbone.View.extend({
     $navItemsStub.replaceWith(navItemJQueryElements);
   },
 
-  className: 'rwc-multi-level-nav-item',
+  className: 'rwc-multi-level-nav-item rwc-nav-item rwc-nav-logo-or-item',
 
   initialRender: function() {
     this.$el.html(this.template({
-      href: this.options.href,
-      urlText: this.options.urlText
+      text: this.options.text
     }));
 
     this.renderAllSubViews();

@@ -8,5 +8,8 @@ export default Backbone.Model.extend({
     //'address':  '',
     //latitude: '',
     //longitude: ''
+  },
+  getURL() {
+    return this.URL;
   }
 });

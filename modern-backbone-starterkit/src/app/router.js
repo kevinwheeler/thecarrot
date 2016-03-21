@@ -6,6 +6,7 @@ import AboutView from './views/aboutView.js';
 import HeroView from './views/heroView.js';
 import HomeView from './views/homeView.js';
 import HomeHeroContentView from './views/homeHeroContentView.js';
+import IndividualPropertyView from './views/individualPropertyView.js';
 import MapView from './views/mapView.js';
 import MultiLevelNavItem from './views/multiLevelNavItemView.js';
 import NavView from './views/navView.js';
@@ -19,22 +20,48 @@ export default Backbone.Router.extend({
 
   // IMPORTANT: When you create a new route, make sure to add it server-side as well.
   routes: {
-    '': 'home',
-    'about': 'about',
-    'properties': 'properties',
-    'map': 'map'
+    '': 'homeRoute',
+    'about': 'aboutRoute',
+    'properties': 'propertiesRoute',
+    'map': 'mapRoute'
   },
 
   afterRoute() {
     this.navView.collapse();
   },
 
-  initialize() {
-    $('body').append('<div id="js-app"></div>');
+  individualPropertyRoute() {
+    let ahcv = new AboutHeroContentView();
+    let hv = new HeroView({
+      'contentView': ahcv,
+      'navView': this.navView
+    });
 
+    let aboutViewInst = new IndividualPropertyView({
+      'heroView': hv
+    }).render();
+    $('#js-app').empty().append(aboutViewInst.$el);
+    this.afterRoute();
+  },
+
+  createDynamicRoutes(propertiesColl) {
     var self = this;
 
+    //create /properties/<property-slug> routes
+    propertiesColl.forEach(function(property) {
+      let routeURL = property.get('url');
+      //assume URL has a leading slash and remove it.
+      routeURL = routeURL.slice(1, routeURL.length);
+      let routeName = routeURL;
+      self.route(routeURL, routeName, self.individualPropertyRoute);
+    });
+  },
+
+  createNavView() {
     let navItems = [];
+    let propertiesNavItem = this.createPropertiesNavItem();
+
+    navItems.push(propertiesNavItem);
 
     let aboutNavItem = new NavItemView({
       href: '/about',
@@ -43,27 +70,57 @@ export default Backbone.Router.extend({
 
     navItems.push(aboutNavItem);
 
-    let property1NavItem = new NavItemView({
-      href: '/property1',
-      urlText: 'property1'
+    return new NavView({navItems: navItems});
+  },
+
+  createNavItemForEachProperty() {
+    let retVal = [];
+    this.propertiesColl.forEach(function(property) {
+      retVal.push(new NavItemView({
+        href: property.get('url'),
+        urlText: property.get('navText')
+      }));
     });
 
-    let property2NavItem = new NavItemView({
-      href: '/property2',
-      urlText: 'property2'
+    return retVal;
+  },
+
+  createPropertiesNavItem() {
+    let allPropertiesNavItem = new NavItemView({
+      href: '/properties',
+      urlText: 'All Properties'
     });
 
-    let propertyNavItems = [property1NavItem, property2NavItem];
+    let navItemForEachProperty = this.createNavItemForEachProperty();
+    let allNavItems = [allPropertiesNavItem].concat(navItemForEachProperty);
 
     let propertiesNavItem = new MultiLevelNavItem({
-      navItems: propertyNavItems,
+      navItems: allNavItems,
       text: 'Properties'
     });
 
-    navItems.push(propertiesNavItem);
+    return propertiesNavItem;
+  },
 
-    this.navView = new NavView({navItems: navItems});
+  initialize() {
+    $('body').append('<div id="js-app"></div>');
 
+    let properties = this.getProperties();
+    let shoppingCenters = this.getShoppingCenters();
+    this.propertiesColl = new PropertyCollection(properties);//temp. changed it from a properties collection to a shopping center collection.
+    this.shoppingCentersColl = new ShoppingCenterCollection(shoppingCenters);//temp. changed it from a properties collection to a shopping center collection.
+
+    this.navView = this.createNavView();
+    this.interceptInternalURLs();
+    this.createDynamicRoutes(this.propertiesColl);
+  },
+
+  // Make sure when a user click's a link to somewhere else in our page it doesn't
+  // cause a new pageload.
+  interceptInternalURLs() {
+    var self = this;
+
+    //TODO for peformance reasons, it would be better to not use event delegation on document.
     $(document).on('click', 'a.rwc-dont-pageload', function(evt) {
       let href = $(this).attr('href');
       let isRootRelativeUrl = (href.charAt(0) === '/') && (href.charAt(1) !== '/');
@@ -77,7 +134,7 @@ export default Backbone.Router.extend({
     });
   },
 
-  about() {
+  aboutRoute() {
     // The content we are filling the hero with.
     let ahcv = new AboutHeroContentView();
     let hv = new HeroView({
@@ -93,21 +150,28 @@ export default Backbone.Router.extend({
   },
 
   getProperties() {
+    let urlPrefix = '/properties/';
     return [{
-      name: 'CVS',
       address: '3801 19th St, Lubbock, TX 79423',
       latitude: 33.578188,
-      longitude: -101.897021
+      longitude: -101.897021,
+      name: 'CVS',
+      navText: '3801 19th St',
+      url: urlPrefix + '3801-19th-St'
     }, {
-      name: 'Verizon',
       address: '5810 W Loop 289, Lubbock, TX 79424',
       latitude: 33.541481,
-      longitude: -101.935755
+      longitude: -101.935755,
+      name: 'Verizon',
+      navText: '5810 W Loop 289',
+      url: urlPrefix + '5810-W-Loop-289'
     }, {
-      name: "Lowe's",
       address: '5725 19th St, Lubbock, TX 79407',
       latitude: 33.576511,
-      longitude: -101.938837
+      longitude: -101.938,
+      name: "Lowe's",
+      navText: '5725 19th St',
+      url: urlPrefix + '5725-19th-St'
     }];
   },
 
@@ -125,7 +189,7 @@ export default Backbone.Router.extend({
     }];
   },
 
-  home() {
+  homeRoute() {
     // The content we are filling the hero with.
     let hhcv = new HomeHeroContentView();
 
@@ -140,37 +204,22 @@ export default Backbone.Router.extend({
     this.afterRoute();
   },
 
-  map() {
+  mapRoute() {
     // As of right now, this route is only here for development purposes so that I
     // can test the map view
 
-    let properties = this.getProperties();
-    let shoppingCenters = this.getShoppingCenters();
-    let propertiesColl = new PropertyCollection(properties);//temp. changed it from a properties collection to a shopping center collection.
-    let shoppingCentersColl = new ShoppingCenterCollection(shoppingCenters);//temp. changed it from a properties collection to a shopping center collection.
     let mv = new MapView({
-      propertiesColl: propertiesColl,
-      shoppingCentersColl: shoppingCentersColl
+      propertiesColl: this.propertiesColl,
+      shoppingCentersColl: this.shoppingCentersColl
     }).render();
 
     $('#js-app').empty().append(mv.$el);
 
   },
-  properties() {
-    // this whole route is for development only, to make sure I'm creating the collections
-    // correctly.
-
-    let properties = this.getProperties();
-    let shoppingCenters = this.getShoppingCenters();
-
-    let propertiesColl = new PropertyCollection(properties);
-    let shoppingCentersColl = new ShoppingCenterCollection(shoppingCenters);
-    //let propertyCollection = new PropertyModel({
-    //  address: 'right behind you'
-    //});
+  propertiesRoute() {
     let pv = new PropertiesView({
-      propertiesColl: propertiesColl,
-      shoppingCentersColl: shoppingCentersColl
+      propertiesColl: this.propertiesColl,
+      shoppingCentersColl: this.shoppingCentersColl
     }).render();
 
     $('#js-app').empty().append(pv.$el);

@@ -14,7 +14,7 @@ export default Backbone.View.extend({
     $nav.replaceWith(this.options.navView.$el);
   },
 
-  className: 'rwcHeroView',
+  className: 'rwc-slider-view',
 
   initialRender: function() {
     this.$el.html(this.template({}));
