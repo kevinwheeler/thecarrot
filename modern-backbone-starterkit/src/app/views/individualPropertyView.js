@@ -31,10 +31,7 @@ export default Backbone.View.extend({
       dots: true,
       arrows: false,
       infinite: true,
-      slidesToShow: 2,
-      slidesToScroll: 2
     });
-
   },
 
   className: 'rwc-individual-property-view',

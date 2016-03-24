@@ -38,7 +38,7 @@ export default Backbone.View.extend({
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
-    this.initMap(options.propertiesColl, options.shoppingCentersColl);
+    this.initMap(options.individualPropertiesColl, options.shoppingCentersColl);
 
     //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
@@ -52,7 +52,7 @@ export default Backbone.View.extend({
       view.render();
     });
     //this.$el.html(this.template({
-    //  prop: JSON.stringify(this.options.propertiesColl.toJSON()),
+    //  prop: JSON.stringify(this.options.individualPropertiesColl.toJSON()),
     //  shop: JSON.stringify(this.options.shoppingCentersColl.toJSON())
     //}));
     return this;

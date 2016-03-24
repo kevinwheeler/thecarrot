@@ -11,18 +11,22 @@ import MapView from './views/mapView.js';
 import MultiLevelNavItem from './views/multiLevelNavItemView.js';
 import NavView from './views/navView.js';
 import NavItemView from './views/navItemView.js';
-import PropertiesView from './views/propertiesView.js';
-import PropertyModel from './models/propertyModel.js';
 import PropertyCollection from './collections/propertyCollection.js';
+import PropertiesView from './views/propertiesView.js';
+import IndividualPropertyModel from './models/individualPropertyModel.js';
+import IndividualPropertyCollection from './collections/individualPropertyCollection.js';
 import ShoppingCenterCollection from './collections/ShoppingCenterCollection.js';
 
 export default Backbone.Router.extend({
 
   // IMPORTANT: When you create a new route, make sure to add it server-side as well.
+  // Note these route names are assumed in other places (like navbar items). TODO take the time
+  // to factor this out.
   routes: {
     '': 'homeRoute',
     'about': 'aboutRoute',
     'properties': 'propertiesRoute',
+    'properties/:propertyslug': 'specificPropertyRoute',
     'map': 'mapRoute'
   },
 
@@ -30,26 +34,26 @@ export default Backbone.Router.extend({
     this.navView.collapse();
   },
 
-  individualPropertyRoute() {
-    let aboutViewInst = new IndividualPropertyView({
+  specificPropertyRoute(propertySlug) {
+    let individualPropertyViewInst = new IndividualPropertyView({
       'navView': this.navView
     }).render();
-    $('#js-app').empty().append(aboutViewInst.$el);
+    $('#js-app').empty().append(individualPropertyViewInst.$el);
     this.afterRoute();
   },
 
-  createDynamicRoutes(propertiesColl) {
-    var self = this;
+  //createDynamicRoutes(propertiesColl) {
+  //  var self = this;
 
-    //create /properties/<property-slug> routes
-    propertiesColl.forEach(function(property) {
-      let routeURL = property.get('url');
-      //assume URL has a leading slash and remove it.
-      routeURL = routeURL.slice(1, routeURL.length);
-      let routeName = routeURL;
-      self.route(routeURL, routeName, self.individualPropertyRoute);
-    });
-  },
+  //  //create /properties/<property-slug> routes
+  //  propertiesColl.forEach(function(property) {
+  //    let routeURL = property.get('url');
+  //    //assume URL has a leading slash and remove it.
+  //    routeURL = routeURL.slice(1, routeURL.length);
+  //    let routeName = routeURL;
+  //    self.route(routeURL, routeName, self.individualPropertyRoute);
+  //  });
+  //},
 
   createNavView() {
     let navItems = [];
@@ -69,7 +73,7 @@ export default Backbone.Router.extend({
 
   createNavItemForEachProperty() {
     let retVal = [];
-    this.propertiesColl.forEach(function(property) {
+    this.individualPropertiesColl.forEach(function(property) {
       retVal.push(new NavItemView({
         href: property.get('url'),
         urlText: property.get('navText')
@@ -101,16 +105,15 @@ export default Backbone.Router.extend({
 
     let properties = this.getProperties();
     let shoppingCenters = this.getShoppingCenters();
-    this.propertiesColl = new PropertyCollection(properties);//temp. changed it from a properties collection to a shopping center collection.
+    this.individualPropertiesColl = new IndividualPropertyCollection(properties);//temp. changed it from a properties collection to a shopping center collection.
     this.shoppingCentersColl = new ShoppingCenterCollection(shoppingCenters);//temp. changed it from a properties collection to a shopping center collection.
+    this.allPropertiesColl = new PropertyCollection();
+    this.allPropertiesColl.add(this.individualPropertiesColl.models);
+    this.allPropertiesColl.add(this.shoppingCentersColl.models);
 
     this.navView = this.createNavView();
     this.interceptInternalURLs();
-    this.createDynamicRoutes(this.propertiesColl);
-    console.dir
-    console.dir("slick = ");
-    console.log($.prototype.slick);
-    console.log($("*").slick);
+    //this.createDynamicRoutes(this.individualPropertiesColl);
   },
 
   // Make sure when a user click's a link to somewhere else in our page it doesn't
@@ -207,7 +210,7 @@ export default Backbone.Router.extend({
     // can test the map view
 
     let mv = new MapView({
-      propertiesColl: this.propertiesColl,
+      individualPropertiesColl: this.individualPropertiesColl,
       shoppingCentersColl: this.shoppingCentersColl
     }).render();
 
@@ -216,8 +219,9 @@ export default Backbone.Router.extend({
   },
   propertiesRoute() {
     let pv = new PropertiesView({
-      propertiesColl: this.propertiesColl,
-      shoppingCentersColl: this.shoppingCentersColl
+      individualPropertiesColl: this.individualPropertiesColl,
+      shoppingCentersColl: this.shoppingCentersColl,
+      allPropertiesColl: this.allPropertiesColl
     }).render();
 
     $('#js-app').empty().append(pv.$el);

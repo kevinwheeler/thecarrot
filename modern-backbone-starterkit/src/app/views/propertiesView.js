@@ -22,8 +22,9 @@ export default Backbone.View.extend({
       view.render();
     });
     this.$el.html(this.template({
-      prop: JSON.stringify(this.options.propertiesColl.toJSON()),
-      shop: JSON.stringify(this.options.shoppingCentersColl.toJSON())
+      prop: JSON.stringify(this.options.individualPropertiesColl.toJSON()),
+      shop: JSON.stringify(this.options.shoppingCentersColl.toJSON()),
+      all: JSON.stringify(this.options.allPropertiesColl.toJSON())
     }));
     return this;
   },
