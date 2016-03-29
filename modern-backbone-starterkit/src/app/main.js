@@ -3,10 +3,9 @@ import 'slick';
 import Backbone from 'backbone';
 import 'bootstrap';
 
-import Router from './router';
+import serviceProvider from './utils/serviceProvider.js';
 
-
-const router = new Router();
+const router = serviceProvider.getRouter();
 
 Backbone.history.start({pushState: true});
 

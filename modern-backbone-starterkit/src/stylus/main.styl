@@ -3,6 +3,24 @@
 #js-app
   font-size 20px
 
+.rwc-individual-property-view
+  display flex
+  flex 1 1
+  flex-direction column
+  min-height 100vh
+
+.rwc-individual-property-view-slider
+  display flex !important
+  flex 1 0
+  flex-direction column
+  box-sizing border-box
+
+.rwc-individual-property-view-slider-slide
+  //display flex !important
+  //flex 1 0
+  //flex-direction column
+  background linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(/static/images/japan-skyline/japan-217878.jpg);
+
 // begin styles for hero view and sub elements
 .rwcHeroView
   min-height 100vh
@@ -11,16 +29,19 @@
   background-attachment center
   color white
   display flex
-  flex 1
+  flex 1 0
   flex-direction column
 
 .rwc-hero-content
-  flex 1
   display flex
+  flex 1 0
+  flex-direction column
   justify-content center
 
 .rwc-home-view-hero-content-view
   display flex
+  flex 1 0
+  flex-direction column
   flex-direction column
   align-items center
 

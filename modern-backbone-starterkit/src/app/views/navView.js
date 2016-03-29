@@ -28,11 +28,15 @@ export default Backbone.View.extend({
   initialize: function(options = {}) {
     this.options = options;
     this.views = [];
+    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     //TODO add nav item views to views array
 
+    console.log("options = ");
+    console.dir(options);
+    this.listenTo(options.routerEvents, 'routed', this.collapse);
 
     this.initialRender();
-    _.bindAll(this, 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
   },
 
   tagName: 'nav',

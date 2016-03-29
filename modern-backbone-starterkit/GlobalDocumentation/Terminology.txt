@@ -1,0 +1,4 @@
+property - either a shopping center or an individual property.
+individual property - an individual property (ie not a shopping center)
+specific property - this is the route name for one property which could be a shopping
+  center or an individual property.

@@ -1,0 +1,2 @@
+rwc = reverse word counter. The actual words are meaningless here. It's an artifact from an old project that I copied when
+creating this project. I just use it to namespace things.

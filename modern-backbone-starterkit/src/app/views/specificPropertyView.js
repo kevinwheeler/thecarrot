@@ -4,7 +4,7 @@ import Backbone from 'backbone';
 
 import AboutHeroContentView from './aboutHeroContentView.js';
 import HeroView from './heroView.js';
-import template from './individualPropertyTemplate.hbs';
+import template from './specificPropertyTemplate.hbs';
 
 
 //export default Marionette.ItemView.extend({
