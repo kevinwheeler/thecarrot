@@ -1,21 +1,6 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
 
-import AboutHeroContentView from './views/aboutHeroContentView.js';
-import AboutView from './views/aboutView.js';
-import HeroView from './views/heroView.js';
-import HomeView from './views/homeView.js';
-import HomeHeroContentView from './views/homeHeroContentView.js';
-import IndividualPropertyView from './views/specificPropertyView.js';
-import MapView from './views/mapView.js';
-import MultiLevelNavItem from './views/multiLevelNavItemView.js';
-import NavView from './views/navView.js';
-import NavItemView from './views/navItemView.js';
-import PropertyCollection from './collections/propertyCollection.js';
-import PropertiesView from './views/propertiesView.js';
-import IndividualPropertyModel from './models/individualPropertyModel.js';
-import IndividualPropertyCollection from './collections/individualPropertyCollection.js';
-import ShoppingCenterCollection from './collections/ShoppingCenterCollection.js';
 import serviceProvider from './utils/serviceProvider.js';
 
 export default Backbone.Router.extend({

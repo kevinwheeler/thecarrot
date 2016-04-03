@@ -180,7 +180,7 @@ th {
 #js-app {
   font-size: 20px;
 }
-.rwc-individual-property-view {
+.rwc-specific-property-view {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -196,25 +196,15 @@ th {
           flex-direction: column;
   min-height: 100vh;
 }
-.rwc-individual-property-view-slider {
-  display: -webkit-box !important;
-  display: -webkit-flex !important;
-  display: -ms-flexbox !important;
-  display: flex !important;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 0;
-      -ms-flex: 1 0;
-          flex: 1 0;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  box-sizing: border-box;
+.rwc-specific-property-view-slider {
+  margin-top: -20px;
 }
-.rwc-individual-property-view-slider-slide {
+.rwc-specific-property-view-slider-slide {
   background: -webkit-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/japan-skyline/japan-217878.jpg");
   background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/static/images/japan-skyline/japan-217878.jpg");
+}
+.rwc-specific-property-view-slider-slide {
+  height: 100vh !important;
 }
 .rwcHeroView {
   min-height: 100vh;
@@ -287,6 +277,19 @@ th {
   background-size: cover;
   -webkit-filter: saturate(300%);
           filter: saturate(300%);
+}
+.rwc-nav.mod-fixed {
+  position: fixed;
+}
+.transform-hack {
+  -webkit-transform: translate3d(0, 0, 0);
+          transform: translate3d(0, 0, 0);
+}
+.slick-list {
+  z-index: 1;
+}
+.rwc-nav-item-anchor {
+  z-index: 2;
 }
 button.navbar-toggle .icon-bar {
   background-color: rgba(255,255,255,0.25);

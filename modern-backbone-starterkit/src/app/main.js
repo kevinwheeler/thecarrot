@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import 'slick';
+import 'css!slickCSS';
+import 'css!slickTheme';
 import Backbone from 'backbone';
 import 'bootstrap';
 

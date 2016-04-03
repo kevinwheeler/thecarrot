@@ -43,6 +43,10 @@ export default Backbone.View.extend({
 
   template: template,
 
+  useFixedPositioning() {
+    this.$el.addClass('mod-fixed');
+  },
+
   render: function() {
     //TODO render sub views
     return this;

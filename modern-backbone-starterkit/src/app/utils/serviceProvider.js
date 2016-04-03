@@ -2,6 +2,7 @@ import Backbone from 'backbone';
 
 import AboutHeroContentView from '../views/aboutHeroContentView.js';
 import AboutView from '../views/aboutView.js';
+import slideTemplate from '../views/propertyTemplates/genericSpecificPropertySlideTemplate.hbs';
 import HeroView from '../views/heroView.js';
 import HomeView from '../views/homeView.js';
 import HomeHeroContentView from '../views/homeHeroContentView.js';
@@ -18,7 +19,7 @@ import Router from '../router';
 import ShoppingCenterCollection from '../collections/ShoppingCenterCollection.js';
 
 var serviceProvider = {
-
+  //TODO clean up create vs get methods so there is a consistent pattern.
   createRouterEvents() {
     let routerEvents = {};
     _.extend(routerEvents, Backbone.Events);
@@ -63,7 +64,7 @@ var serviceProvider = {
     }
     let individualPropertyViewInst = new SpecificPropertyView({
       'navView': this.navView,
-      'property': property
+      'slides': property.get('slides')
     });
     return individualPropertyViewInst;
   },
@@ -144,10 +145,11 @@ var serviceProvider = {
     this.navView = this.createNavView();
   },
 
+  // returns data in raw json form
   getProperties() {
     let urlPrefix = '/properties/'; // this is currently duplicated in the routes hash up
 
-    return [{
+    let retval = [{
       address: '3801 19th St, Lubbock, TX 79423',
       latitude: 33.578188,
       longitude: -101.897021,
@@ -172,6 +174,14 @@ var serviceProvider = {
       url: urlPrefix + '5725-19th-St', //note duplication
       urlSlug: '5725-19th-St' // note duplication
     }];
+
+    // Dynamically add attribute 'slides' to each object.
+    for (let i = 0; i < retval.length; ++i) {
+      // right now using the same value 3 times just as a stub.
+      retval[i].slides = [slideTemplate(retval[i]), slideTemplate(retval[i]), slideTemplate(retval[i])];
+    }
+
+    return retval;
   },
 
   getRouter() {

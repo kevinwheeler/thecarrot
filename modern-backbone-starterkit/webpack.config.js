@@ -9,13 +9,15 @@ var entry = './src/app/main.js',
 var sharedLoaders = [
   { test: /node_modules.bootstrap.*\.js?$/, loader: 'imports?jQuery=jquery' },
   { test: /node_modules.slick-carousel\/slick\/slick.min.js?$/ , loader: 'imports?jQuery=jquery,$=jquery' },
+  { test: /.(gif|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/, loader: 'url-loader?limit=100000' },//https://github.com/webpack/css-loader/issues/38
   { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
   { test: /\.hbs$/, loader: 'handlebars-loader' }
 ];
 
 var sharedAliases = {
   slick: 'slick-carousel/slick/slick.min.js',
-  slickCSS: 'slick-carousel/slick/slick.css'
+  slickCSS: 'slick-carousel/slick/slick.css',
+  slickTheme: 'slick-carousel/slick/slick-theme.css'
 };
 
 module.exports.development = {
