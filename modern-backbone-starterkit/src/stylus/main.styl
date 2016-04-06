@@ -1,7 +1,22 @@
 @import 'normalize'
 
+navbar-height = 50px
+
 #js-app
   font-size 20px
+
+.slick-next
+  right 50px
+
+.slick-prev
+  left 50px
+
+.slick-arrow
+  z-index 1000
+
+.slick-list
+  margin-bottom 0
+  height calc(100vh - 50px)
 
 .rwc-specific-property-view
   display flex
@@ -79,6 +94,11 @@ button.navbar-toggle .icon-bar
 
 button.navbar-toggle:hover .icon-bar
   background-color rgba(255, 255, 255, hover-alpha + .1)
+
+
+.navbar
+  border-radius 0
+  height navbar-height
 
 .rwc-nav-logo-or-item, .rwc-nav-logo-or-item:visited
   color rgba(255, 255, 255, base-alpha)

@@ -180,6 +180,20 @@ th {
 #js-app {
   font-size: 20px;
 }
+.slick-next {
+  right: 50px;
+}
+.slick-prev {
+  left: 50px;
+}
+.slick-arrow {
+  z-index: 1000;
+}
+.slick-list {
+  margin-bottom: 0;
+  height: -webkit-calc(100vh - 50px);
+  height: calc(100vh - 50px);
+}
 .rwc-specific-property-view {
   display: -webkit-box;
   display: -webkit-flex;
@@ -296,6 +310,10 @@ button.navbar-toggle .icon-bar {
 }
 button.navbar-toggle:hover .icon-bar {
   background-color: rgba(255,255,255,0.35);
+}
+.navbar {
+  border-radius: 0;
+  height: 50px;
 }
 .rwc-nav-logo-or-item,
 .rwc-nav-logo-or-item:visited {
