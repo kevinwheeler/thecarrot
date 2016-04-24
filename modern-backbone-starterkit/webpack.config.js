@@ -1,5 +1,7 @@
 var _ = require('lodash');
 var path = require('path');
+var webpack = require('webpack');
+
 var entry = './src/app/main.js',
   output = {
     path: __dirname,
@@ -47,8 +49,12 @@ module.exports.production = {
     entry: entry,
     output: output,
     resolve: {
-   //   alias: {'bootstrap$': "bootstrap/dist/js/bootstrap.min.js",}
-      alias:  {'bootstrap$': "bootstrap/dist/js/bootstrap.js"},
-    }
+      alias: {'bootstrap$': "bootstrap/dist/js/bootstrap.min.js",}
+    },
+    plugins: [
+      new webpack.optimize.UglifyJsPlugin({
+        compress: { warnings: false }
+      })
+    ]
 };
 _.merge(module.exports.production, sharedExports);
