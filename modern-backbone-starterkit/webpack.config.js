@@ -47,9 +47,8 @@ module.exports.production = {
     entry: entry,
     output: output,
     resolve: {
-      alias: {
-        bootstrap: "bootstrap/dist/js/bootstrap.min.js",
-      }
+   //   alias: {'bootstrap$': "bootstrap/dist/js/bootstrap.min.js",}
+      alias:  {'bootstrap$': "bootstrap/dist/js/bootstrap.js"},
     }
 };
 _.merge(module.exports.production, sharedExports);
