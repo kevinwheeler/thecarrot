@@ -43,7 +43,7 @@ gulp.task('html', function() {
 });
 
 gulp.task('styles',function(cb) {
-  return gulp.src(src + 'stylus/main.styl')
+  return gulp.src(src + 'styles/**/*.styl')
     .pipe($.stylus({
       compress: isProduction,
       'include css' : true
@@ -73,7 +73,7 @@ gulp.task('static', function(cb) {
 });
 
 gulp.task('watch', function() {
-  gulp.watch(src + 'stylus/*.styl', ['styles']);
+  gulp.watch(src + 'styles/**/*.styl', ['styles','scripts']);//scripts because importing css from js
   gulp.watch(src + 'index.html', ['html']);
   gulp.watch([src + 'app/**/*.js', src + 'app/**/*.hbs'], ['scripts']);
 });

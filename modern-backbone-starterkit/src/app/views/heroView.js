@@ -4,6 +4,7 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from './heroTemplate.hbs';
+import '../../../dist/css/hero.css';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({

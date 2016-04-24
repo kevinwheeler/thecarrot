@@ -22,8 +22,10 @@ export default Backbone.Router.extend({
   },
 
   specificPropertyRoute(propertySlug) {
+    console.log("specific property route");
     let individualPropertyViewInst = serviceProvider.getIndividualPropertyView(propertySlug);
     $('#js-app').empty().append(individualPropertyViewInst.$el);
+    //$(window).trigger('resize'); // fixes slick slider being width 0. https://github.com/kenwheeler/slick/issues/235
     this.afterRoute();
   },
 

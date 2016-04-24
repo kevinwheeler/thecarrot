@@ -30,6 +30,7 @@ export default Backbone.View.extend({
   },
 
   initialRender() {
+    console.log("in initial render");
     this.$el.html(this.template({}));
     this.attachSubViews();
     this.$('.rwc-specific-property-view-slider').slick({
@@ -37,8 +38,7 @@ export default Backbone.View.extend({
       arrows: true,
       infinite: true,
     });
-    this.options.navView.$el.addClass('transform-hack');//
-    this.options.navView.$('*').addClass('transform-hack');
+    this.$('.rwc-specific-property-view-slider-slide').css('width', ''); //Undo slick slider's shennanigans
   },
 
   className: 'rwc-specific-property-view',
@@ -46,6 +46,7 @@ export default Backbone.View.extend({
   template: template,
 
   render: function() {
+    console.log("in render");
     _.forEach(this.views, function(view){
       view.render();
     });
