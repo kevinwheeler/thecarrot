@@ -49,7 +49,7 @@ module.exports.production = {
     entry: entry,
     output: output,
     resolve: {
-      alias: {'bootstrap$': "bootstrap/dist/js/bootstrap.min.js",}
+      alias: {'bootstrap$': "bootstrap/dist/js/bootstrap.min.js"}
     },
     plugins: [
       new webpack.optimize.UglifyJsPlugin({
