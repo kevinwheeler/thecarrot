@@ -1,6 +1,7 @@
-var gulp = require('gulp');
-var path = require('path');
 var del = require('del');
+var gulp = require('gulp');
+var merge = require('merge-stream');
+var path = require('path');
 var $ = require('gulp-load-plugins')({
   pattern: '*',
 });
@@ -26,7 +27,7 @@ var autoprefixerBrowsers = [
 ];
 
 
-gulp.task('scripts', function() {
+gulp.task('scripts', ['styles'], function() {
   return gulp.src(webpackConfig.entry)
     .pipe($.webpackStream(webpackConfig))
     .pipe(gulp.dest(dist + 'js/'))
@@ -41,16 +42,23 @@ gulp.task('html', function() {
     .pipe($.connect.reload());
 });
 
-gulp.task('styles',function(cb) {
-  return gulp.src(src + 'styles/**/*.styl')
+gulp.task('styles', function() {
+  var stylus = gulp.src(src + 'styles/**/*.styl')
     .pipe($.stylus({
       compress: isProduction,
       'include css' : true
     }))
     .pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
     .pipe(gulp.dest(dist + 'css/'))
+    .pipe($.size({ title : 'stylus' }))
+    .pipe($.connect.reload());
+
+  var css = gulp.src(src + 'styles/**/*.css')
+    .pipe(gulp.dest(dist + 'css/'))
     .pipe($.size({ title : 'css' }))
     .pipe($.connect.reload());
+
+  return merge(stylus, css);
 
 });
 
@@ -72,7 +80,7 @@ gulp.task('static', function(cb) {
 });
 
 gulp.task('watch', function() {
-  gulp.watch(src + 'styles/**/*.styl', ['styles','scripts']);//scripts because importing css from js
+  gulp.watch(src + 'styles/**/*', ['scripts']);//scripts because importing css from js
   gulp.watch(src + 'index.html', ['html']);
   gulp.watch([src + 'app/**/*.js', src + 'app/**/*.hbs'], ['scripts']);
 });
@@ -88,5 +96,5 @@ gulp.task('default', ['build', 'serve', 'watch']);
 
 // waits until clean is finished then builds the project
 gulp.task('build', ['clean'], function(){
-  gulp.start(['static', 'html','scripts','styles']);
+  gulp.start(['static', 'html','scripts']);
 });
