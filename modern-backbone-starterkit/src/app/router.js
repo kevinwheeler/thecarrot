@@ -17,16 +17,7 @@ export default Backbone.Router.extend({
   },
 
   afterRoute() {
-    console.log("after route");
     this.routerEvents.trigger('routed');
-  },
-
-  specificPropertyRoute(propertySlug) {
-    console.log("specific property route");
-    let individualPropertyViewInst = serviceProvider.getIndividualPropertyView(propertySlug);
-    $('#js-app').empty().append(individualPropertyViewInst.$el);
-    //$(window).trigger('resize'); // fixes slick slider being width 0. https://github.com/kenwheeler/slick/issues/235
-    this.afterRoute();
   },
 
   initialize(options) {
@@ -66,24 +57,6 @@ export default Backbone.Router.extend({
     let homeViewInst = serviceProvider.getHomeView();
     homeViewInst.render();
     $('#js-app').empty().append(homeViewInst.$el);
-    this.afterRoute();
-  },
-
-  mapRoute() {
-    // As of right now, this route is only here for development purposes so that I
-    // can test the map view
-
-    let mv = serviceProvider.getMapView();
-    mv.render();
-
-    $('#js-app').empty().append(mv.$el);
-
-  },
-  propertiesRoute() {
-    let pv = serviceProvider.getPropertiesView();
-    pv.render();
-
-    $('#js-app').empty().append(pv.$el);
     this.afterRoute();
   }
 });

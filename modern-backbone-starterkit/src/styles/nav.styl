@@ -1,49 +1,8 @@
-@import 'zIndexes'
-@import 'navExports'
+.kmw-navbar-center .navbar-nav {
+  display: inline-block;
+  float: none;
+}
 
-.rwc-nav
-  // we use min-height instead of height so that the nav can expand to be bigger when uncollapsed..
-  // however, the uncollapsed height needs to be exactly this height because our slick-list
-  // in the specificPropertyView sets its height based on this value.
-  min-height nav-collapsed-height
-  width: 100%
-  padding-left 10px
-  padding-right 10px
-  background linear-gradient( rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8) ), url(/static/images/japan-skyline/japan-217878.jpg);
-  background-size cover
-  filter: saturate(300%)
-  position relative
-  z-index rwc-nav-z-index
-
-base-alpha = .15
-hover-alpha = base-alpha + .1
-
-.dropdown-menu
-  background-color rgba(0, 0, 0, base-alpha + .1)
-
-button.navbar-toggle .icon-bar
-  background-color rgba(255, 255, 255, base-alpha + .1)
-
-button.navbar-toggle:hover .icon-bar
-  background-color rgba(255, 255, 255, hover-alpha + .1)
-
-.navbar
-  border-radius 0
-  //height navbar-height
-
-.rwc-nav-logo-or-item, .rwc-nav-logo-or-item:visited
-  color rgba(255, 255, 255, base-alpha)
-//text-shadow: 0px 0px .1px white;
-
-.rwc-nav-item-anchor
-  background transparent !important
-
-.rwc-nav-logo-or-item:hover
-  color rgba(255, 255, 255, hover-alpha)
-
-.rwc-nav-logo-or-item:focus, .rwc-nav-logo-or-item:active
-  color rgba(0, 0, 255, .1)
-  outline none
-
-.rwc-nav-logo-or-item:link, .rwc-nav-logo-or-item:visited, .rwc-nav-logo-or-item:hover, .rwc-nav-logo-or-item:active
-  text-decoration none
+.kmw-navbar-center .navbar-collapse {
+  text-align: center;
+}

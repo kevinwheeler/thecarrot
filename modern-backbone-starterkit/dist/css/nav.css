@@ -1,1 +1,7 @@
-.rwc-nav{min-height:50px;width:100%;padding-left:10px;padding-right:10px;background:-webkit-linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("/static/images/japan-skyline/japan-217878.jpg");background:linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url("/static/images/japan-skyline/japan-217878.jpg");background-size:cover;-webkit-filter:saturate(300%);filter:saturate(300%);position:relative;z-index:50}.dropdown-menu{background-color:rgba(0,0,0,0.25)}button.navbar-toggle .icon-bar{background-color:rgba(255,255,255,0.25)}button.navbar-toggle:hover .icon-bar{background-color:rgba(255,255,255,0.35)}.navbar{border-radius:0}.rwc-nav-logo-or-item,.rwc-nav-logo-or-item:visited{color:rgba(255,255,255,0.15)}.rwc-nav-item-anchor{background:transparent !important}.rwc-nav-logo-or-item:hover{color:rgba(255,255,255,0.25)}.rwc-nav-logo-or-item:focus,.rwc-nav-logo-or-item:active{color:rgba(0,0,255,0.1);outline:none}.rwc-nav-logo-or-item:link,.rwc-nav-logo-or-item:visited,.rwc-nav-logo-or-item:hover,.rwc-nav-logo-or-item:active{text-decoration:none}
+.kmw-navbar-center .navbar-nav {
+  display: inline-block;
+  float: none;
+}
+.kmw-navbar-center .navbar-collapse {
+  text-align: center;
+}

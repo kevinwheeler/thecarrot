@@ -4,11 +4,11 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from './navTemplate.hbs';
-import '../../../dist/css/nav.css';
+//import 'CSSDIR/nav.css';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-  className: 'rwc-nav navbar',
+  className: 'kmw-nav navbar',
 
   collapse: function() {
     this.$('#rwc-nav-collapse').collapse('hide');

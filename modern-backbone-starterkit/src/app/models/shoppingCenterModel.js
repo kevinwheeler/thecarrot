@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 
-import PropertyModel from './propertyModel.js';
+import PropertyModel from './articleModel.js';
 
 export default PropertyModel.extend({
   initialize() {

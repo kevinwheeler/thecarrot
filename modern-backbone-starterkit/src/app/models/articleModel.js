@@ -3,7 +3,9 @@
 import Backbone from 'backbone';
 
 export default Backbone.Model.extend({
-  getURL() {
-    return this.URL;
+  defaults: {
+    headline: null,
+    imageURL: null,
+    excerpt: null
   }
 });

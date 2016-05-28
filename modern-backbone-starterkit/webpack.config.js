@@ -13,7 +13,6 @@ var sharedExports = {
   module : {
       loaders : [
         { test: /bootstrap.dist.*\.js?$/, loader: 'imports?jQuery=jquery' },
-        { test: /node_modules.slick-carousel\/slick\/slick.min.js?$/ , loader: 'imports?jQuery=jquery,$=jquery' },
         { test: /.(gif|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/, loader: 'url-loader?limit=100000' },//https://github.com/webpack/css-loader/issues/38
         { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
         { test: /\.hbs$/, loader: 'handlebars-loader' },
@@ -25,9 +24,8 @@ var sharedExports = {
     alias: {
       bootstrapCSS: 'bootstrap/dist/css/bootstrap.min.css',
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
-      slick: 'slick-carousel/slick/slick.min.js',
-      slickCSS: 'slick-carousel/slick/slick.css',
-      slickTheme: 'slick-carousel/slick/slick-theme.css'
+      'TEMPLATESDIR': __dirname + '/src/app/templates',
+      //'CSSDIR': __dirname + '/dist/css'
     },
     fallback: path.join(__dirname, "node_modules")
   }

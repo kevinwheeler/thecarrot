@@ -3,29 +3,39 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
+import template from 'TEMPLATESDIR/homeTemplate.hbs';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
+  className: 'rwc-home-view',
 
   initialize: function(options = {}) {
-    this.options = options;
     this.views = [];
 
-    let hv = options.heroView;
-    this.$el.append(hv.$el);
-    this.views.push(hv);
+    this.views.push(options.navView);
+    this.navView = options.navView;
 
-   //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+   // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
    _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
+    this.$el.html(template());
+    this.attachSubViews();
     this.render();
   },
 
-  className: 'rwc-home-view',
-
   render: function() {
-    _.forEach(this.views, function(view){
+    _.forEach(this.views, function(view) {
       view.render();
     });
     return this;
-  }
+  },
+
+  attachSubViews: function() {
+    let $nav = this.$('.NAV-STUB');
+    console.log("nav stub = ");
+    console.dir($nav.get(0));
+    console.log("this naview el = ");
+    console.dir(this.navView.$el.get());
+    $nav.replaceWith(this.navView.$el);
+  },
+
 });
