@@ -25,7 +25,7 @@ var sharedExports = {
       bootstrapCSS: 'bootstrap/dist/css/bootstrap.min.css',
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
       'TEMPLATESDIR': __dirname + '/src/app/templates',
-      //'CSSDIR': __dirname + '/dist/css'
+      'STYLESDIR': __dirname + '/dist/styles'
     },
     fallback: path.join(__dirname, "node_modules")
   }

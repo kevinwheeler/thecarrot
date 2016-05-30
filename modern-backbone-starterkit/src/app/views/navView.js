@@ -4,7 +4,8 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from './navTemplate.hbs';
-//import 'CSSDIR/nav.css';
+import 'STYLESDIR/css/nav.css';
+import 'STYLESDIR/stylus/nav.css';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({

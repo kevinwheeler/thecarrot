@@ -49,12 +49,12 @@ gulp.task('styles', function() {
       'include css' : true
     }))
     .pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
-    .pipe(gulp.dest(dist + 'css/'))
+    .pipe(gulp.dest(dist + 'styles/stylus/'))
     .pipe($.size({ title : 'stylus' }))
     .pipe($.connect.reload());
 
   var css = gulp.src(src + 'styles/**/*.css')
-    .pipe(gulp.dest(dist + 'css/'))
+    .pipe(gulp.dest(dist + 'styles/css/'))
     .pipe($.size({ title : 'css' }))
     .pipe($.connect.reload());
 
