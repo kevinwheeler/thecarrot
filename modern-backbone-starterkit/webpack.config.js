@@ -13,6 +13,7 @@ var sharedExports = {
   module : {
       loaders : [
         { test: /bootstrap.dist.*\.js?$/, loader: 'imports?jQuery=jquery' },
+        { test: /bootstrap-toolkit.min.js$/, loader: 'exports?ResponsiveBootstrapToolkit!imports?jQuery=jquery' },
         { test: /.(gif|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/, loader: 'url-loader?limit=100000' },//https://github.com/webpack/css-loader/issues/38
         { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
         { test: /\.hbs$/, loader: 'handlebars-loader' },
@@ -24,10 +25,12 @@ var sharedExports = {
     alias: {
       bootstrapCSS: 'bootstrap/dist/css/bootstrap.min.css',
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
+      bootstrapToolkit: 'responsive-bootstrap-toolkit/dist/bootstrap-toolkit.min.js',
       'TEMPLATESDIR': __dirname + '/src/app/templates',
       'STYLESDIR': __dirname + '/dist/styles'
     },
-    fallback: path.join(__dirname, "node_modules")
+    fallback: [path.join(__dirname, "node_modules"), path.join(__dirname, "src", "bower_components")],
+    
   }
 }
 

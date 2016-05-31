@@ -12,20 +12,24 @@
     <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
       <br>
       <ul class="nav navbar-nav">
+        {{!-- Routes are duplicated in server code and in router file. --}}
         <li>
-          <a href="#">Politics</a>
+          <a href="/">Home</a>
         </li>
         <li>
-          <a href="#">Sports</a>
+          <a href="/politics">Politics</a>
         </li>
         <li>
-          <a href="#">Spirituality</a>
-        </li>
-        <li class="active">
-          <a href="#">Business</a>
+          <a href="/sports">Sports</a>
         </li>
         <li>
-          <a href="#">Other</a>
+          <a href="/spirituality">Spirituality</a>
+        </li>
+        <li>
+          <a href="/business">Business</a>
+        </li>
+        <li>
+          <a href="/other">Other</a>
         </li>
       </ul>
     </nav>

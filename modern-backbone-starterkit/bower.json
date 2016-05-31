@@ -15,5 +15,6 @@
     "tests"
   ],
   "dependencies": {
+    "responsive-bootstrap-toolkit": "responsive-toolkit#~2.5.1"
   }
 }

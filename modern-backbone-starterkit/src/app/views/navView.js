@@ -6,11 +6,41 @@ import Backbone from 'backbone';
 import template from './navTemplate.hbs';
 import 'STYLESDIR/css/nav.css';
 import 'STYLESDIR/stylus/nav.css';
+import bootstrap from 'bootstrap';
+import viewport from 'bootstrapToolkit';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
+  //Thesee first few properties are standard Backbone properties. Look them up in Backbone's documentation.
   className: 'kmw-nav navbar',
 
+  initialize: function(options = {}) {
+    this.options = options;
+    this.views = [];
+    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+    //TODO add nav item views to views array
+
+    console.log("options = ");
+    console.dir(options);
+    this.listenTo(options.routerEvents, 'routed', this.collapse);
+    //this.updateHeightWhenBreakpointReached();
+    this.initialRender();
+    this.updateWhenBreakpointReached();
+    this.setActiveElement();
+
+    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+  },
+
+  tagName: 'nav',
+
+  template: template,
+
+  render: function() {
+    //TODO render sub views
+    return this;
+  },
+
+  // All of the following properties are not standard backbone properties.
   collapse: function() {
     this.$('#rwc-nav-collapse').collapse('hide');
   },
@@ -23,34 +53,50 @@ export default Backbone.View.extend({
       navItemElements.push(nItem.$el);
     });
     $navItemsStub.replaceWith(navItemElements);
+    if (this.isMobile()) {
+      this.$el.addClass('kmw-nav-mobile');
+    }
     //this.renderAllSubViews();
     //this.attachSubViews();
   },
 
-  initialize: function(options = {}) {
-    this.options = options;
-    this.views = [];
-    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
-    //TODO add nav item views to views array
-
-    console.log("options = ");
-    console.dir(options);
-    this.listenTo(options.routerEvents, 'routed', this.collapse);
-
-    this.initialRender();
-    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+  isMobile: function() {
+    return viewport.is('xs');
   },
 
-  tagName: 'nav',
-
-  template: template,
-
-  useFixedPositioning() {
-    this.$el.addClass('mod-fixed');
+  setActiveElement: function() {
+    // url without the host info. EX: if we are at 'example.com/route'
+    // routeUrl will hold '/route'
+    let routeUrl = window.location.href.toString().split(window.location.host)[1];
+    let $navAnchors = this.$('li a');
+    $navAnchors.each(function() {
+      if (this.getAttribute('href') === routeUrl) {
+        this.parentNode.className += ' active';
+      }
+    });
   },
 
-  render: function() {
-    //TODO render sub views
-    return this;
+  // http://stackoverflow.com/questions/18546067/why-is-the-window-width-smaller-than-the-viewport-width-set-in-media-queries
+  // Used to compare against breakpoint width. Handles complexities of the width of scrollbar.
+  viewport: function() {
+    let e = window, a = 'inner';
+    if (!('innerWidth' in window)) {
+      a = 'client';
+      e = document.documentElement || document.body;
+    }
+    return {width: e[ a + 'Width' ] , height: e[ a + 'Height' ]};
+  },
+
+  updateWhenBreakpointReached: function() {
+    let self = this;
+    $(window).resize(_.throttle(function() {
+        if (self.isMobile()) {
+          self.$el.addClass('kmw-nav-mobile');
+        } else {
+          self.$el.removeClass('kmw-nav-mobile');
+        }
+      }, 100)
+    );
   }
+
 });
