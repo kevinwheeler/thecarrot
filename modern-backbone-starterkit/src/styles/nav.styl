@@ -24,7 +24,24 @@
   padding-top: 20px;
 }
 
-kmw-navbar-center .navbar-header {
+.kmw-navbar.kmw-navbar-sticky{
+  padding-top: 0px;
+  transition: padding-top 0.25s ease-in;
+}
+
+.kmw-navbar-header {
+  height: 58px;
+  transform: scaleY(1);
+  transition: transform 0.25s ease-in, height 0.25s ease-in;
+}
+
+.kmw-navbar-header-sticky {
+  transform: scaleY(0);
+  height: 0;
+  transition: transform 0.25s ease-in, height 0.25s ease-in;
+}
+
+.kmw-navbar-center .navbar-header {
   text-align: center;
 }
 
@@ -51,6 +68,11 @@ kmw-navbar-center .navbar-header {
 
 .kmw-nav-hr {
   border-top: 1px solid #aaa
+}
+
+.kmw-nav-hr.kmw-nav-hr-sticky {
+  margin-top: 0;
+  transition: margin-top 0.25s ease-in;
 }
 
 desktop-height = 195px;

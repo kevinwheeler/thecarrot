@@ -22,11 +22,15 @@ export default Backbone.View.extend({
 
     console.log("options = ");
     console.dir(options);
-    this.listenTo(options.routerEvents, 'routed', this.collapse);
+    //this.listenTo(options.routerEvents, 'routed', this.collapse);
     //this.updateHeightWhenBreakpointReached();
     this.initialRender();
     this.updateWhenBreakpointReached();
+    this.toggleStickyOnScroll();
     this.setActiveElement();
+
+    let self = this;
+    //setInterval(function(){self.disableSticky()},750);
 
     _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
   },
@@ -43,6 +47,18 @@ export default Backbone.View.extend({
   // All of the following properties are not standard backbone properties.
   collapse: function() {
     this.$('#rwc-nav-collapse').collapse('hide');
+  },
+
+  disableSticky: function() {
+    this.$('.kmw-navbar-header').removeClass('kmw-navbar-header-sticky');
+    this.$('.kmw-navbar').removeClass('kmw-navbar-sticky');
+    this.$('.kmw-nav-hr').removeClass('kmw-nav-hr-sticky');
+  },
+
+  enableSticky: function() {
+    this.$('.kmw-navbar-header').addClass('kmw-navbar-header-sticky');
+    this.$('.kmw-navbar').addClass('kmw-navbar-sticky');
+    this.$('.kmw-nav-hr').addClass('kmw-nav-hr-sticky');
   },
 
   initialRender: function() {
@@ -76,6 +92,18 @@ export default Backbone.View.extend({
     });
   },
 
+  updateWhenBreakpointReached: function() {
+    let self = this;
+    $(window).resize(_.throttle(function() {
+        if (self.isMobile()) {
+          self.$el.addClass('kmw-nav-mobile');
+        } else {
+          self.$el.removeClass('kmw-nav-mobile');
+        }
+      }, 100)
+    );
+  },
+
   // http://stackoverflow.com/questions/18546067/why-is-the-window-width-smaller-than-the-viewport-width-set-in-media-queries
   // Used to compare against breakpoint width. Handles complexities of the width of scrollbar.
   viewport: function() {
@@ -87,16 +115,20 @@ export default Backbone.View.extend({
     return {width: e[ a + 'Width' ] , height: e[ a + 'Height' ]};
   },
 
-  updateWhenBreakpointReached: function() {
+  toggleStickyOnScroll: function() {
     let self = this;
-    $(window).resize(_.throttle(function() {
-        if (self.isMobile()) {
-          self.$el.addClass('kmw-nav-mobile');
-        } else {
-          self.$el.removeClass('kmw-nav-mobile');
-        }
-      }, 100)
-    );
-  }
 
+    let runOnScroll = function() {
+      let currentScrollAmount = $(document).scrollTop();
+      let NUM_PIXELS_THRESHOLD = 200;
+
+      if (currentScrollAmount > NUM_PIXELS_THRESHOLD) {
+        self.enableSticky();
+      } else {
+        self.disableSticky();
+      }
+    };
+
+    window.addEventListener("scroll", runOnScroll);
+  }
 });
