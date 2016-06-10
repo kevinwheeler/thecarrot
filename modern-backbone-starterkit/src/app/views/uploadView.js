@@ -33,7 +33,6 @@ export default Backbone.View.extend({
     let recaptchaURL = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit';
     $script(recaptchaURL);
 
-
     this.render();
   },
 
@@ -66,7 +65,7 @@ export default Backbone.View.extend({
           this.uploadFile(file, response.signedRequest, response.url);
         } else {
           //alert('Could not get signed URL.');
-          alert('An error has occurred. Please refresh.');
+          alert('An error was encountered. Please refresh.');
         }
       }
     };
@@ -80,6 +79,7 @@ export default Backbone.View.extend({
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           //document.getElementById('preview').src = url;
+          console.log("in callback, url = " + url);
           document.getElementById('s3-uploaded-url').value = url;
           // look into having a loading bar as it uploads.
           // enable submit button now.

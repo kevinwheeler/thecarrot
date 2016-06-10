@@ -42,13 +42,10 @@ app.get('/other', sendIndex);
 
 //API ROUTES
 app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response) {
-  console.log("IN ARTICLE ROUTE");
-
   var RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
 
   var postJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
 
-  console.log("POST JSON = " + JSON.stringify(postJSON));
   requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: postJSON }, function(err, httpResponse, body) {
     if (err) {
       response.status(500).send('Something went wrong! Please try again.');
@@ -56,11 +53,11 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
     else {
       var bodyJSON = JSON.parse(body);
       if (bodyJSON.success) {
-        console.log("Captcha successful");
+        //console.log("Captcha successful");
         response.redirect('/');
       }
       else {
-        console.log("Captcha failed. Please fill out the captcha.");
+        //console.log("Captcha failed. Please fill out the captcha.");
         response.redirect('/');
       }
     }
@@ -90,11 +87,12 @@ function validateFileType(fileType) {
 app.get('/sign-s3', (req, res) => {
   const s3 = new aws.S3();
   const fileName = req.query['file-name'];
-  validateFilename();
+  validateFilename(fileName);
   const fileType = req.query['file-type'];
   validateFileType(fileType);
+  const S3_BUCKET = process.env.S3_BUCKET;
   const s3Params = {
-    Bucket: process.env.S3_BUCKET,
+    Bucket: S3_BUCKET,
     Key: fileName,
     Expires: 60,
     ContentType: fileType,
