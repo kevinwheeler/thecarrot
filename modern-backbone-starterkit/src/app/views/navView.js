@@ -3,10 +3,10 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import template from './navTemplate.hbs';
 import 'STYLESDIR/css/nav.css';
 import 'STYLESDIR/stylus/nav.css';
 import bootstrap from 'bootstrap';
+import template from 'TEMPLATESDIR/navTemplate.hbs';
 import viewport from 'bootstrapToolkit';
 
 //export default Marionette.ItemView.extend({
@@ -20,8 +20,6 @@ export default Backbone.View.extend({
     _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     //TODO add nav item views to views array
 
-    console.log("options = ");
-    console.dir(options);
     //this.listenTo(options.routerEvents, 'routed', this.collapse);
     //this.updateHeightWhenBreakpointReached();
     this.initialRender();
@@ -97,8 +95,14 @@ export default Backbone.View.extend({
     $(window).resize(_.throttle(function() {
         if (self.isMobile()) {
           self.$el.addClass('kmw-nav-mobile');
+          self.disableSticky();
         } else {
           self.$el.removeClass('kmw-nav-mobile');
+          if (self.shouldBeSticky()) {
+            self.enableSticky();
+          } else{
+            self.disableSticky();
+          }
         }
       }, 100)
     );
@@ -115,19 +119,24 @@ export default Backbone.View.extend({
     return {width: e[ a + 'Width' ] , height: e[ a + 'Height' ]};
   },
 
+  shouldBeSticky: function() {
+    let currentScrollAmount = $(document).scrollTop();
+    let NUM_PIXELS_THRESHOLD = 200;
+    return (currentScrollAmount > NUM_PIXELS_THRESHOLD) && !this.isMobile();
+  },
+
   toggleStickyOnScroll: function() {
     let self = this;
 
     let runOnScroll = function() {
-      let currentScrollAmount = $(document).scrollTop();
-      let NUM_PIXELS_THRESHOLD = 200;
-
-      if (currentScrollAmount > NUM_PIXELS_THRESHOLD) {
+      if (self.shouldBeSticky()) {
         self.enableSticky();
       } else {
         self.disableSticky();
       }
     };
+
+    runOnScroll = _.throttle(runOnScroll, 100);
 
     window.addEventListener("scroll", runOnScroll);
   }

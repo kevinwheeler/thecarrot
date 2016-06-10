@@ -31,10 +31,6 @@ export default Backbone.View.extend({
 
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
-    console.log("nav stub = ");
-    console.dir($nav.get(0));
-    console.log("this naview el = ");
-    console.dir(this.navView.$el.get());
     $nav.replaceWith(this.navView.$el);
   },
 

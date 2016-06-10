@@ -12,8 +12,10 @@ export default Backbone.Router.extend({
     'sports'      : 'categoryRoute',
     'spirituality': 'categoryRoute',
     'business'    : 'categoryRoute',
-    'other'       : 'categoryRoute'
-    //'about': 'aboutRoute',
+    'other'       : 'categoryRoute',
+
+    //DEVELOPMENT ROUTES
+    'upload': 'uploadRoute'
   },
 
   afterRoute() {
@@ -67,4 +69,10 @@ export default Backbone.Router.extend({
     this.afterRoute();
   },
 
+  uploadRoute() {
+    let uploadViewInst = serviceProvider.getUploadView();
+    uploadViewInst.render();
+    $('#js-app').empty().append(uploadViewInst.$el);
+    this.afterRoute();
+  },
 });

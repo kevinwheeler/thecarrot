@@ -1,12 +1,11 @@
 import Backbone from 'backbone';
 
-import ArticleModel from '../router';
-import HomeView from '../views/homeView.js';
-import NavView from '../views/navView.js';
+import HomeView from '../views/homeView';
+import NavView from '../views/navView';
 import Router from '../router';
+import UploadView from '../views/uploadView.js';
 
 var serviceProvider = {
-  //TODO clean up create vs get methods so there is a consistent pattern.
   _createRouterEvents() {
     let routerEvents = {};
     _.extend(routerEvents, Backbone.Events);
@@ -30,6 +29,11 @@ var serviceProvider = {
 
   getNavView() {
     return this.navView;
+  },
+
+  getUploadView() {
+    let uploadViewInst = new UploadView();
+    return uploadViewInst;
   },
 
   initialize() {

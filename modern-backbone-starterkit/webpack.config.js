@@ -10,6 +10,9 @@ var entry = './src/app/main.js',
 
 // exports that are used both in production and in development
 var sharedExports = {
+  externals: {
+    grecaptcha: 'grecaptcha'
+  },
   module : {
       loaders : [
         { test: /bootstrap.dist.*\.js?$/, loader: 'imports?jQuery=jquery' },
@@ -26,8 +29,8 @@ var sharedExports = {
       bootstrapCSS: 'bootstrap/dist/css/bootstrap.min.css',
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
       bootstrapToolkit: 'responsive-bootstrap-toolkit/dist/bootstrap-toolkit.min.js',
-      'TEMPLATESDIR': __dirname + '/src/app/templates',
-      'STYLESDIR': __dirname + '/dist/styles'
+      'STYLESDIR': __dirname + '/dist/styles',
+      'TEMPLATESDIR': __dirname + '/src/app/templates'
     },
     fallback: [path.join(__dirname, "node_modules"), path.join(__dirname, "src", "bower_components")],
     

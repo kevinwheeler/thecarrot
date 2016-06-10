@@ -7,11 +7,16 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "aws-sdk": "^2.3.18",
+    "body-parser": "^1.15.1",
     "ejs": "2.3.3",
-    "express": "4.13.3"
+    "express": "4.13.3",
+    "http-status": "^0.2.3",
+    "multer": "^1.1.0",
+    "request": "^2.72.0"
   },
   "engines": {
-    "node": "0.12.7"
+    "node": "6.2.1"
   },
   "repository": {
     "type": "git",
