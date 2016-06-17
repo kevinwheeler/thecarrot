@@ -1,13 +1,15 @@
 const aws = require('aws-sdk');
-const express = require('express');
-const app = express();
-
 const bodyParser = require('body-parser');
-
+const compression = require('compression');
+const express = require('express');
+const MongoClient = require('mongodb').MongoClient;
 const multer = require('multer');
-const upload = multer();
-
 const requester = require('request');
+const RateLimit = require('express-rate-limit');
+const util = require('util');
+
+const app = express();
+const upload = multer();
 
 const distDir = __dirname + '/modern-backbone-starterkit/dist/'
 
@@ -25,10 +27,12 @@ const distDir = __dirname + '/modern-backbone-starterkit/dist/'
 //    app.use(forceSsl);
 //}
 
+app.enable('trust proxy'); // Needed for rate limiter.
+app.use(compression());
 app.set('port', (process.env.PORT || 5000));
 
 var sendIndex = function(request, response) {
- response.sendFile(distDir + 'index.html');
+  response.sendFile(distDir + 'index.html');
 }
 
 //IMPORTANT: Routes are duplicated in various places in client side code.
@@ -39,30 +43,6 @@ app.get('/sports', sendIndex);
 app.get('/spirituality', sendIndex);
 app.get('/business', sendIndex);
 app.get('/other', sendIndex);
-
-//API ROUTES
-app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response) {
-  var RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
-
-  var postJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
-
-  requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: postJSON }, function(err, httpResponse, body) {
-    if (err) {
-      response.status(500).send('Something went wrong! Please try again.');
-    }
-    else {
-      var bodyJSON = JSON.parse(body);
-      if (bodyJSON.success) {
-        //console.log("Captcha successful");
-        response.redirect('/');
-      }
-      else {
-        //console.log("Captcha failed. Please fill out the captcha.");
-        response.redirect('/');
-      }
-    }
-  });
-});
 
 function validateFilename(filename) {
   const hexDigitRegex = '[a-f0-9]';
@@ -80,11 +60,69 @@ function validateFilename(filename) {
 }
 
 function validateFileType(fileType) {
-  //TODO use mmmagic to detect filetype maybe.
+  // TODO use mmmagic to detect filetype maybe.
+  // wait, mmmagic only makes sense if we have the file in our hands.
   return;
 }
 
-app.get('/sign-s3', (req, res) => {
+//API ROUTES
+app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response) {
+  const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
+  const MONGO_URI = process.env.MONGODB_URI;
+
+  const postJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
+
+
+  requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: postJSON }, function(err, httpResponse, body) {
+    if (err) {
+      response.status(500).send('Something went wrong! Please try again.');
+    }
+    else {
+      var bodyJSON = JSON.parse(body);
+      if (bodyJSON.success) {
+        // Captcha successful.
+        MongoClient.connect(MONGO_URI, (err, db) => {
+          if (err !== null) {
+            throw "/article couldn't connect to mongo.";
+          }
+          const imageId = request.body['kmw-image-id'];
+          // right now the image's filename and the id are the same value.
+          validateFilename(imageId); 
+          db.collection('article', (err, collection) => {
+            if (err !== null) {
+              util.error(err);
+              throw "Error getting article collection";
+            }
+            const doc = {
+              _id: imageId,
+              headline: request.body.headline,
+              s3URL: request.body['s3-uploaded-url'],
+              subline: request.body.subline
+            }
+            collection.insert(doc); 
+          });
+          db.close();
+        });
+        response.redirect('/');
+      }
+      else {
+        // Captcha failed.
+        response.redirect('/');
+      }
+    }
+  });
+});
+
+
+// Rate limit how many requests can come from one ip address.
+var s3Limiter = new RateLimit({
+  delayAfter: 3, // begin slowing down responses after the third request 
+  delayMs: 1000, // slow down subsequent responses by 1 second per request 
+  max: 30, // limit each IP to 30 requests per windowMs 
+  windowMs: 60*1000 // 1 minute
+});
+
+app.get('/sign-s3', s3Limiter, (req, res) => {
   const s3 = new aws.S3();
   const fileName = req.query['file-name'];
   validateFilename(fileName);

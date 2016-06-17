@@ -1,9 +1,12 @@
 <form action="/article" enctype='multipart/form-data' method="post">
   <input type="hidden" id="s3-uploaded-url" name="s3-uploaded-url" value="/images/default.png">
+  <input type="hidden" id="kmw-image-id" name="kmw-image-id">
 
   <label for="kmw-picture-input">Picture</label>
-  <input accept="image/*" id="kmw-picture-input" name="picture" type="file">
+  <input accept="image/*" id="kmw-picture-input" type="file">
   <br>
+
+  <div id="kmw-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
 
   <label for="kmw-headline-input">Headline</label>
   <input type="text" id="kmw-headline-input" name="headline">
