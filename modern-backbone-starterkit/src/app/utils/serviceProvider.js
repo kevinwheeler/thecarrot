@@ -3,7 +3,8 @@ import Backbone from 'backbone';
 import HomeView from '../views/homeView';
 import NavView from '../views/navView';
 import Router from '../router';
-import UploadView from '../views/uploadView.js';
+import UploadModel from '../models/uploadModel';
+import UploadView from '../views/uploadView';
 
 var serviceProvider = {
   _createRouterEvents() {
@@ -32,8 +33,15 @@ var serviceProvider = {
   },
 
   getUploadView() {
-    let uploadViewInst = new UploadView();
+    let uploadViewInst = new UploadView({
+      model: this.getUploadModel()
+    });
     return uploadViewInst;
+  },
+
+  getUploadModel() {
+    let uploadModelInst = new UploadModel();
+    return uploadModelInst;
   },
 
   initialize() {

@@ -65,52 +65,73 @@ function validateFileType(fileType) {
   return;
 }
 
+function validateHeadline(headline) {
+  if (typeof(headline) !== "string") {
+    throw "headline isn't string"; 
+  }
+  if (headline.length > 400) {
+    throw "headline too long";
+  }
+}
+
+function validateSubline(subline) {
+  if (typeof(subline) !== "string") {
+    throw "subline isn't string"; 
+  }
+  if (subline.length > 400) {
+    throw "subline too long";
+  }
+}
+
 //API ROUTES
 app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response) {
   const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
   const MONGO_URI = process.env.MONGODB_URI;
 
-  const postJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
+  const imageId = request.body['kmw-image-id'];
+  validateFilename(imageId); // right now the image's filename and the id are the same value.
+  const headline = request.body.headline;
+  validateHeadline(headline);
+  const subline = request.body.subline;
+  validateSubline(subline);
 
-
-  requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: postJSON }, function(err, httpResponse, body) {
-    if (err) {
-      response.status(500).send('Something went wrong! Please try again.');
-    }
-    else {
-      var bodyJSON = JSON.parse(body);
-      if (bodyJSON.success) {
-        // Captcha successful.
-        MongoClient.connect(MONGO_URI, (err, db) => {
-          if (err !== null) {
-            throw "/article couldn't connect to mongo.";
-          }
-          const imageId = request.body['kmw-image-id'];
-          // right now the image's filename and the id are the same value.
-          validateFilename(imageId); 
-          db.collection('article', (err, collection) => {
-            if (err !== null) {
-              util.error(err);
-              throw "Error getting article collection";
-            }
-            const doc = {
-              _id: imageId,
-              headline: request.body.headline,
-              s3URL: request.body['s3-uploaded-url'],
-              subline: request.body.subline
-            }
-            collection.insert(doc); 
-          });
-          db.close();
-        });
-        response.redirect('/');
+  const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
+  requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
+    function(err, httpResponse, body) {
+      if (err) {
+        response.status(500).send('Something went wrong! Please try again.');
       }
       else {
-        // Captcha failed.
-        response.redirect('/');
+        var bodyJSON = JSON.parse(body);
+        if (bodyJSON.success) {
+          // Captcha successful.
+          MongoClient.connect(MONGO_URI, (err, db) => {
+            if (err !== null) {
+              throw "/article couldn't connect to mongo.";
+            }
+            db.collection('article', (err, collection) => {
+              if (err !== null) {
+                util.error(err);
+                throw "Error getting article collection";
+              }
+              const doc = {
+                _id: imageId,
+                headline: headline,
+                subline: subline
+              }
+              collection.insert(doc); 
+            });
+            db.close();
+          });
+          response.redirect('/');
+        }
+        else {
+          // Captcha failed.
+          response.redirect('/'); //TODO
+        }
       }
     }
-  });
+  );
 });
 
 
