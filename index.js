@@ -6,6 +6,7 @@ const MongoClient = require('mongodb').MongoClient;
 const multer = require('multer');
 const requester = require('request');
 const RateLimit = require('express-rate-limit');
+const url = require('url');
 const util = require('util');
 
 const app = express();
@@ -83,6 +84,34 @@ function validateSubline(subline) {
   }
 }
 
+app.get('/article/:articleId', function(request, response) {
+  const MONGO_URI = process.env.MONGODB_URI;
+  console.log("article id = " + request.params.articleId);
+
+  MongoClient.connect(MONGO_URI, (err, db) => {
+    if (err !== null) {
+      throw "GET /article couldn't connect to mongo.";
+    }
+    db.collection('article', (err, collection) => {
+      if (err !== null) {
+        util.error(err);
+        throw "Error getting article collection";
+      }
+      collection.findOne({'_id': request.params.articleId}, function(err, item) {
+        if (err !== null) {
+          console.log("error = " + err);
+        } else {
+        response.render('article', {
+          article: item
+        });
+        db.close();
+        }
+      });
+    });
+  });
+
+});
+
 //API ROUTES
 app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response) {
   const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
@@ -107,7 +136,7 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
           // Captcha successful.
           MongoClient.connect(MONGO_URI, (err, db) => {
             if (err !== null) {
-              throw "/article couldn't connect to mongo.";
+              throw "POST /article couldn't connect to mongo.";
             }
             db.collection('article', (err, collection) => {
               if (err !== null) {
@@ -182,8 +211,8 @@ app.use(function(req, res, next) {
 });
 
 // views is directory for all template files
-//app.set('views', __dirname + '/views');
-//app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));

@@ -8,6 +8,7 @@ export default Backbone.Router.extend({
   // IMPORTANT: Routes need to be duplicated on server code and in navbar code.
   routes: {
     '': 'homeRoute',
+    'article/:articleid'       : 'articleRoute',
     'politics'    : 'categoryRoute',
     'sports'      : 'categoryRoute',
     'spirituality': 'categoryRoute',
@@ -48,10 +49,10 @@ export default Backbone.Router.extend({
   //  });
   //},
 
-  aboutRoute() {
-    let aboutViewInst = serviceProvider.getAboutView();
-    aboutViewInst.render();
-    $('#js-app').empty().append(aboutViewInst.$el);
+  articleRoute() {
+    let homeViewInst = serviceProvider.getArticleView();
+    homeViewInst.render();
+    $('#js-app').empty().append(homeViewInst.$el);
     this.afterRoute();
   },
 

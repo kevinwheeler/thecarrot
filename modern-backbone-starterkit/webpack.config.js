@@ -30,9 +30,11 @@ var sharedExports = {
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
       bootstrapToolkit: 'responsive-bootstrap-toolkit/dist/bootstrap-toolkit.min.js',
       'ISOMORPHICDIR': __dirname + '/isomorphic',
+      'MODELSDIR': __dirname + '/src/app/models',
       'STYLESDIR': __dirname + '/dist/styles',
       'TEMPLATESDIR': __dirname + '/src/app/templates',
-      'UTILSDIR': __dirname + '/src/app/utils'
+      'UTILSDIR': __dirname + '/src/app/utils',
+      'VIEWSDIR': __dirname + '/src/app/views',
     },
     fallback: [path.join(__dirname, "node_modules"), path.join(__dirname, "src", "bower_components")],
   }

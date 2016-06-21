@@ -1,10 +1,11 @@
 import Backbone from 'backbone';
 
-import HomeView from '../views/homeView';
-import NavView from '../views/navView';
+import ArticleView from 'VIEWSDIR/articleView';
+import HomeView from 'VIEWSDIR/homeView';
+import NavView from 'VIEWSDIR/navView';
 import Router from '../router';
-import UploadModel from '../models/uploadModel';
-import UploadView from '../views/uploadView';
+import UploadModel from 'MODELSDIR/uploadModel';
+import UploadView from 'VIEWSDIR/uploadView';
 
 var serviceProvider = {
   _createRouterEvents() {
@@ -21,6 +22,11 @@ var serviceProvider = {
   getAboutView() {
     let aboutViewInst = new AboutView({navView: this.getNavView()});
     return aboutViewInst;
+  },
+
+  getArticleView() {
+    let articleViewInst = new ArticleView({navView: this.getNavView()});
+    return articleViewInst;
   },
 
   getHomeView() {
