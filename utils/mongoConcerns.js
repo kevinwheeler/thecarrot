@@ -1,8 +1,14 @@
+/*
+  Throws error if environment variables aren't set.
+  Also converts them from strings to the appropriate datatype (int/boolean).
+*/
 const JOURNAL_CONCERN_ENV = process.env.JOURNAL_CONCERN;
 const WRITE_CONCERN_ENV = process.env.WRITE_CONCERN;
+const WTIMEOUT_ENV = process.env.WTIMEOUT;
 
 var JOURNAL_CONCERN;
 var WRITE_CONCERN;
+var WTIMEOUT;
 
 
 { // setup journal concern
@@ -23,7 +29,15 @@ var WRITE_CONCERN;
   WRITE_CONCERN = parseInt(WRITE_CONCERN_ENV);
 }
 
+{ // setup wtimeout
+  if (WTIMEOUT_ENV.length === 0) {
+    throw "WTIMEOUT environment variable isn't set";
+  }
+  WTIMEOUT = parseInt(WTIMEOUT_ENV);
+}
+
 module.exports = {
   JOURNAL_CONCERN: JOURNAL_CONCERN,
-  WRITE_CONCERN: WRITE_CONCERN
+  WRITE_CONCERN: WRITE_CONCERN,
+  WTIMEOUT: WTIMEOUT
 }

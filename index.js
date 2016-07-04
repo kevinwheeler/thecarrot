@@ -9,6 +9,7 @@ const requester = require('request');
 const RateLimit = require('express-rate-limit');
 const url = require('url');
 const util = require('util');
+const mongoConcerns = require('./utils/mongoConcerns');
 
 const app = express();
 const upload = multer();
@@ -74,24 +75,26 @@ app.get('/article/:articleId', function(request, response, next) {
 
   MongoClient.connect(MONGO_URI, (err, db) => {
     if (err !== null) {
+      db.close();
       next(err);
     } else {
       db.collection('article', (err, collection) => {
         if (err !== null) {
-          util.error(err);
+          db.close();
           next(err);
         } else {
-          collection.findOne({'_id': request.params.articleId}, function(err, item) {
+          collection.findOne({'_id': parseInt(request.params.articleId)}, function(err, item) {
             if (err !== null) {
-              util.error(err);
+              db.close();
+              next(err);
             } else {
               if (item === null) {
                 send404(response);
-                return;
+              } else {
+                response.render('article', {
+                  article: item
+                });
               }
-              response.render('article', {
-                article: item
-              });
               db.close();
             }
           });
@@ -107,19 +110,19 @@ function getNextSequence(db, name, cb) {
      {_id: name},
      [],
      {$inc: {seq:1}},
-     function(err, record) {
+     {},
+     function(err, result) {
        if (err !== null) {
          throw err;
        } else {
-         console.log("record = " + JSON.stringify(record));
-         console.log("record.seq = " + record.seq);
-         cb(record.value.seq);
+         cb(result.value.seq);
        }
      }
    );
 }
 
 //API ROUTES
+// TODO remove upload.single('picture')
 app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response, next) {
   const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
   const MONGO_URI = process.env.MONGODB_URI;
@@ -148,33 +151,51 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
           // Captcha successful.
           MongoClient.connect(MONGO_URI, (err, db) => {
             if (err !== null) {
+              db.close(); 
               next(err);
-            }
-            // id is the id to use for the new record we are inserting
-            const insertNewArticle = function(id) {
-              db.collection('article', (err, collection) => {
-                if (err !== null) {
-                  next(err);
-                } else {
-                  const doc = {
-                    _id: id,
-                    dateCreated: new Date(),
-                    headline: headline,
-                    imageURL: `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageId}`,
-                    subline: subline
+            } else {
+              // id is the id to use for the new record we are inserting
+              const insertNewArticle = function(id) {
+                db.collection('article', (err, collection) => {
+                  if (err !== null) {
+                    db.close();
+                    next(err);
+                  } else {
+                    const doc = {
+                      _id: id,
+                      dateCreated: new Date(),
+                      headline: headline,
+                      imageURL: `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageId}`,
+                      subline: subline
+                    }
+                    collection.insert(doc, {
+                        w: "majority",
+                        wtimeout: mongoConcerns.WTIMEOUT
+                      }, 
+                      (error, result) => {
+                        if (error !== null){
+                          db.close();
+                          next(error);
+                        } else {
+                          db.close();
+                          response.redirect('/article/' + id);
+                        }
+                      }); 
                   }
-                  collection.insert(doc); 
-                }
-              });
-              db.close();
+                });
+              }
+              try {
+                getNextSequence(db, 'articleId', insertNewArticle);
+              } catch (e) {
+                next(e);
+                return;
+              }
             }
-            getNextSequence(db, 'articleId', insertNewArticle);
           });
-          response.redirect('/');
         }
         else {
           // Captcha failed.
-          response.redirect('/'); //TODO
+          response.redirect('/upload?captcha=fail'); //TODO
         }
       }
     });
