@@ -16,8 +16,14 @@
   <body>
     <div id="content"></div>
     <script>
-      window.kmw = {};
-      window.kmw.article = <%- JSON.stringify(article) %>;
+      window.kmw = {article: {}};
+      <%# 
+          Make sure to html escape these user generated values so that we aren't
+          vulnerable to injection attacks
+       %>
+      window.kmw.article.headline = '<%= article.headline %>';
+      window.kmw.article.subline = '<%= article.subline %>';
+      window.kmw.article.imageURL = '<%= article.imageURL %>';
     </script>
     <script src="/js/main.js" defer></script>
   </body>

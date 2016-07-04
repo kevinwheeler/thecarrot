@@ -9,11 +9,14 @@ export default Backbone.Router.extend({
   routes: {
     '': 'homeRoute',
     'article/:articleid'       : 'articleRoute',
-    'politics'    : 'categoryRoute',
-    'sports'      : 'categoryRoute',
-    'spirituality': 'categoryRoute',
-    'business'    : 'categoryRoute',
-    'other'       : 'categoryRoute',
+
+    'business'      : 'categoryRoute',
+    'education'     : 'categoryRoute',
+    'other'         : 'categoryRoute',
+    'politics'      : 'categoryRoute',
+    'spirituality'  : 'categoryRoute',
+    'sports'        : 'categoryRoute',
+    'technology'    : 'categoryRoute',
 
     //DEVELOPMENT ROUTES
     'upload': 'uploadRoute'

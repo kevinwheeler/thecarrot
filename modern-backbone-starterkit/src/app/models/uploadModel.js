@@ -28,7 +28,6 @@ export default Backbone.Model.extend({
           const response = JSON.parse(xhr.responseText);
           this.uploadFile(file, response.signedRequest, response.url, filenameUUID);
         } else {
-          //alert('Could not get signed URL.');
           alert('An error was encountered. Please refresh.');
         }
       }

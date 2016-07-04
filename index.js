@@ -1,4 +1,5 @@
 const aws = require('aws-sdk');
+const validations = require('./modern-backbone-starterkit/isomorphic/articleValidations.js');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const express = require('express');
@@ -32,20 +33,26 @@ app.enable('trust proxy'); // Needed for rate limiter.
 app.use(compression());
 app.set('port', (process.env.PORT || 5000));
 
-var sendIndex = function(request, response) {
+const sendIndex = function(request, response) {
   response.sendFile(distDir + 'index.html');
 }
 
-//IMPORTANT: Routes are duplicated in various places in client side code.
-// Namely the router, the nav view, and the nav view's template.
+const send404 = function(response) {
+  response.status(404).send('Error 404. Page not found.');
+}
+
+// IMPORTANT: Routes are duplicated in client side code.
+// Namely the router and the nav template.
 app.get('/', sendIndex);
+app.get('/business', sendIndex);
+app.get('/education', sendIndex);
+app.get('/other', sendIndex);
 app.get('/politics', sendIndex);
 app.get('/sports', sendIndex);
 app.get('/spirituality', sendIndex);
-app.get('/business', sendIndex);
-app.get('/other', sendIndex);
+app.get('/technology', sendIndex);
 
-function validateFilename(filename) {
+function filenameIsValid(filename) {
   const hexDigitRegex = '[a-f0-9]';
   const fourHexDigits = `${hexDigitRegex}{4}`;
   const eightHexDigits = `${hexDigitRegex}{8}`;
@@ -54,77 +61,82 @@ function validateFilename(filename) {
     fourHexDigits + '-' + fourHexDigits + '-' + twelveHexDigits + '$';
   // uuidRegex should match strings of this form: 110ec58a-a0f2-4ac4-8393-c866d813b8d1
 
-  const filenameIsValid =  filename.match(uuidRegex) !== null;
-  if (!filenameIsValid) {
-    throw "Invalid filename.";
-  }
+  return filename.match(uuidRegex) !== null;
 }
 
-function validateFileType(fileType) {
-  // TODO use mmmagic to detect filetype maybe.
-  // wait, mmmagic only makes sense if we have the file in our hands.
-  return;
+function fileTypeIsValid(fileType) {
+  const imageMimeTypeRegex = /image\/.*/;
+  return fileType.match(imageMimeTypeRegex) !== null;
 }
 
-function validateHeadline(headline) {
-  if (typeof(headline) !== "string") {
-    throw "headline isn't string"; 
-  }
-  if (headline.length > 400) {
-    throw "headline too long";
-  }
-}
-
-function validateSubline(subline) {
-  if (typeof(subline) !== "string") {
-    throw "subline isn't string"; 
-  }
-  if (subline.length > 400) {
-    throw "subline too long";
-  }
-}
-
-app.get('/article/:articleId', function(request, response) {
+app.get('/article/:articleId', function(request, response, next) {
   const MONGO_URI = process.env.MONGODB_URI;
-  console.log("article id = " + request.params.articleId);
 
   MongoClient.connect(MONGO_URI, (err, db) => {
     if (err !== null) {
-      throw "GET /article couldn't connect to mongo.";
-    }
-    db.collection('article', (err, collection) => {
-      if (err !== null) {
-        util.error(err);
-        throw "Error getting article collection";
-      }
-      collection.findOne({'_id': request.params.articleId}, function(err, item) {
+      next(err);
+    } else {
+      db.collection('article', (err, collection) => {
         if (err !== null) {
-          console.log("error = " + err);
+          util.error(err);
+          next(err);
         } else {
-        response.render('article', {
-          article: item
-        });
-        db.close();
+          collection.findOne({'_id': request.params.articleId}, function(err, item) {
+            if (err !== null) {
+              util.error(err);
+            } else {
+              if (item === null) {
+                send404(response);
+                return;
+              }
+              response.render('article', {
+                article: item
+              });
+              db.close();
+            }
+          });
         }
       });
-    });
+    }
   });
 
 });
 
+function getNextSequence(db, name, cb) {
+   const ret = db.collection('counters').findAndModify(
+     {_id: name},
+     [],
+     {$inc: {seq:1}},
+     function(err, record) {
+       if (err !== null) {
+         throw err;
+       } else {
+         console.log("record = " + JSON.stringify(record));
+         console.log("record.seq = " + record.seq);
+         cb(record.value.seq);
+       }
+     }
+   );
+}
+
 //API ROUTES
-app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response) {
+app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response, next) {
   const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
   const MONGO_URI = process.env.MONGODB_URI;
 
   const imageId = request.body['kmw-image-id'];
-  validateFilename(imageId); // right now the image's filename and the id are the same value.
+  if (!filenameIsValid(imageId)) { // right now the image's filename and the id are the same value.
+    next("invalid filename for image");
+  }
   const headline = request.body.headline;
-  validateHeadline(headline);
   const subline = request.body.subline;
-  validateSubline(subline);
+  validationErrors = validations.validateEverything(headline, subline);
+  if (validationErrors)
+    next(validationErrors[0]);
 
   const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
+ 
+  //id = the id to use for the new record we are inserting.
   requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
     function(err, httpResponse, body) {
       if (err) {
@@ -136,21 +148,27 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
           // Captcha successful.
           MongoClient.connect(MONGO_URI, (err, db) => {
             if (err !== null) {
-              throw "POST /article couldn't connect to mongo.";
+              next(err);
             }
-            db.collection('article', (err, collection) => {
-              if (err !== null) {
-                util.error(err);
-                throw "Error getting article collection";
-              }
-              const doc = {
-                _id: imageId,
-                headline: headline,
-                subline: subline
-              }
-              collection.insert(doc); 
-            });
-            db.close();
+            // id is the id to use for the new record we are inserting
+            const insertNewArticle = function(id) {
+              db.collection('article', (err, collection) => {
+                if (err !== null) {
+                  next(err);
+                } else {
+                  const doc = {
+                    _id: id,
+                    dateCreated: new Date(),
+                    headline: headline,
+                    imageURL: `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageId}`,
+                    subline: subline
+                  }
+                  collection.insert(doc); 
+                }
+              });
+              db.close();
+            }
+            getNextSequence(db, 'articleId', insertNewArticle);
           });
           response.redirect('/');
         }
@@ -159,8 +177,7 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
           response.redirect('/'); //TODO
         }
       }
-    }
-  );
+    });
 });
 
 
@@ -172,12 +189,17 @@ var s3Limiter = new RateLimit({
   windowMs: 60*1000 // 1 minute
 });
 
-app.get('/sign-s3', s3Limiter, (req, res) => {
+app.get('/sign-s3', s3Limiter, (req, res, next) => {
   const s3 = new aws.S3();
   const fileName = req.query['file-name'];
-  validateFilename(fileName);
+  if (!filenameIsValid(fileName)) {
+    next("In /sign-s3 : Invalid image filename");
+  }
   const fileType = req.query['file-type'];
-  validateFileType(fileType);
+  console.log("filetype = " + fileType);
+  if (!fileTypeIsValid(fileType)) {
+    next("In /sign-s3 : File type is invalid"); 
+  }
   const S3_BUCKET = process.env.S3_BUCKET;
   const s3Params = {
     Bucket: S3_BUCKET,
@@ -207,8 +229,15 @@ app.get('/upload', sendIndex);
 app.use(express.static(distDir));
 
 app.use(function(req, res, next) {
-	  res.status(404).send('Error 404. Page not found.');
+  send404(res);
 });
+
+const errorHandler = function(err, req, res, next) {
+  util.error(err);
+  res.status(500).send('Something went wrong. Please try again.');
+}
+
+app.use
 
 // views is directory for all template files
 app.set('views', __dirname + '/views');
