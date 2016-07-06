@@ -7,6 +7,8 @@ const MongoClient = require('mongodb').MongoClient;
 const multer = require('multer');
 const requester = require('request');
 const RateLimit = require('express-rate-limit');
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const url = require('url');
 const util = require('util');
 const mongoConcerns = require('./utils/mongoConcerns');
@@ -16,7 +18,11 @@ const upload = multer();
 
 const distDir = __dirname + '/modern-backbone-starterkit/dist/'
 
-//var env = process.env.NODE_ENV || 'production';
+const env = process.env.NODE_ENV;
+if (env !== 'production' && env !== 'development') {
+  throw "NODE_ENV environment variable not set.";
+}
+const MONGO_URI = process.env.MONGODB_URI;
 
 // from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
 //var forceSsl = function (req, res, next) {
@@ -32,6 +38,12 @@ const distDir = __dirname + '/modern-backbone-starterkit/dist/'
 
 app.enable('trust proxy'); // Needed for rate limiter.
 app.use(compression());
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  store: new MongoStore({
+    url: MONGO_URI
+  }),
+}));
 app.set('port', (process.env.PORT || 5000));
 
 const sendIndex = function(request, response) {
@@ -71,7 +83,6 @@ function fileTypeIsValid(fileType) {
 }
 
 app.get('/article/:articleId', function(request, response, next) {
-  const MONGO_URI = process.env.MONGODB_URI;
 
   MongoClient.connect(MONGO_URI, (err, db) => {
     if (err !== null) {
@@ -105,8 +116,37 @@ app.get('/article/:articleId', function(request, response, next) {
 
 });
 
+function getNextId() {
+  console.log("in getNextId");
+  var nextIdPromise = new Promise(function(resolve, reject) {
+    MongoClient.connect(MONGO_URI, (err, db) => {
+      if (err !== null) {
+        db.close(); 
+        reject(err);
+      } else {
+        db.collection('counters').findAndModify(
+          {_id: 'articleId'},
+          [],
+          {$inc: {seq:1}},
+          {},
+          function(err, result) {
+            console.log("in findandmodify");
+            if (err !== null) {
+              reject(err);
+            } else {
+              resolve(result.value.seq);
+            }
+          }
+        );
+      }
+    });
+  });
+  return nextIdPromise;
+}
+
+// cb will be passed the id as a parameter.
 function getNextSequence(db, name, cb) {
-   const ret = db.collection('counters').findAndModify(
+   db.collection('counters').findAndModify(
      {_id: name},
      [],
      {$inc: {seq:1}},
@@ -122,15 +162,31 @@ function getNextSequence(db, name, cb) {
 }
 
 //API ROUTES
-// TODO remove upload.single('picture')
-app.post('/article', upload.single('picture'), bodyParser.json(), function(request, response, next) {
-  const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
-  const MONGO_URI = process.env.MONGODB_URI;
+app.post('/articleId', function(request, response, next) {
+  MongoClient.connect(MONGO_URI, (err, db) => {
+    if (err !== null) {
+      db.close(); 
+      next(err);
+    } else {
+      let f = function(id) {
+        response.json({id: id});
+      }
+      getNextSequence(db, 'articleId', f);
+    }
+  });
+});
 
-  const imageId = request.body['kmw-image-id'];
-  if (!filenameIsValid(imageId)) { // right now the image's filename and the id are the same value.
-    next("invalid filename for image");
-  }
+// TODO remove upload.single('picture')
+app.post('/article', bodyParser.urlencoded(), function(request, response, next) {
+  const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
+
+  const sess = request.session;
+  //const imageId = request.body['kmw-image-id'];
+  const imageId = sess.articleAndImageId;
+  console.log("image id = " + imageId);
+  //if (!filenameIsValid(imageId)) { // right now the image's filename and the id are the same value.
+  //  next("invalid filename for image");
+  //}
   const headline = request.body.headline;
   const subline = request.body.subline;
   validationErrors = validations.validateEverything(headline, subline);
@@ -161,11 +217,17 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
                     db.close();
                     next(err);
                   } else {
+                    let imageURL;
+                    if (env === 'production') {
+                      imageURL = `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageId}`;
+                    } else {
+                      imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageId}`;
+                    }
                     const doc = {
                       _id: id,
                       dateCreated: new Date(),
                       headline: headline,
-                      imageURL: `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageId}`,
+                      imageURL: imageURL,
                       subline: subline
                     }
                     collection.insert(doc, {
@@ -173,7 +235,7 @@ app.post('/article', upload.single('picture'), bodyParser.json(), function(reque
                         wtimeout: mongoConcerns.WTIMEOUT
                       }, 
                       (error, result) => {
-                        if (error !== null){
+                        if (error !== null) {
                           db.close();
                           next(error);
                         } else {
@@ -211,36 +273,44 @@ var s3Limiter = new RateLimit({
 });
 
 app.get('/sign-s3', s3Limiter, (req, res, next) => {
-  const s3 = new aws.S3();
-  const fileName = req.query['file-name'];
-  if (!filenameIsValid(fileName)) {
-    next("In /sign-s3 : Invalid image filename");
-  }
-  const fileType = req.query['file-type'];
-  console.log("filetype = " + fileType);
-  if (!fileTypeIsValid(fileType)) {
-    next("In /sign-s3 : File type is invalid"); 
-  }
-  const S3_BUCKET = process.env.S3_BUCKET;
-  const s3Params = {
-    Bucket: S3_BUCKET,
-    Key: fileName,
-    Expires: 60,
-    ContentType: fileType,
-    ACL: 'public-read'
-  };
-
-  s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    if(err){
-      console.log(err);
-      return res.end();
+  const name = req.query['file-name'];
+  console.log("name = " + name);
+  getNextId().then(function(fileName) {
+    let sess = req.session;
+    sess.articleAndImageId = fileName;
+    console.log("in then");
+    fileName = fileName + ""; //convert from int to string
+    const e3 = new aws.S3();
+    //const fileName = req.query['file-name'];
+    //if (!filenameIsValid(fileName)) {
+    //  next("In /sign-s3 : Invalid image filename");
+    //}
+    const fileType = req.query['file-type'];
+    if (!fileTypeIsValid(fileType)) {
+      next("In /sign-s3 : File type is invalid"); 
     }
-    const returnData = {
-      signedRequest: data,
-      url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+    const S3_BUCKET = process.env.S3_BUCKET;
+    const s3Params = {
+      Bucket: S3_BUCKET,
+      Key: fileName,
+      Expires: 60,
+      ContentType: fileType,
+      ACL: 'public-read'
     };
-    res.write(JSON.stringify(returnData));
-    res.end();
+
+    s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    console.log("in then callback");
+      if(err){
+        next(err);
+        return;
+      }
+      const returnData = {
+        signedRequest: data,
+        url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+      };
+      res.write(JSON.stringify(returnData));
+      res.end();
+    });
   });
 });
 
@@ -253,12 +323,10 @@ app.use(function(req, res, next) {
   send404(res);
 });
 
-const errorHandler = function(err, req, res, next) {
-  util.error(err);
-  res.status(500).send('Something went wrong. Please try again.');
-}
-
-app.use
+//const errorHandler = function(err, req, res, next) {
+//  util.error(err);
+//  res.status(500).send('Something went wrong. Please try again.');
+//}
 
 // views is directory for all template files
 app.set('views', __dirname + '/views');

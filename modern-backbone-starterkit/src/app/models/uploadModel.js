@@ -5,8 +5,11 @@ import Backbone from 'backbone';
 import uuid from 'node-uuid';
 import articleValidations from 'ISOMORPHICDIR/articleValidations.js';
 
+//TODO what if someone selects a file and then selects another one?
 export default Backbone.Model.extend({
+  // The first few attributes are standard backbone attributes. You can read about them in the docs.
   defaults: {
+    fileCounter: 0,
     headline: null,
     imageId: null,
     uploading: false,
@@ -14,19 +17,45 @@ export default Backbone.Model.extend({
     subline: null
   },
 
+  initialize: function() {
+    this.nextIdPromiseInst = this.getNextId();
+  },
+
+  // Attributes below aren't standard backbone attributes. They are custom.
+  getNextId: function() {
+    const self = this;
+    var nextIdPromise = new Promise(function(resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `/articleId`);
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.id);
+          } else {
+            alert('An error was encountered. Please refresh.');
+          }
+        }
+      };
+      xhr.send();
+    });
+    return nextIdPromise;
+  },
+
   getSignedRequest: function(file) {
     const xhr = new XMLHttpRequest();
-    const filenameUUID = uuid.v4();
-    this.set('imageId', filenameUUID);
+    const filenameId = this.fileCounter;
+    this.fileCounter++;
+    this.set('imageId', filenameId);
     this.set('uploaded', false);
     this.set('uploading', true);
 
-    xhr.open('GET', `/sign-s3?file-name=${filenameUUID}&file-type=${file.type}`);
+    xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
-          this.uploadFile(file, response.signedRequest, response.url, filenameUUID);
+          this.uploadFile(file, response.signedRequest, response.url, filenameId);
         } else {
           alert('An error was encountered. Please refresh.');
         }
@@ -35,7 +64,7 @@ export default Backbone.Model.extend({
     xhr.send();
   },
 
-  uploadFile: function(file, signedRequest, url, filenameUUID) {
+  uploadFile: function(file, signedRequest, url, filenameId) {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', signedRequest);
     //this.loading(); //
@@ -45,20 +74,11 @@ export default Backbone.Model.extend({
         if (xhr.status === 200) {
           // protect against someone uploading a file and then uploading another one before the first finishes.
           console.log("in callback, url = " + url);
-          if (this.get('imageId') === filenameUUID) {
+          if (this.get('imageId') === filenameId) {
             this.set('uploading', false);
             this.set('uploaded', true);
-            //self.doneUploading(); TODO
-            //document.getElementById('preview').src = url;
-            console.log("in callback if");
-
-            //document.getElementById('s3-uploaded-url').value = url;
-
-            // look into having a loading bar as it uploads.
-            // enable submit button now.
           }
         } else {
-          //alert('Could not upload file.');
           alert('An error has occurred. Please refresh.');
         }
       }

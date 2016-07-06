@@ -113,7 +113,7 @@ export default Backbone.View.extend({
     this.model.set('subline', this.$("#kmw-subline-input").val());
   },
 
-  uploading: function(){
+  uploading: function() {
     const opts = {
       lines: 12             // The number of lines to draw
       , length: 7             // The length of each line
