@@ -1,9 +1,10 @@
 const aws = require('aws-sdk');
-const validations = require('./modern-backbone-starterkit/isomorphic/articleValidations.js');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const express = require('express');
+const getSlug = require('speakingurl');
 const MongoClient = require('mongodb').MongoClient;
+const mongoConcerns = require('./utils/mongoConcerns');
 const multer = require('multer');
 const requester = require('request');
 const RateLimit = require('express-rate-limit');
@@ -11,7 +12,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const url = require('url');
 const util = require('util');
-const mongoConcerns = require('./utils/mongoConcerns');
+const validations = require('./modern-backbone-starterkit/isomorphic/articleValidations.js');
 
 const app = express();
 const upload = multer();
@@ -82,7 +83,9 @@ function fileTypeIsValid(fileType) {
   return fileType.match(imageMimeTypeRegex) !== null;
 }
 
-app.get('/article/:articleId', function(request, response, next) {
+app.get('/article/:articleSlug', function(request, response, next) {
+  let articleSlug = request.params.articleSlug;
+  let articleId = parseInt(articleSlug, 10); // extract leading integers
 
   MongoClient.connect(MONGO_URI, (err, db) => {
     if (err !== null) {
@@ -94,16 +97,21 @@ app.get('/article/:articleId', function(request, response, next) {
           db.close();
           next(err);
         } else {
-          collection.findOne({'_id': parseInt(request.params.articleId)}, function(err, item) {
+          collection.findOne({'_id': articleId}, function(err, article) {
             if (err !== null) {
               db.close();
               next(err);
             } else {
-              if (item === null) {
+              if (article === null) {
+                send404(response);
+              } else if (articleSlug !== article.articleURLSlug) {
+                // Even if the articleId corresponds to a valid article,
+                // send a 404 unless the rest of the slug matches as well.
+                // This will avoid duplicate content SEO issues.
                 send404(response);
               } else {
                 response.render('article', {
-                  article: item
+                  article: article 
                 });
               }
               db.close();
@@ -117,7 +125,6 @@ app.get('/article/:articleId', function(request, response, next) {
 });
 
 function getNextId() {
-  console.log("in getNextId");
   var nextIdPromise = new Promise(function(resolve, reject) {
     MongoClient.connect(MONGO_URI, (err, db) => {
       if (err !== null) {
@@ -130,7 +137,6 @@ function getNextId() {
           {$inc: {seq:1}},
           {},
           function(err, result) {
-            console.log("in findandmodify");
             if (err !== null) {
               reject(err);
             } else {
@@ -161,6 +167,51 @@ function getNextSequence(db, name, cb) {
    );
 }
 
+let getExtension = function(filename) {
+  // http://stackoverflow.com/questions/190852/how-can-i-get-file-extensions-with-javascript
+  return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+}
+
+let filenameWithoutExtension = function(filename) {
+  let extension = getExtension(filename);
+  if (extension !== "") {
+    return filename.slice(0, -(extension.length + 1));
+  } else {
+    return filename
+  }
+}
+
+let getFilenameSlug = function(id, filename) {
+  const filenameMinusExtension = filenameWithoutExtension(filename);
+  const extension = getExtension(filename);
+  let slug = getSlug(filenameMinusExtension, {
+    truncate: 100 // Truncate to a max length of 100 characters while only breaking on word boundaries.
+  }); 
+  if (extension !== "") {
+    slug += '.';
+  }
+  slug += extension;
+   
+  if (slug !== '') {
+    slug = id + '-' + slug;
+  } else {
+    slug = id;
+  }
+  return slug;
+}
+
+let getURLSlug = function(id, headline) {
+  let slug = getSlug(headline, {
+    truncate: 100 // Truncate to a max length of 100 characters while only breaking on word boundaries.
+  });
+  if (slug !== "") {
+    slug = id + '-' + slug;
+  } else { // This else statement should never get reached honestly.
+    slug = id;
+  }
+  return slug;
+}
+
 //API ROUTES
 app.post('/articleId', function(request, response, next) {
   MongoClient.connect(MONGO_URI, (err, db) => {
@@ -176,22 +227,18 @@ app.post('/articleId', function(request, response, next) {
   });
 });
 
-// TODO remove upload.single('picture')
 app.post('/article', bodyParser.urlencoded(), function(request, response, next) {
   const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
 
   const sess = request.session;
-  //const imageId = request.body['kmw-image-id'];
-  const imageId = sess.articleAndImageId;
-  console.log("image id = " + imageId);
-  //if (!filenameIsValid(imageId)) { // right now the image's filename and the id are the same value.
-  //  next("invalid filename for image");
-  //}
+  const articleId = sess.articleId;
+  const imageSlug = sess.imageSlug;
   const headline = request.body.headline;
   const subline = request.body.subline;
   validationErrors = validations.validateEverything(headline, subline);
-  if (validationErrors)
+  if (validationErrors) {
     next(validationErrors[0]);
+  }
 
   const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
  
@@ -211,47 +258,41 @@ app.post('/article', bodyParser.urlencoded(), function(request, response, next) 
               next(err);
             } else {
               // id is the id to use for the new record we are inserting
-              const insertNewArticle = function(id) {
-                db.collection('article', (err, collection) => {
-                  if (err !== null) {
-                    db.close();
-                    next(err);
+              db.collection('article', (err, collection) => {
+                if (err !== null) {
+                  db.close();
+                  next(err);
+                } else {
+                  let imageURL;
+                  if (env === 'production') {
+                    imageURL = `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageSlug}`;
                   } else {
-                    let imageURL;
-                    if (env === 'production') {
-                      imageURL = `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageId}`;
-                    } else {
-                      imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageId}`;
-                    }
-                    const doc = {
-                      _id: id,
-                      dateCreated: new Date(),
-                      headline: headline,
-                      imageURL: imageURL,
-                      subline: subline
-                    }
-                    collection.insert(doc, {
-                        w: "majority",
-                        wtimeout: mongoConcerns.WTIMEOUT
-                      }, 
-                      (error, result) => {
-                        if (error !== null) {
-                          db.close();
-                          next(error);
-                        } else {
-                          db.close();
-                          response.redirect('/article/' + id);
-                        }
-                      }); 
+                    imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
                   }
-                });
-              }
-              try {
-                getNextSequence(db, 'articleId', insertNewArticle);
-              } catch (e) {
-                next(e);
-                return;
-              }
+                  const articleURLSlug = getURLSlug(articleId, headline);
+                  const doc = {
+                    _id: articleId,
+                    articleURLSlug: articleURLSlug,
+                    dateCreated: new Date(),
+                    headline: headline,
+                    imageURL: imageURL,
+                    subline: subline
+                  }
+                  collection.insert(doc, {
+                      w: "majority",
+                      wtimeout: mongoConcerns.WTIMEOUT
+                    }, 
+                    (error, result) => {
+                      if (error !== null) {
+                        db.close();
+                        next(error);
+                      } else {
+                        db.close();
+                        response.redirect('/article/' + articleURLSlug);
+                      }
+                    }); 
+                }
+              });
             }
           });
         }
@@ -265,26 +306,23 @@ app.post('/article', bodyParser.urlencoded(), function(request, response, next) 
 
 
 // Rate limit how many requests can come from one ip address.
-var s3Limiter = new RateLimit({
+let s3Limiter = new RateLimit({
   delayAfter: 3, // begin slowing down responses after the third request 
   delayMs: 1000, // slow down subsequent responses by 1 second per request 
   max: 30, // limit each IP to 30 requests per windowMs 
   windowMs: 60*1000 // 1 minute
 });
 
+
 app.get('/sign-s3', s3Limiter, (req, res, next) => {
-  const name = req.query['file-name'];
-  console.log("name = " + name);
-  getNextId().then(function(fileName) {
+  getNextId().then(function(id) {
+    const filename = req.query['file-name'];
+    const slug = getFilenameSlug(id, filename);
     let sess = req.session;
-    sess.articleAndImageId = fileName;
-    console.log("in then");
-    fileName = fileName + ""; //convert from int to string
-    const e3 = new aws.S3();
-    //const fileName = req.query['file-name'];
-    //if (!filenameIsValid(fileName)) {
-    //  next("In /sign-s3 : Invalid image filename");
-    //}
+    sess.articleId = id;
+    sess.imageSlug = slug;
+    id += ""; //convert from int to string
+    const s3 = new aws.S3();
     const fileType = req.query['file-type'];
     if (!fileTypeIsValid(fileType)) {
       next("In /sign-s3 : File type is invalid"); 
@@ -292,21 +330,20 @@ app.get('/sign-s3', s3Limiter, (req, res, next) => {
     const S3_BUCKET = process.env.S3_BUCKET;
     const s3Params = {
       Bucket: S3_BUCKET,
-      Key: fileName,
+      Key: slug,
       Expires: 60,
       ContentType: fileType,
       ACL: 'public-read'
     };
 
     s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    console.log("in then callback");
       if(err){
         next(err);
         return;
       }
       const returnData = {
         signedRequest: data,
-        url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+        url: `https://${S3_BUCKET}.s3.amazonaws.com/${slug}`
       };
       res.write(JSON.stringify(returnData));
       res.end();

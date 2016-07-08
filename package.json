@@ -18,7 +18,8 @@
     "http-status": "^0.2.3",
     "mongodb": "^2.1.18",
     "multer": "^1.1.0",
-    "request": "^2.72.0"
+    "request": "^2.72.0",
+    "speakingurl": "^9.0.0"
   },
   "engines": {
     "node": "6.2.1"
