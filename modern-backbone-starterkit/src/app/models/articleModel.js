@@ -5,7 +5,7 @@ import Backbone from 'backbone';
 export default Backbone.Model.extend({
   defaults: {
     headline: null,
-    imageId: null,
+    imageURL: null,
     subline: null
   }
 });

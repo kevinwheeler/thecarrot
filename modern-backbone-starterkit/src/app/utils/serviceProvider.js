@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 
+import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import HomeView from 'VIEWSDIR/homeView';
 import NavView from 'VIEWSDIR/navView';
@@ -30,7 +31,11 @@ var serviceProvider = {
   },
 
   getHomeView() {
-    let homeViewInst = new HomeView({navView: this.getNavView()});
+    let articleGridViewInst = new ArticleGridView();
+    let homeViewInst = new HomeView({
+      navView: this.getNavView(),
+      articleGridView: articleGridViewInst
+    });
     return homeViewInst;
   },
 

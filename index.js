@@ -121,7 +121,42 @@ app.get('/article/:articleSlug', function(request, response, next) {
       });
     }
   });
+});
 
+function getAllArticlesJSON() {
+  let prom = new Promise(function(resolve, reject) {
+    MongoClient.connect(MONGO_URI, (err, db) => {
+      if (err !== null) {
+        db.close();
+        reject("couldn't connect to db");
+      } else {
+        db.collection('article', (err, collection) => {
+          if (err !== null) {
+            db.close();
+            reject("couldn't get article collection");
+          } else {
+            collection.find({}, function(err, articles) {
+              let articlesJSON = articles.toArray();
+              resolve(articlesJSON);
+            });
+          }
+        });
+      }
+    });
+  });
+  return prom;
+}
+
+//DEVELOPMENT ONLY ROUTE
+app.get('/all-articles', (req, res, next) => {
+  getAllArticlesJSON().then(
+    function(articlesJSON){
+      res.send(articlesJSON);
+    }, 
+    function(){
+      throw "error";
+    }
+  );
 });
 
 function getNextId() {

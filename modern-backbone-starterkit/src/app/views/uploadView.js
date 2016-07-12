@@ -89,14 +89,21 @@ export default Backbone.View.extend({
     $target.addClass("kmw-hidden");
   },
 
-  fileSelected: function() {
-    console.log("FILE SELECTED");
-    const files = document.getElementById('kmw-picture-input').files;
+  fileSelected: function(e) {
+    const files = e.target.files;
     const file = files[0];
+    const fileSize = file.size;
+    const fiftyMegabytes = 50 * 1000 * 1000;
+    console.log(fiftyMegabytes);
     if (file == null) {
       return alert('No file selected.');
+    } else if (fileSize > fiftyMegabytes) { // NOTE: if you change this value,
+    } else if (fileSize > 150000) { // NOTE: if you change this value,
+      // you will also need to change it server-side.
+      alert("File too big. Files must be smaller than 50 MB.");
+    } else {
+      this.model.getSignedRequest(file);
     }
-    this.model.getSignedRequest(file);
   },
 
   onFormSubmitted: function(e) {
