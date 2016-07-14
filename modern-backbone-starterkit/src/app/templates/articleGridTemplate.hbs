@@ -1,5 +1,13 @@
 <div class="container">
-  {{#each rows}}
-    {{this}}
-  {{/each}}
+  <div class="row">
+    {{#each articles}}
+      <a href="{{this.articleURL}}">
+        <div class="col-xs-12 col-sm-6">
+          <img src="{{this.imageURL}}">
+          <h2>{{this.headline}}</h2>
+          <h3>{{this.subline}}</h3>
+        </div>
+      </a>
+    {{/each}}
+  </div>
 </div>

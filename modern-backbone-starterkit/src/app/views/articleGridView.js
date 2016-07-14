@@ -11,20 +11,33 @@ export default Backbone.View.extend({
   className: 'rwc-article-grid-view',
 
   initialize: function(options = {}) {
-    this.views = [];
-
     // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
-    this.$el.html(template({
-      rows: ['a','b','c']
-    }));
+
+    this.views = [];
+
+    this.articleCollection = options.articleCollection;
+
+    this.listenTo(this.articleCollection, 'change add', this.render);
+
     this.render();
   },
 
+  logChange: function() {
+    console.log("in log change");
+  },
+
   render: function() {
+    console.log("rendering article grid view. articleCollection = ");
+    console.dir(this.articleCollection.toJSON());
     _.forEach(this.views, function(view) {
       view.render();
     });
+
+    this.$el.html(template({
+      articles: this.articleCollection.toJSON()
+    }));
+
     return this;
   }
 });

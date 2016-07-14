@@ -26,6 +26,10 @@ export default Backbone.Router.extend({
     this.routerEvents.trigger('routed');
   },
 
+  exports: {
+    articleRoutePrefix: 'article'
+  },
+
   initialize(options) {
     $('body').append('<div id="js-app"></div>');
     this.routerEvents = options.routerEvents;

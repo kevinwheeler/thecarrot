@@ -29,6 +29,7 @@ var sharedExports = {
       bootstrapCSS: 'bootstrap/dist/css/bootstrap.min.css',
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
       bootstrapToolkit: 'responsive-bootstrap-toolkit/dist/bootstrap-toolkit.min.js',
+      'COLLECTIONSDIR': __dirname + '/src/app/collections',
       'ISOMORPHICDIR': __dirname + '/isomorphic',
       'MODELSDIR': __dirname + '/src/app/models',
       'STYLESDIR': __dirname + '/dist/styles',

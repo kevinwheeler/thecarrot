@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 
+import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import HomeView from 'VIEWSDIR/homeView';
@@ -9,15 +10,18 @@ import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 
 var serviceProvider = {
+  _createRouter(routerEvents) {
+    this.router = new Router({'routerEvents': routerEvents});
+  },
+
   _createRouterEvents() {
     let routerEvents = {};
     _.extend(routerEvents, Backbone.Events);
-    return routerEvents;
+    this.routerEvents = routerEvents;
   },
 
   _createNavView() {
-    let navItems = [];
-    return new NavView({routerEvents: this.routerEvents});
+    this.navView = new NavView({routerEvents: this.routerEvents});
   },
 
   getAboutView() {
@@ -31,11 +35,19 @@ var serviceProvider = {
   },
 
   getHomeView() {
-    let articleGridViewInst = new ArticleGridView();
+    let allArticlesCollectionInst = new AllArticlesCollection();
+    allArticlesCollectionInst.fetch();
+    window.allArticlesCollection = allArticlesCollectionInst;//TODO dev only
+
+    let articleGridViewInst = new ArticleGridView({
+      articleCollection: allArticlesCollectionInst
+    });
+
     let homeViewInst = new HomeView({
       navView: this.getNavView(),
       articleGridView: articleGridViewInst
     });
+
     return homeViewInst;
   },
 
@@ -56,13 +68,13 @@ var serviceProvider = {
   },
 
   initialize() {
-    this.routerEvents = this._createRouterEvents();
-    this.navView = this._createNavView();
+    this._createRouterEvents();
+    this._createRouter(this.routerEvents);
+    this._createNavView();
   },
 
-  // returns data in raw json form
   getRouter() {
-    return new Router({'routerEvents': this.routerEvents});
+    return this.router;
   }
 };
 
