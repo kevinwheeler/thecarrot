@@ -267,7 +267,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 } else {
                   let imageURL;
                   if (env === 'production') {
-                    imageURL = `https://kevinwheeler-thecarrotimages.s3.amazonaws.com/${imageSlug}`;
+                    imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
                   } else {
                     imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
                   }
