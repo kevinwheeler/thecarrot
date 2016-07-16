@@ -19,8 +19,8 @@ const upload = multer();
 
 const distDir = __dirname + '/modern-backbone-starterkit/dist/'
 
-const env = process.env.NODE_ENV;
-if (env !== 'production' && env !== 'development') {
+const NODE_ENV = process.env.NODE_ENV;
+if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
   throw "NODE_ENV environment variable not set.";
 }
 const MONGO_URI = process.env.MONGODB_URI;
@@ -31,17 +31,17 @@ MongoClient.connect(MONGO_URI, (err, db) => {
    throw "couldn't connect to db";
  } else {
    
-    // from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
-    //var forceSsl = function (req, res, next) {
-    //   if (req.headers['x-forwarded-proto'] !== 'https') {
-    //     return res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
-    //   }
-    //   return next();
-    //};
-    //
-    //if (env === 'production') {
-    //    app.use(forceSsl);
-    //}
+    //from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
+    var forceSsl = function (req, res, next) {
+       if (req.headers['x-forwarded-proto'] !== 'https') {
+         return res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
+       }
+       return next();
+    };
+    
+    if (NODE_ENV === 'production') {
+        app.use(forceSsl);
+    }
     
     app.enable('trust proxy'); // Needed for rate limiter.
     app.use(compression());
