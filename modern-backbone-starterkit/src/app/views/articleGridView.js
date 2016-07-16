@@ -23,13 +23,7 @@ export default Backbone.View.extend({
     this.render();
   },
 
-  logChange: function() {
-    console.log("in log change");
-  },
-
   render: function() {
-    console.log("rendering article grid view. articleCollection = ");
-    console.dir(this.articleCollection.toJSON());
     _.forEach(this.views, function(view) {
       view.render();
     });

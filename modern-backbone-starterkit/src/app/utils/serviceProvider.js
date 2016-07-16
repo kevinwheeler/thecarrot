@@ -36,7 +36,7 @@ var serviceProvider = {
 
   getHomeView() {
     let allArticlesCollectionInst = new AllArticlesCollection();
-    allArticlesCollectionInst.fetch();
+    allArticlesCollectionInst.fetch({'articleRoutePrefix': this.getRouter().exports.articleRoutePrefix});
     window.allArticlesCollection = allArticlesCollectionInst;//TODO dev only
 
     let articleGridViewInst = new ArticleGridView({
@@ -57,7 +57,8 @@ var serviceProvider = {
 
   getUploadView() {
     let uploadViewInst = new UploadView({
-      model: this.getUploadModel()
+      model: this.getUploadModel(),
+      navView: this.getNavView()
     });
     return uploadViewInst;
   },

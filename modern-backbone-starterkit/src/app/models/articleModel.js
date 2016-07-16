@@ -13,7 +13,7 @@ export default Backbone.Model.extend({
   },
 
   parse: function(articleJSON, options) {
-    articleJSON.articleURL = '/' + ServiceProvider.getRouter().exports.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
+    articleJSON.articleURL = '/' + options.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
     return articleJSON;
   }
 });

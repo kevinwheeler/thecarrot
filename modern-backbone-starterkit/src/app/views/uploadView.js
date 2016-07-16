@@ -32,7 +32,11 @@ export default Backbone.View.extend({
     _.bindAll(this, 'render');
     this.views = [];
 
+    this.views.push(options.navView);
+    this.navView = options.navView;
+
     this.$el.html(template());
+    this.attachSubViews();
     window.kmwrecaptcha = this.$('.kmw-recaptcha').get(0);
     let recaptchaURL = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit';
     // run recaptcha script
@@ -49,6 +53,11 @@ export default Backbone.View.extend({
   },
 
   // Attributes below aren't standard backbone attributes. They are custom.
+  attachSubViews: function() {
+    let $nav = this.$('.NAV-STUB');
+    $nav.replaceWith(this.navView.$el);
+  },
+
   bindToModel: function() {
     let self = this;
 
@@ -98,7 +107,6 @@ export default Backbone.View.extend({
     if (file == null) {
       return alert('No file selected.');
     } else if (fileSize > fiftyMegabytes) { // NOTE: if you change this value,
-    } else if (fileSize > 150000) { // NOTE: if you change this value,
       // you will also need to change it server-side.
       alert("File too big. Files must be smaller than 50 MB.");
     } else {
