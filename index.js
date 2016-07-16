@@ -266,7 +266,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                   next(err);
                 } else {
                   let imageURL;
-                  if (env === 'production') {
+                  if (NODE_ENV === 'production') {
                     imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
                   } else {
                     imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
@@ -330,9 +330,11 @@ MongoClient.connect(MONGO_URI, (err, db) => {
           Bucket: S3_BUCKET,
           Key: slug,
           Expires: 60,
-          ContentType: fileType,
-          ACL: 'public-read'
+          ContentType: fileType
         };
+        if (NODE_ENV === 'development') {
+          s3Params.ACL = 'public-read';
+        }
     
         s3.getSignedUrl('putObject', s3Params, (err, data) => {
           if(err){
