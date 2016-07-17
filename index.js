@@ -110,7 +110,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               } else {
                 console.log("article = ");
                 console.dir(article);
-                response.render('article', {
+                response.render('pages/article', {
                   article: article 
                 });
               }
