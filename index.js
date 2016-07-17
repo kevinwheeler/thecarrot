@@ -108,6 +108,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // This will avoid duplicate content SEO issues.
                 send404(response);
               } else {
+                console.log("article = ");
+                console.dir(article);
                 response.render('article', {
                   article: article 
                 });
@@ -243,6 +245,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       const imageSlug = sess.imageSlug;
       const headline = request.body.headline;
       const subline = request.body.subline;
+      const articleBody = request.body.articleBody;
       validationErrors = validations.validateEverything(headline, subline);
       if (validationErrors) {
         next(validationErrors[0]);
@@ -274,6 +277,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                   const articleURLSlug = getURLSlug(articleId, headline);
                   const doc = {
                     _id: articleId,
+                    articleBody: articleBody,
                     articleURLSlug: articleURLSlug,
                     dateCreated: new Date(),
                     headline: headline,
