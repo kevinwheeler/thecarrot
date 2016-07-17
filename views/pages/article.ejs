@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- TODO add open graph url meta -->
+    <meta property="og:url"           content="<%= url %>" />
     <meta property="og:type"          content="article" />
     <meta property="og:title"         content="<%= article.headline %>" />
     <meta property="og:description"   content="<%= article.subline %>" />
@@ -27,6 +28,7 @@
       window.kmw.article.subline = '<%= article.subline %>';
       window.kmw.article.imageURL = '<%= article.imageURL %>';
       window.kmw.article.articleBody = '<%= article.articleBody %>';
+      window.kmw.url = '<%= url %>';
     </script>
     <script src="/js/main.js" defer></script>
   </body>

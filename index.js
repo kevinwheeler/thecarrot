@@ -111,7 +111,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 console.log("article = ");
                 console.dir(article);
                 response.render('pages/article', {
-                  article: article 
+                  article: article,
+                  url: request.protocol + '://' + request.get('host') + request.originalUrl //http://stackoverflow.com/a/10185427
                 });
               }
             }
