@@ -5,7 +5,8 @@ import Backbone from 'backbone';
 import uuid from 'node-uuid';
 import articleValidations from 'ISOMORPHICDIR/articleValidations.js';
 
-//TODO what if someone selects a file and then selects another one?
+// TODO what if someone selects a file and then selects another one quickly such that
+// the order the are sent to the server gets messed up?
 export default Backbone.Model.extend({
   // The first few attributes are standard backbone attributes. You can read about them in the docs.
   defaults: {
@@ -18,30 +19,9 @@ export default Backbone.Model.extend({
   },
 
   initialize: function() {
-    this.nextIdPromiseInst = this.getNextId();
   },
 
   // Attributes below aren't standard backbone attributes. They are custom.
-  getNextId: function() {
-    const self = this;
-    var nextIdPromise = new Promise(function(resolve, reject) {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `/articleId`);
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            resolve(response.id);
-          } else {
-            alert('An error was encountered. Please refresh.');
-          }
-        }
-      };
-      xhr.send();
-    });
-    return nextIdPromise;
-  },
-
   getSignedRequest: function(file) {
     const xhr = new XMLHttpRequest();
     const filenameId = this.fileCounter;

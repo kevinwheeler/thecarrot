@@ -11,4 +11,4 @@ while true; do
     esac
 done
 
-node ./individualMigrations/createCountersCollection.js
+node ./individualMigrations/1createCountersCollection.js

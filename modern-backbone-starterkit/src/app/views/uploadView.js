@@ -19,7 +19,7 @@ window.onRecaptchaLoaded = function() {
 export default Backbone.View.extend({
   // The first few attributes are all standard backbone attributes that can be
   // found in the backbone documentation.
-  className: 'rwc-home-view',
+  className: 'kmw-upload-view',
 
   events: {
     'change #kmw-picture-input': 'fileSelected',
@@ -94,6 +94,8 @@ export default Backbone.View.extend({
   },
 
   doneUploading: function() {
+    // This event is used by the createSampleData.js file in the migrations directory.
+    this.$el.trigger('doneUploading');
     const $target = this.$("#kmw-loading-wheel");
     $target.addClass("kmw-hidden");
   },

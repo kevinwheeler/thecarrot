@@ -15,6 +15,7 @@ var sharedExports = {
   },
   module : {
       loaders : [
+        { test: require.resolve('jquery'), loader: 'expose?jQuery!expose?$' },
         { test: /bootstrap.dist.*\.js?$/, loader: 'imports?jQuery=jquery' },
         { test: /bootstrap-toolkit.min.js$/, loader: 'exports?ResponsiveBootstrapToolkit!imports?jQuery=jquery' },
         { test: /.(gif|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/, loader: 'url-loader?limit=100000' },//https://github.com/webpack/css-loader/issues/38

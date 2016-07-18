@@ -1,6 +1,6 @@
 <nav class='NAV-STUB'></nav>
 <form action="/article" id="kmw-article-upload-form" method="post">
-  {{!-- <input type="hidden" id="s3-uploaded-url" name="s3-uploaded-url" value="/images/default.png"> --}}
+  <input type="hidden" id="kmw-bypass-recaptcha-secret" name="kmw-bypass-recaptcha-secret" value="whatt">
   <input type="hidden" id="kmw-image-id" name="kmw-image-id">
 
   <label for="kmw-picture-input">Picture</label>
@@ -25,6 +25,6 @@
 
   <div id="kmw-validation-errors" class="kmw-validation-errors kmw-hidden"></div>
 
-  <input type="submit">
+  <input type="submit" id="kmw-submit">
 </form>
 

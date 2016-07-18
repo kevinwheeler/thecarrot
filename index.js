@@ -72,17 +72,17 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.get('/spirituality', sendIndex);
     app.get('/technology', sendIndex);
     
-    function filenameIsValid(filename) {
-      const hexDigitRegex = '[a-f0-9]';
-      const fourHexDigits = `${hexDigitRegex}{4}`;
-      const eightHexDigits = `${hexDigitRegex}{8}`;
-      const twelveHexDigits = `${hexDigitRegex}{12}`;
-      const uuidRegex = '^' + eightHexDigits + '-' + fourHexDigits + '-' + 
-        fourHexDigits + '-' + fourHexDigits + '-' + twelveHexDigits + '$';
-      // uuidRegex should match strings of this form: 110ec58a-a0f2-4ac4-8393-c866d813b8d1
-    
-      return filename.match(uuidRegex) !== null;
-    }
+    //function filenameIsValid(filename) {
+    //  const hexDigitRegex = '[a-f0-9]';
+    //  const fourHexDigits = `${hexDigitRegex}{4}`;
+    //  const eightHexDigits = `${hexDigitRegex}{8}`;
+    //  const twelveHexDigits = `${hexDigitRegex}{12}`;
+    //  const uuidRegex = '^' + eightHexDigits + '-' + fourHexDigits + '-' + 
+    //    fourHexDigits + '-' + fourHexDigits + '-' + twelveHexDigits + '$';
+    //  // uuidRegex should match strings of this form: 110ec58a-a0f2-4ac4-8393-c866d813b8d1
+    //
+    //  return filename.match(uuidRegex) !== null;
+    //}
     
     function fileTypeIsValid(fileType) {
       const imageMimeTypeRegex = /image\/.*/;
@@ -108,10 +108,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // This will avoid duplicate content SEO issues.
                 send404(response);
               } else {
-                console.log("article = ");
-                console.dir(article);
                 response.render('pages/article', {
                   article: article,
+                  fbAppId: '1017606658346256', //Duplicated in facebooksdk.js
                   url: request.protocol + '://' + request.get('host') + request.originalUrl //http://stackoverflow.com/a/10185427
                 });
               }
@@ -119,6 +118,62 @@ MongoClient.connect(MONGO_URI, (err, db) => {
           });
         }
       });
+    });
+
+    const MAX_ARTICLES_PER_REQUEST = 50;
+
+    function getMostRecentArticlesJSON(maxId, howMany) {
+      // TODO validations
+       if (typeof(maxId) !== "number" || maxId < 0) {
+         throw "maxId invalid";
+       }
+
+       if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
+         throw "howMany invalid";
+       }
+
+      let prom = new Promise(function(resolve, reject) {
+        db.collection('article', (err, collection) => {
+          if (err !== null) {
+            reject(err);
+          } else {
+            collection.find({
+              _id: {$lte: maxId}
+            }).sort([['_id', -1]]).limit(howMany).toArray(
+              function (err, articles) {
+                if (err !== null) {
+                  reject(err);
+                } else {
+                  resolve(articles);
+                }
+              }
+            );
+          }
+        });
+      });
+      return prom;
+    }
+
+    app.get('/most-recent-articles', (req, res, next) => {
+      const maxId = parseInt(req.query.maxId) || Number.MAX_SAFE_INTEGER;
+      const howMany = parseInt(req.query.howMany) || 10;
+      if (maxId < 0) {
+        res.status(400).send('Invalid maxId parameter');
+      }
+      if (howMany < 0) {
+        res.status(400).send('Invalid howMany parameter');
+      }
+      if (howMany > MAX_ARTICLES_PER_REQUEST) {
+        res.status(400).send('Too many articles requested');
+      }
+      getMostRecentArticlesJSON(maxId, howMany).then(
+        function(articlesJSON) {
+          res.send(articlesJSON);
+        }, 
+        function(err) {
+          throw err;
+        }
+      );
     });
     
     function getAllArticlesJSON() {
@@ -131,8 +186,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               let articlesJSON = articles.toArray();
               resolve(articlesJSON);
             });
-          }
-        });
+          } });
       });
       return prom;
     }
@@ -166,23 +220,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         );
       });
       return nextIdPromise;
-    }
-    
-    // cb will be passed the id as a parameter.
-    function getNextSequence(name, cb) {
-       db.collection('counters').findAndModify(
-         {_id: name},
-         [],
-         {$inc: {seq:1}},
-         {},
-         function(err, result) {
-           if (err !== null) {
-             throw err;
-           } else {
-             cb(result.value.seq);
-           }
-         }
-       );
     }
     
     let getExtension = function(filename) {
@@ -231,13 +268,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     }
     
     //API ROUTES
-    app.post('/articleId', function(request, response, next) {
-      let f = function(id) {
-        response.json({id: id});
-      }
-      getNextSequence('articleId', f);
-    });
-    
     app.post('/article', bodyParser.urlencoded(), function(request, response, next) {
       const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
     
@@ -252,59 +282,69 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         next(validationErrors[0]);
       }
     
-      const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
-     
-      //id = the id to use for the new record we are inserting.
-      requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
-        function(err, httpResponse, body) {
-          if (err) {
-            response.status(500).send('Something went wrong! Please try again.');
-          }
-          else {
-            var bodyJSON = JSON.parse(body);
-            if (bodyJSON.success) {
-              // Captcha successful.
-              // id is the id to use for the new record we are inserting
-              db.collection('article', (err, collection) => {
-                if (err !== null) {
-                  next(err);
+      const insertArticleAndRedirect = function(){
+        // id is the id to use for the new record we are inserting
+        db.collection('article', (err, collection) => {
+          if (err !== null) {
+            next(err);
+          } else {
+            let imageURL;
+            if (NODE_ENV === 'production') {
+              imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
+            } else {
+              imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
+            }
+            const articleURLSlug = getURLSlug(articleId, headline);
+            const doc = {
+              _id: articleId,
+              articleBody: articleBody,
+              articleURLSlug: articleURLSlug,
+              dateCreated: new Date(),
+              headline: headline,
+              imageURL: imageURL,
+              subline: subline
+            }
+            collection.insert(doc, {
+                w: "majority",
+                wtimeout: mongoConcerns.WTIMEOUT
+              }, 
+              (error, result) => {
+                if (error !== null) {
+                  next(error);
                 } else {
-                  let imageURL;
-                  if (NODE_ENV === 'production') {
-                    imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
-                  } else {
-                    imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
-                  }
-                  const articleURLSlug = getURLSlug(articleId, headline);
-                  const doc = {
-                    _id: articleId,
-                    articleBody: articleBody,
-                    articleURLSlug: articleURLSlug,
-                    dateCreated: new Date(),
-                    headline: headline,
-                    imageURL: imageURL,
-                    subline: subline
-                  }
-                  collection.insert(doc, {
-                      w: "majority",
-                      wtimeout: mongoConcerns.WTIMEOUT
-                    }, 
-                    (error, result) => {
-                      if (error !== null) {
-                        next(error);
-                      } else {
-                        response.redirect('/article/' + articleURLSlug);
-                      }
-                    }); 
+                  response.redirect('/article/' + articleURLSlug);
                 }
-              });
-            }
-            else {
-              // Captcha failed.
-              response.redirect('/upload?captcha=fail'); //TODO
-            }
+              }); 
           }
         });
+      }
+
+      if (request.body['kmw-bypass-recaptcha-secret'] === process.env.BYPASS_RECAPTCHA_SECRET) {
+        // We should be in local development environment because this
+        // env variable is only available in local development environment.
+        insertArticleAndRedirect();
+      } else {
+        const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
+     
+        //id = the id to use for the new record we are inserting.
+        requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
+          function(err, httpResponse, body) {
+            if (err) {
+              response.status(500).send('Something went wrong! Please try again.');
+            }
+            else {
+              var bodyJSON = JSON.parse(body);
+              if (bodyJSON.success) {
+                // Captcha successful.
+                insertArticleAndRedirect();
+              }
+              else {
+                // Captcha failed.
+                response.redirect('/upload?captcha=fail'); //TODO
+              }
+            }
+          });
+      }
     });
     
     
@@ -312,7 +352,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     let s3Limiter = new RateLimit({
       delayAfter: 3, // begin slowing down responses after the third request 
       delayMs: 1000, // slow down subsequent responses by 1 second per request 
-      max: 30, // limit each IP to 30 requests per windowMs 
+      max: 50, // limit each IP to 30 requests per windowMs 
       windowMs: 60*1000 // 1 minute
     });
     
