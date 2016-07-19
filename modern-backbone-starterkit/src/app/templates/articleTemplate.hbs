@@ -1,9 +1,11 @@
 <nav class='NAV-STUB'></nav>
-<p>headline = {{article.headline}}</p>
-<p>subline = {{article.subline}}</p>
-<p>article body = {{article.articleBody}}</p>
-<img src="{{article.imageURL}}">
-<div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
-<div class="fb-comments" data-href="{{articleURL}}" data-width="500" data-numposts="5"></div>
+<div class="container">
+  <h1>headline = {{article.headline}}</h1>
+  <h2>subline = {{article.subline}}</h2>
+  <p>article body = {{article.articleBody}}</p>
+  <img src="{{article.imageURL}}" class="img-responsive">
+  <div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+  <div class="fb-comments" data-href="{{articleURL}}" data-width="500" data-numposts="5"></div>
+</div>
 {{!-- <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="200" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div> --}}
 
