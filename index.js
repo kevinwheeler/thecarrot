@@ -108,9 +108,18 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // This will avoid duplicate content SEO issues.
                 send404(response);
               } else {
+                let title = article.headline;
+                let description;
+                if (article.subline.length) {
+                  description = article.subline;
+                } else {
+                  description = article.headline;
+                }
                 response.render('pages/article', {
                   article: article,
+                  description: description,
                   fbAppId: '1017606658346256', //Duplicated in facebooksdk.js
+                  title: title,
                   url: request.protocol + '://' + request.get('host') + request.originalUrl //http://stackoverflow.com/a/10185427
                 });
               }
@@ -155,8 +164,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     }
 
     app.get('/most-recent-articles', (req, res, next) => {
-      const maxId = parseInt(req.query.maxId) || Number.MAX_SAFE_INTEGER;
-      const howMany = parseInt(req.query.howMany) || 10;
+      const maxId = parseInt(req.query.max_id) || Number.MAX_SAFE_INTEGER;
+      console.log("maxId = " + maxId);
+      const howMany = parseInt(req.query.how_many) || 10;
       if (maxId < 0) {
         res.status(400).send('Invalid maxId parameter');
       }
