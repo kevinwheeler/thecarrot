@@ -15,6 +15,9 @@ export default Backbone.View.extend({
     this.views.push(options.navView);
     this.navView = options.navView;
 
+    this.views.push(options.mostRecentPopularToggleView);
+    this.mostRecentPopularToggleView = options.mostRecentPopularToggleView;
+
     this.views.push(options.articleGridView);
     this.articleGridView = options.articleGridView;
 
@@ -33,10 +36,13 @@ export default Backbone.View.extend({
   },
 
   attachSubViews: function() {
-    let $nav = this.$('.NAV-STUB');
+    const $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
 
-    let $articleGrid = this.$('.ARTICLE-GRID-STUB');
+    const $mostRecentPopularToggle = this.$('.MOST-RECENT-POPULAR-TOGGLE-STUB');
+    $mostRecentPopularToggle.replaceWith(this.mostRecentPopularToggleView.$el);
+
+    const $articleGrid = this.$('.ARTICLE-GRID-STUB');
     $articleGrid.replaceWith(this.articleGridView.$el);
   },
 });

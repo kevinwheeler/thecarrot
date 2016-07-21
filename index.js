@@ -165,7 +165,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
 
     app.get('/most-recent-articles', (req, res, next) => {
       const maxId = parseInt(req.query.max_id) || Number.MAX_SAFE_INTEGER;
-      console.log("maxId = " + maxId);
       const howMany = parseInt(req.query.how_many) || 10;
       if (maxId < 0) {
         res.status(400).send('Invalid maxId parameter');
@@ -330,8 +329,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       }
 
       if (request.body['kmw-bypass-recaptcha-secret'] === process.env.BYPASS_RECAPTCHA_SECRET) {
-        // We should be in local development environment because this
-        // env variable is only available in local development environment.
         insertArticleAndRedirect();
       } else {
         const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};

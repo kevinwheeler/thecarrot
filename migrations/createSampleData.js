@@ -54,6 +54,7 @@ let driver = new webdriver.Builder()
   .build();
 
 for (var i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
+  //driver.get('https://www.createaheadline.com/upload');
   driver.get('http://localhost:5000/upload');
   driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
   driver.findElement(By.id('kmw-headline-input')).sendKeys("headline " + i);

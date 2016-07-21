@@ -8,12 +8,9 @@ export default Backbone.Collection.extend({
   },
   model: ArticleModel,
   parse: function(response, options) {
-    console.log("parse response = ");
-    console.dir(response);
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
       const articleId = parseInt(articleJSON._id, 10);
-      console.log("article id = " + articleId);
       if (articleId < this.minId) {
         this.minId = articleId;
       }

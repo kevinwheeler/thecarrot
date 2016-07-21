@@ -4,7 +4,7 @@ import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import HomeView from 'VIEWSDIR/homeView';
-import MostRecentArticlesCollection from 'COLLECTIONSDIR/mostRecentArticlesCollection';
+import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
 import NavView from 'VIEWSDIR/navView';
 import Router from '../router';
 import UploadModel from 'MODELSDIR/uploadModel';
@@ -36,16 +36,16 @@ var serviceProvider = {
   },
 
   getHomeView() {
-    let mostRecentArticlesCollectionInst = new MostRecentArticlesCollection();
-    mostRecentArticlesCollectionInst.fetch({'articleRoutePrefix': this.getRouter().exports.articleRoutePrefix});
+    const articleGridViewInst = new ArticleGridView();
 
-    let articleGridViewInst = new ArticleGridView({
-      articleCollection: mostRecentArticlesCollectionInst
+    const mostRecentPopularToggleViewInst = new MostRecentPopularToggleView({
+      articleGridView: articleGridViewInst
     });
 
-    let homeViewInst = new HomeView({
-      navView: this.getNavView(),
-      articleGridView: articleGridViewInst
+    const homeViewInst = new HomeView({
+      articleGridView: articleGridViewInst,
+      mostRecentPopularToggleView: mostRecentPopularToggleViewInst,
+      navView: this.getNavView()
     });
 
     return homeViewInst;

@@ -18,20 +18,14 @@ export default Backbone.View.extend({
     // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
 
-    this.views = [];
+    //this.articleCollection = options.articleCollection;
 
-    this.articleCollection = options.articleCollection;
+    //this.listenTo(this.articleCollection, 'change add', this.render);
 
-    this.listenTo(this.articleCollection, 'change add', this.render);
-
-    this.render();
+    //this.render();
   },
 
   render: function() {
-    _.forEach(this.views, function(view) {
-      view.render();
-    });
-
     this.$el.html(template({
       articles: this.articleCollection.toJSON()
     }));
@@ -41,5 +35,14 @@ export default Backbone.View.extend({
 
   fetchMoreResults: function() {
     this.articleCollection.fetchNextArticles();
+  },
+
+  setArticleCollection: function(articleCollection) {
+    if (this.articleCollection !== undefined) {
+      this.stopListening(this.articleCollection);
+    }
+    this.articleCollection = articleCollection;
+    this.listenTo(this.articleCollection, 'change add', this.render);
+    this.render();
   }
 });
