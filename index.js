@@ -10,6 +10,7 @@ const requester = require('request');
 const RateLimit = require('express-rate-limit');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const timebucket = require('timebucket');
 const url = require('url');
 const util = require('util');
 const validations = require('./modern-backbone-starterkit/isomorphic/articleValidations.js');
@@ -26,10 +27,12 @@ if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
 const MONGO_URI = process.env.MONGODB_URI;
 
 MongoClient.connect(MONGO_URI, (err, db) => {
- if (err !== null) {
-   db.close();
-   throw "couldn't connect to db";
- } else {
+  if (err !== null) {
+    if (db !== null) { //TODO add this check in other places
+      db.close();
+    }
+    throw "couldn't connect to db";
+  } else {
    
     //from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
     var forceSsl = function (req, res, next) {
@@ -89,6 +92,76 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       return fileType.match(imageMimeTypeRegex) !== null;
     }
     
+
+    // Basically, in order to let people sort the articles by
+    // most popular - daily, weekly, monthly, all time
+    // we have to update some tables every time the user views an article
+    function updateViewsTables(articleId) {
+      const MONGO_TIME_BUCKETS_URI = process.env.MONGOLAB_DUMP_URI;
+      const curDateMillis = Date.now();
+      const curDate = new Date(curDateMillis);
+      const curDatePlusFiveMinutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 5));
+      const tBucket = timebucket(curDate).resize('5m');
+      const tBucketPlusFiveMinutes = timebucket(curDatePlusFiveMinutes).resize('5m');
+      // This ends up being 7 minutes after the beginning of the time interval, tBucket.
+      // AKA this is two minutes after the next time interval starts.
+      const sevenMinutesAfterTbucket = tBucketPlusFiveMinutes.toDate().getTime() + (1000 /*sec*/ * 60 /*min*/ * 2);
+      const tBucketPlusSevenMinutesDate = new Date(sevenMinutesAfterTbucket);
+
+      //TODO Decide how to handle errors. Don't throw from within promise code.
+      //TODO ponder setting write concern, journal concern, wtimeout. Honestly do this in other places in our code too.
+      const addTimeBucketToProcessingList = function() {
+        db.collection('time_buckets_processing', (err, collection) => {
+          if (err !== null) {
+            throw "couldn't get time_bucket_processing collection";
+          } else {
+            collection.insertOne(
+              {
+                _id: tBucket.toString(),
+                'status': 'initializing',
+                'beginProcessingAt': tBucketPlusSevenMinutesDate
+              }
+            );
+            //collection.update();
+          }
+        });
+      }
+
+      MongoClient.connect(MONGO_TIME_BUCKETS_URI, (err, db2) => {
+       if (err !== null) {
+         db2.close();
+         throw "couldn't connect to MONGO_TIME_BUCKETS db";
+       } else {
+         
+         // This collection holds records where the key is an article id
+         // and the value is how many views that article got in this
+         // time interval.
+         const tBucketCollectionName = tBucket.toString() + '-views';
+         db2.collection(tBucketCollectionName, (err, collection) => {
+           if (err !== null) {
+             throw "couldn't get timebucket collection";
+           } else {
+             collection.findOneAndUpdate(
+               {_id: articleId},
+               {
+                 $inc: {views: 1},
+                 'status': 'notYetAdded'
+               },
+               {
+                 upsert: true
+               }
+             ).then(addTimeBucketToProcessingList);
+             //collection.update();
+           }
+         });
+
+
+        
+       }
+      });
+      
+    }
+
     app.get('/article/:articleSlug', function(request, response, next) {
       let articleSlug = request.params.articleSlug;
       let articleId = parseInt(articleSlug, 10); // extract leading integers
@@ -108,6 +181,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // This will avoid duplicate content SEO issues.
                 send404(response);
               } else {
+                updateViewsTables(articleId);
                 let title = article.headline;
                 let description;
                 if (article.subline.length) {
