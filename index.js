@@ -24,6 +24,11 @@ const NODE_ENV = process.env.NODE_ENV;
 if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
   throw "NODE_ENV environment variable not set.";
 }
+
+//if (NODE_ENV === 'development') { // doesn't seem to play nicely with errors in promises.
+//  require('longjohn');
+//}
+
 const MONGO_URI = process.env.MONGODB_URI;
 
 MongoClient.connect(MONGO_URI, (err, db) => {
@@ -101,8 +106,17 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       const curDateMillis = Date.now();
       const curDate = new Date(curDateMillis);
       const curDatePlusFiveMinutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 5));
+      const curDatePlus1Day = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24));
+      const curDatePlus1Week = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24 /*day*/ * 7));
+      const curDatePlus30Days = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24 /*day*/ * 30));
       const tBucket = timebucket(curDate).resize('5m');
       const tBucketPlusFiveMinutes = timebucket(curDatePlusFiveMinutes).resize('5m');
+
+      // for developing/debugging
+      const curDatePlus1Minute = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 1));
+      const curDatePlus2Minutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 2));
+      const curDatePlus3Minutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 3));
+
       // This ends up being 7 minutes after the beginning of the time interval, tBucket.
       // AKA this is two minutes after the next time interval starts.
       const sevenMinutesAfterTbucket = tBucketPlusFiveMinutes.toDate().getTime() + (1000 /*sec*/ * 60 /*min*/ * 2);
@@ -115,49 +129,63 @@ MongoClient.connect(MONGO_URI, (err, db) => {
           if (err !== null) {
             throw "couldn't get time_bucket_processing collection";
           } else {
+            console.log("about to insert");
             collection.insertOne(
               {
                 _id: tBucket.toString(),
                 'status': 'initializing',
-                'beginProcessingAt': tBucketPlusSevenMinutesDate
+                //'beginProcessingAt': tBucketPlusSevenMinutesDate,
+                //'removeFromDailyAt': curDatePlus1Day,
+                //'removeFromWeeklyAt': curDatePlus1Week,
+                //'removeFromMonthlyAt': curDatePlus30Days
+                // for developing/debugging
+                'beginProcessingAt': curDate,
+                'removeFromDailyAt': curDatePlus1Minute,
+                'removeFromWeeklyAt': curDatePlus2Minutes,
+                'removeFromMonthlyAt': curDatePlus3Minutes
               }
-            );
-            //collection.update();
+            ).then(function(result){}, function(err) {
+                const duplicateKeyErrorCode = 11000;
+                if (err.code === duplicateKeyErrorCode) {
+                  return;
+                }
+                console.error(err);
+                console.trace("Caught from:");
+                throw err;
+            });
           }
         });
       }
 
-      MongoClient.connect(MONGO_TIME_BUCKETS_URI, (err, db2) => {
-       if (err !== null) {
-         db2.close();
-         throw "couldn't connect to MONGO_TIME_BUCKETS db";
-       } else {
-         
-         // This collection holds records where the key is an article id
-         // and the value is how many views that article got in this
-         // time interval.
-         const tBucketCollectionName = tBucket.toString() + '-views';
-         db2.collection(tBucketCollectionName, (err, collection) => {
-           if (err !== null) {
-             throw "couldn't get timebucket collection";
-           } else {
-             collection.findOneAndUpdate(
-               {_id: articleId},
-               {
-                 $inc: {views: 1},
+      MongoClient.connect(MONGO_TIME_BUCKETS_URI, (err, tbdb) => {
+        if (err !== null) {
+          tbdb.close();
+          throw "couldn't connect to MONGO_TIME_BUCKETS db";
+        } else {
+          // This collection holds records where the key is an article id
+          // and the value is how many views that article got in this
+          // time interval.
+          const tBucketCollectionName = tBucket.toString();
+          tbdb.collection(tBucketCollectionName, (err, timeBucket) => {
+            if (err !== null) {
+              throw err;
+            } else {
+              timeBucket.updateOne(
+                {
+                 _id: articleId,
                  'status': 'notYetAdded'
-               },
-               {
-                 upsert: true
-               }
-             ).then(addTimeBucketToProcessingList);
-             //collection.update();
-           }
-         });
-
-
-        
-       }
+                },
+                {
+                  $set: {'status': 'notYetAdded'},
+                  $inc: {views: 1}
+                },
+                {
+                  upsert: true
+                }
+              ).then(addTimeBucketToProcessingList, function(err){console.log(err);throw err;}).then(function(r){}, function(err){console.log(err); throw err;});
+            }
+          });
+        }
       });
       
     }
@@ -365,7 +393,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         next(validationErrors[0]);
       }
     
-      const insertArticleAndRedirect = function(){
+      const insertArticleAndRedirect = function() {
         // id is the id to use for the new record we are inserting
         db.collection('article', (err, collection) => {
           if (err !== null) {

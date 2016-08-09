@@ -37,6 +37,7 @@
   "license": "MIT",
   "devDependencies": {
     "dotenv": "^2.0.0",
-    "jscs": "^2.10.1"
+    "jscs": "^2.10.1",
+    "longjohn": "^0.2.11"
   }
 }
