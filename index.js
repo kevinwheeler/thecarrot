@@ -11,6 +11,7 @@ const RateLimit = require('express-rate-limit');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const timebucket = require('timebucket');
+const updateViewsCollections = require('./utils/updateViewsCollections');
 const url = require('url');
 const util = require('util');
 const validations = require('./modern-backbone-starterkit/isomorphic/articleValidations.js');
@@ -24,10 +25,6 @@ const NODE_ENV = process.env.NODE_ENV;
 if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
   throw "NODE_ENV environment variable not set.";
 }
-
-//if (NODE_ENV === 'development') { // doesn't seem to play nicely with errors in promises.
-//  require('longjohn');
-//}
 
 const MONGO_URI = process.env.MONGODB_URI;
 
@@ -101,94 +98,94 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     // Basically, in order to let people sort the articles by
     // most popular - daily, weekly, monthly, all time
     // we have to update some tables every time the user views an article
-    function updateViewsTables(articleId) {
-      const MONGO_TIME_BUCKETS_URI = process.env.MONGOLAB_DUMP_URI;
-      const curDateMillis = Date.now();
-      const curDate = new Date(curDateMillis);
-      const curDatePlusFiveMinutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 5));
-      const curDatePlus1Day = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24));
-      const curDatePlus1Week = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24 /*day*/ * 7));
-      const curDatePlus30Days = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24 /*day*/ * 30));
-      const tBucket = timebucket(curDate).resize('5m');
-      const tBucketPlusFiveMinutes = timebucket(curDatePlusFiveMinutes).resize('5m');
+    //function updateViewsTables(articleId) {
+    //  const MONGO_TIME_BUCKETS_URI = process.env.MONGOLAB_DUMP_URI;
+    //  const curDateMillis = Date.now();
+    //  const curDate = new Date(curDateMillis);
+    //  const curDatePlusFiveMinutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 5));
+    //  const curDatePlus1Day = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24));
+    //  const curDatePlus1Week = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24 /*day*/ * 7));
+    //  const curDatePlus30Days = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ *24 /*day*/ * 30));
+    //  const tBucket = timebucket(curDate).resize('5m');
+    //  const tBucketPlusFiveMinutes = timebucket(curDatePlusFiveMinutes).resize('5m');
 
-      // for developing/debugging
-      const curDatePlus1Minute = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 1));
-      const curDatePlus2Minutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 2));
-      const curDatePlus3Minutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 3));
+    //  // for developing/debugging
+    //  const curDatePlus1Minute = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 1));
+    //  const curDatePlus2Minutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 2));
+    //  const curDatePlus3Minutes = new Date(curDateMillis + (1000 /*sec*/ * 60 /*min*/ * 3));
 
-      // This ends up being 7 minutes after the beginning of the time interval, tBucket.
-      // AKA this is two minutes after the next time interval starts.
-      const sevenMinutesAfterTbucket = tBucketPlusFiveMinutes.toDate().getTime() + (1000 /*sec*/ * 60 /*min*/ * 2);
-      const tBucketPlusSevenMinutesDate = new Date(sevenMinutesAfterTbucket);
+    //  // This ends up being 7 minutes after the beginning of the time interval, tBucket.
+    //  // AKA this is two minutes after the next time interval starts.
+    //  const sevenMinutesAfterTbucket = tBucketPlusFiveMinutes.toDate().getTime() + (1000 /*sec*/ * 60 /*min*/ * 2);
+    //  const tBucketPlusSevenMinutesDate = new Date(sevenMinutesAfterTbucket);
 
-      //TODO Decide how to handle errors. Don't throw from within promise code.
-      //TODO ponder setting write concern, journal concern, wtimeout. Honestly do this in other places in our code too.
-      const addTimeBucketToProcessingList = function() {
-        db.collection('time_buckets_processing', (err, collection) => {
-          if (err !== null) {
-            throw "couldn't get time_bucket_processing collection";
-          } else {
-            console.log("about to insert");
-            collection.insertOne(
-              {
-                _id: tBucket.toString(),
-                'status': 'initializing',
-                //'beginProcessingAt': tBucketPlusSevenMinutesDate,
-                //'removeFromDailyAt': curDatePlus1Day,
-                //'removeFromWeeklyAt': curDatePlus1Week,
-                //'removeFromMonthlyAt': curDatePlus30Days
-                // for developing/debugging
-                'beginProcessingAt': curDate,
-                'removeFromDailyAt': curDatePlus1Minute,
-                'removeFromWeeklyAt': curDatePlus2Minutes,
-                'removeFromMonthlyAt': curDatePlus3Minutes
-              }
-            ).then(function(result){}, function(err) {
-                const duplicateKeyErrorCode = 11000;
-                if (err.code === duplicateKeyErrorCode) {
-                  return;
-                }
-                console.error(err);
-                console.trace("Caught from:");
-                throw err;
-            });
-          }
-        });
-      }
+    //  //TODO Decide how to handle errors. Don't throw from within promise code.
+    //  //TODO ponder setting write concern, journal concern, wtimeout. Honestly do this in other places in our code too.
+    //  const addTimeBucketToProcessingList = function() {
+    //    db.collection('time_buckets_processing', (err, collection) => {
+    //      if (err !== null) {
+    //        throw "couldn't get time_bucket_processing collection";
+    //      } else {
+    //        console.log("about to insert");
+    //        collection.insertOne(
+    //          {
+    //            _id: tBucket.toString(),
+    //            'status': 'initializing',
+    //            //'beginProcessingAt': tBucketPlusSevenMinutesDate,
+    //            //'removeFromDailyAt': curDatePlus1Day,
+    //            //'removeFromWeeklyAt': curDatePlus1Week,
+    //            //'removeFromMonthlyAt': curDatePlus30Days
+    //            // for developing/debugging
+    //            'beginProcessingAt': curDate,
+    //            'removeFromDailyAt': curDatePlus1Minute,
+    //            'removeFromWeeklyAt': curDatePlus2Minutes,
+    //            'removeFromMonthlyAt': curDatePlus3Minutes
+    //          }
+    //        ).then(function(result){}, function(err) {
+    //            const duplicateKeyErrorCode = 11000;
+    //            if (err.code === duplicateKeyErrorCode) {
+    //              return;
+    //            }
+    //            console.error(err);
+    //            console.trace("Caught from:");
+    //            throw err;
+    //        });
+    //      }
+    //    });
+    //  }
 
-      MongoClient.connect(MONGO_TIME_BUCKETS_URI, (err, tbdb) => {
-        if (err !== null) {
-          tbdb.close();
-          throw "couldn't connect to MONGO_TIME_BUCKETS db";
-        } else {
-          // This collection holds records where the key is an article id
-          // and the value is how many views that article got in this
-          // time interval.
-          const tBucketCollectionName = tBucket.toString();
-          tbdb.collection(tBucketCollectionName, (err, timeBucket) => {
-            if (err !== null) {
-              throw err;
-            } else {
-              timeBucket.updateOne(
-                {
-                 _id: articleId,
-                 'status': 'notYetAdded'
-                },
-                {
-                  $set: {'status': 'notYetAdded'},
-                  $inc: {views: 1}
-                },
-                {
-                  upsert: true
-                }
-              ).then(addTimeBucketToProcessingList, function(err){console.log(err);throw err;}).then(function(r){}, function(err){console.log(err); throw err;});
-            }
-          });
-        }
-      });
-      
-    }
+    //  MongoClient.connect(MONGO_TIME_BUCKETS_URI, (err, tbdb) => {
+    //    if (err !== null) {
+    //      tbdb.close();
+    //      throw "couldn't connect to MONGO_TIME_BUCKETS db";
+    //    } else {
+    //      // This collection holds records where the key is an article id
+    //      // and the value is how many views that article got in this
+    //      // time interval.
+    //      const tBucketCollectionName = tBucket.toString();
+    //      tbdb.collection(tBucketCollectionName, (err, timeBucket) => {
+    //        if (err !== null) {
+    //          throw err;
+    //        } else {
+    //          timeBucket.updateOne(
+    //            {
+    //             _id: articleId,
+    //             'status': 'notYetAdded'
+    //            },
+    //            {
+    //              $set: {'status': 'notYetAdded'},
+    //              $inc: {views: 1}
+    //            },
+    //            {
+    //              upsert: true
+    //            }
+    //          ).then(addTimeBucketToProcessingList, function(err){console.log(err);throw err;}).then(function(r){}, function(err){console.log(err); throw err;});
+    //        }
+    //      });
+    //    }
+    //  });
+    //  
+    //}
 
     app.get('/article/:articleSlug', function(request, response, next) {
       let articleSlug = request.params.articleSlug;
@@ -209,7 +206,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // This will avoid duplicate content SEO issues.
                 send404(response);
               } else {
-                updateViewsTables(articleId);
+                updateViewsCollections(db, articleId);
                 let title = article.headline;
                 let description;
                 if (article.subline.length) {
@@ -288,6 +285,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     });
     
     function getAllArticlesJSON() {
+      if (NODE_ENV !== 'development') {
+        throw "NODE_ENV !== 'development'";
+      }
       let prom = new Promise(function(resolve, reject) {
         db.collection('article', (err, collection) => {
           if (err !== null) {

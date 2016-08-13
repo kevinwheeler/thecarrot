@@ -12,3 +12,4 @@ while true; do
 done
 
 node ./individualMigrations/1createCountersCollection.js
+# Add more later, but right now I'm going to harcode in mongouri into 2nd individual migration, so not adding a line for it here right now.

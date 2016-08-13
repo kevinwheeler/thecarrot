@@ -22,6 +22,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         });
       }   
     }); 
-    db.close();
-  }   
+  }
 }); 
+
+//TODO close db
