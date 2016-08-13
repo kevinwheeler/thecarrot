@@ -5,8 +5,10 @@ import serviceProvider from 'UTILSDIR/serviceProvider';
 
 export default Backbone.Model.extend({
   defaults: {
+    _id: null,
     articleURL: null, // This attribute is only found client side, and is created during parse()
     articleURLSlug: null,
+    dateCreated: null,
     headline: null,
     imageURL: null,
     subline: null

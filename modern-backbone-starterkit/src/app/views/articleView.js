@@ -2,8 +2,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
 
-import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import escaper from 'ISOMORPHICDIR/escaper.js';
+import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import 'UTILSDIR/facebooksdk';
 
 //export default Marionette.ItemView.extend({

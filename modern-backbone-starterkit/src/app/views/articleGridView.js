@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
+import escaper from 'ISOMORPHICDIR/escaper.js';
 import template from 'TEMPLATESDIR/articleGridTemplate.hbs';
 import 'UTILSDIR/facebooksdk';
 
@@ -25,13 +26,22 @@ export default Backbone.View.extend({
     //this.render();
   },
 
-  render: function() {
-    this.$el.html(template({
-      articles: this.articleCollection.toJSON()
-    }));
+  render: _.throttle(function() {
+      //TODO this gets called once for every article
+      const articleCollectionJSON = this.articleCollection.toJSON();
+      this.$el.html(template({
+        articles: this.articleCollection.toJSON()
+      }));
 
-    return this;
-  },
+      for (let i = 0; i < articleCollectionJSON.length; i++) {
+        const article = articleCollectionJSON[i];
+        this.$('.kmw-article-' + article._id + '-headline').text(escaper.unescapeHtml(article.headline));
+        this.$('.kmw-article-' + article._id + '-subline').text(escaper.unescapeHtml(article.subline));
+      }
+
+      return this;
+    }, 16
+  ),
 
   fetchMoreResults: function() {
     this.articleCollection.fetchNextArticles();
