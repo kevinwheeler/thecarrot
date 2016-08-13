@@ -82,7 +82,7 @@ gulp.task('static', function() {
 gulp.task('watch', function() {
   gulp.watch(src + 'styles/**/*', ['scripts']);//scripts because importing css from js
   gulp.watch(src + 'index.html', ['html']);
-  gulp.watch([src + 'app/**/*.js', src + 'app/**/*.hbs'], ['scripts']);
+  gulp.watch([src + 'app/**/*.js', src + 'app/**/*.hbs', src + 'isomorphic/**/*.js'], ['scripts']);
 });
 
 gulp.task('clean', function(cb) {

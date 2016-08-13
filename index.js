@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const express = require('express');
 const getSlug = require('speakingurl');
+const escaper = require('./modern-backbone-starterkit/src/isomorphic/escaper.js');
 const MongoClient = require('mongodb').MongoClient;
 const mongoConcerns = require('./utils/mongoConcerns');
 const multer = require('multer');
@@ -14,7 +15,7 @@ const timebucket = require('timebucket');
 const updateViewsCollections = require('./utils/updateViewsCollections');
 const url = require('url');
 const util = require('util');
-const validations = require('./modern-backbone-starterkit/isomorphic/articleValidations.js');
+const validations = require('./modern-backbone-starterkit/src/isomorphic/articleValidations.js');
 
 const app = express();
 const upload = multer();
@@ -94,23 +95,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       return fileType.match(imageMimeTypeRegex) !== null;
     }
 
-    //http://stackoverflow.com/a/12034334/3470632
-    const entityMap = {
-       "&": "&amp;",
-       "<": "&lt;",
-       ">": "&gt;",
-       '"': '&quot;',
-       "'": '&#39;',
-       "/": '&#x2F;'
-     };
-
-     //http://stackoverflow.com/a/12034334/3470632
-     function escapeHtml(string) {
-       return String(string).replace(/[&<>"'\/]/g, function (s) {
-         return entityMap[s];
-       });
-     }
-
     app.get('/article/:articleSlug', function(request, response, next) {
       let articleSlug = request.params.articleSlug;
       let articleId = parseInt(articleSlug, 10); // extract leading integers
@@ -131,8 +115,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 send404(response);
               } else {
                 updateViewsCollections(db, articleId);
-                article.headline = escapeHtml(article.headline);
-                article.subline = escapeHtml(article.subline);
                 let title = article.headline;
                 let description;
                 if (article.subline.length) {
@@ -335,12 +317,11 @@ MongoClient.connect(MONGO_URI, (err, db) => {
             const articleURLSlug = getURLSlug(articleId, headline);
             const doc = {
               _id: articleId,
-              articleBody: articleBody,
               articleURLSlug: articleURLSlug,
               dateCreated: new Date(),
-              headline: headline,
+              headline: escaper.escapeHtml(headline),
               imageURL: imageURL,
-              subline: subline
+              subline: escaper.escapeHtml(subline)
             }
             collection.insert(doc, {
                 w: "majority",
