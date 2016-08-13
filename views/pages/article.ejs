@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title><%= title %></title>
-    <meta name="description" content="<%= description %>">
+    <title><%- title %></title>
+    <meta name="description" content="<%- description %>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- TODO add open graph url meta -->
@@ -21,11 +21,13 @@
     <script>
       window.kmw = {article: {}};
       <%# 
-          Make sure to html escape these user generated values so that we aren't
-          vulnerable to injection attacks
+        NOTE: Make sure to escape these values in the js file so that we aren't vulnerable to inejction attacks.
+        I didn't escape them here in the template so that we have control over the escaping mechanism so that we can
+        unescape these values later in client side code (so that users dont see ugly text like &amp rather than an
+        ampersand in their headline/subline.)
        %>
-      window.kmw.article.headline = '<%= article.headline %>';
-      window.kmw.article.subline = '<%= article.subline %>';
+      window.kmw.article.headline = '<%- article.headline %>';
+      window.kmw.article.subline = '<%- article.subline %>';
       window.kmw.article.imageURL = '<%= article.imageURL %>';
       window.kmw.article.articleBody = '<%= article.articleBody %>';
       window.kmw.url = '<%= url %>';

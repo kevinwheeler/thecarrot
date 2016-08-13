@@ -31,7 +31,7 @@ export default Backbone.Collection.extend({
           const response = this.parse(JSON.parse(xhr.responseText));
           this.add(response);
         } else {
-          alert('An error has occured while fetching the next set of results.');
+          alert('An error has occurred while fetching the next set of results.');
         }
       }
     };
