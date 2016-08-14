@@ -2,7 +2,6 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
 
-import escaper from 'ISOMORPHICDIR/escaper.js';
 import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import 'UTILSDIR/facebooksdk';
 
@@ -20,14 +19,11 @@ export default Backbone.View.extend({
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
 
     this.$el.html(template({
+      article: window.kmw.article,
       //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
       articleURL: [location.protocol, '//', location.host, location.pathname].join(''),
       imageURL: window.kmw.article.imageURL
     }));
-    console.log("obj = ");
-    console.log(escaper);
-    this.$('#kmw-headline').text(escaper.unescapeHtml(window.kmw.article.headline));
-    this.$('#kmw-subline').text(escaper.unescapeHtml(window.kmw.article.subline));
     this.attachSubViews();
     this.render();
   },

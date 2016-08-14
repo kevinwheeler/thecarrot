@@ -2,19 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title><%- title %></title>
-    <meta name="description" content="<%- description %>">
+    <title><%= title %></title>
+    <meta name="description" content="<%= description %>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- TODO add open graph url meta -->
     <meta property="og:url"           content="<%= url %>" />
     <meta property="og:type"          content="article" />
     <meta property="og:title"         content="<%= article.headline %>" />
     <meta property="og:description"   content="<%= article.subline %>" />
     <meta property="og:image"         content="<%= article.imageURL %>" />
     <meta property="fb:app_id"        content="<%= fbAppId %>" />
-
-    <title>The Carrot</title>
   </head>
   <body>
     <div id="content"></div>
@@ -26,10 +23,9 @@
         unescape these values later in client side code (so that users dont see ugly text like &amp rather than an
         ampersand in their headline/subline.)
        %>
-      window.kmw.article.headline = '<%- article.headline %>';
-      window.kmw.article.subline = '<%- article.subline %>';
+      window.kmw.article.headline = '<%= article.headline %>';
+      window.kmw.article.subline = '<%= article.subline %>';
       window.kmw.article.imageURL = '<%= article.imageURL %>';
-      window.kmw.article.articleBody = '<%= article.articleBody %>';
       window.kmw.url = '<%= url %>';
     </script>
     <script src="/js/main.js" defer></script>

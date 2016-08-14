@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const express = require('express');
 const getSlug = require('speakingurl');
-const escaper = require('./modern-backbone-starterkit/src/isomorphic/escaper.js');
 const MongoClient = require('mongodb').MongoClient;
 const mongoConcerns = require('./utils/mongoConcerns');
 const multer = require('multer');
@@ -319,9 +318,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               _id: articleId,
               articleURLSlug: articleURLSlug,
               dateCreated: new Date(),
-              headline: escaper.escapeHtml(headline),
+              headline: headline,
               imageURL: imageURL,
-              subline: escaper.escapeHtml(subline)
+              subline: subline
             }
             collection.insert(doc, {
                 w: "majority",

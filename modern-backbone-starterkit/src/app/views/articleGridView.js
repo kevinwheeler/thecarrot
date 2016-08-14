@@ -3,7 +3,6 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import escaper from 'ISOMORPHICDIR/escaper.js';
 import template from 'TEMPLATESDIR/articleGridTemplate.hbs';
 import 'UTILSDIR/facebooksdk';
 
@@ -32,12 +31,6 @@ export default Backbone.View.extend({
       this.$el.html(template({
         articles: this.articleCollection.toJSON()
       }));
-
-      for (let i = 0; i < articleCollectionJSON.length; i++) {
-        const article = articleCollectionJSON[i];
-        this.$('.kmw-article-' + article._id + '-headline').text(escaper.unescapeHtml(article.headline));
-        this.$('.kmw-article-' + article._id + '-subline').text(escaper.unescapeHtml(article.subline));
-      }
 
       return this;
     }, 16
