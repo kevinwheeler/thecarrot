@@ -22,11 +22,6 @@ export default Backbone.View.extend({
     this.views = [];
     this.articleGridView = options.articleGridView;
 
-    //const mostRecentArticlesCollection = new MostRecentArticlesCollection();
-    //this.mostRecentArticlesCollection = mostRecentArticlesCollection;
-    //this.mostRecentArticlesCollection.fetch();
-    //this.articleGridView.setArticleCollection(mostRecentArticlesCollection);
-
     //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
     this.render();
@@ -42,9 +37,8 @@ export default Backbone.View.extend({
   },
 
   update: function() {
-    console.log("in on change");
     const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
-    console.log(recentOrPopular);
+
     if (recentOrPopular === 'most-recent') {
       if (this.mostRecentArticlesCollection === undefined) {
         this.mostRecentArticlesCollection = new MostRecentArticlesCollection();
@@ -53,20 +47,48 @@ export default Backbone.View.extend({
       this.articleGridView.setArticleCollection(this.mostRecentArticlesCollection);
       this.$('.kmw-time-interval-select').addClass('kmw-hidden');
 
+
     } else if (recentOrPopular === 'most-popular') {
-      console.log("in most popular");
-      if (this.mostViewedArticlesCollection === undefined) {
-        this.mostViewedArticlesCollection = new MostViewedArticlesCollection({
-          timeInterval: 'all-time'
-        });
-        this.mostViewedArticlesCollection.fetchNextArticles();
+      const timeInterval = this.$('.kmw-time-interval-select').get(0).value
+
+      if (timeInterval === 'daily') {
+        if (this.mostViewedArticlesDailyCollection === undefined) {
+          this.mostViewedArticlesDailyCollection = new MostViewedArticlesCollection({
+            timeInterval: 'daily'
+          });
+          this.mostViewedArticlesDailyCollection.fetchNextArticles();
+        }
+        this.articleGridView.setArticleCollection(this.mostViewedArticlesDailyCollection);
+
+      } else if (timeInterval === 'weekly') {
+        if (this.mostViewedArticlesWeeklyCollection === undefined) {
+          this.mostViewedArticlesWeeklyCollection = new MostViewedArticlesCollection({
+            timeInterval: 'weekly'
+          });
+          this.mostViewedArticlesWeeklyCollection.fetchNextArticles();
+        }
+        this.articleGridView.setArticleCollection(this.mostViewedArticlesWeeklyCollection);
+
+      } else if (timeInterval === 'monthly') {
+        if (this.mostViewedArticlesMonthlyCollection === undefined) {
+          this.mostViewedArticlesMonthlyCollection = new MostViewedArticlesCollection({
+            timeInterval: 'monthly'
+          });
+          this.mostViewedArticlesMonthlyCollection.fetchNextArticles();
+        }
+        this.articleGridView.setArticleCollection(this.mostViewedArticlesMonthlyCollection);
+
+      } else if (timeInterval === 'all_time') {
+        if (this.mostViewedArticlesAllTimeCollection === undefined) {
+          this.mostViewedArticlesAllTimeCollection = new MostViewedArticlesCollection({
+            timeInterval: 'all_time'
+          });
+          this.mostViewedArticlesAllTimeCollection.fetchNextArticles();
+        }
+        this.articleGridView.setArticleCollection(this.mostViewedArticlesAllTimeCollection);
       }
-      this.articleGridView.setArticleCollection(this.mostViewedArticlesCollection);
+
       this.$('.kmw-time-interval-select').removeClass('kmw-hidden');
     }
-  },
-
-  timeIntervalSelected: function(e) {
-    console.log('time interval selected');
   }
 });

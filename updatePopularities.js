@@ -171,18 +171,20 @@ function monitorSumarriesHealth(db) {
                      'lastUpdated': {$lt: threshold},
                     }
                   ).count().then(function(count){
-                      console.log("before if");
                       if (count) {
-                        console.log("sending");
-                        sendgrid.send({
-                            to:       process.env.ALERT_EMAIL_ADDRESS,
-                            from:     'noreply@' + process.env.DOMAIN_NAME,
-                            subject:  process.env.DOMAIN_NAME + ' ALERT - most viewed sumarry out of date',
-                            text:     'collectionName = ' + collectionName
-                          }, function(err, json) {
-                            if (err) { handleError(err); }
-                          }
-                        );
+                        if (NODE_ENV !== 'development') {
+                          sendgrid.send({
+                              to: process.env.ALERT_EMAIL_ADDRESS,
+                              from: 'noreply@' + process.env.DOMAIN_NAME,
+                              subject: process.env.DOMAIN_NAME + ' ALERT - most viewed sumarry out of date',
+                              text: 'collectionName = ' + collectionName
+                            }, function (err, json) {
+                              if (err) {
+                                handleError(err);
+                              }
+                            }
+                          );
+                        }
                       }
                       randColl.updateOne(
                         {

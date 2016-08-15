@@ -9,8 +9,6 @@ export default Backbone.Collection.extend({
   },
   model: ArticleModel,
   parse: function(response, options) {
-    console.log("most viewed = ");
-    console.log(response);
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
       const articleId = parseInt(articleJSON._id, 10);
@@ -27,7 +25,7 @@ export default Backbone.Collection.extend({
       data: JSON.stringify({
         dont_include: this.articleIDs,
         how_many: 10,
-        time_interval: 'all_time'
+        time_interval: this.timeInterval
       }),
       remove: false,
       type: 'POST'
