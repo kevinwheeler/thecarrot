@@ -15,6 +15,7 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
+    window.articleGridView = this;
     // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
 

@@ -191,6 +191,92 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         }
       );
     });
+
+    //returns an empty array if no validation errors, else an array of validation errors.
+    function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval) {
+      const validationErrors = [];
+      if (timeInterval !== 'daily' && timeInterval !== 'weekly' && timeInterval !== 'monthly' 
+        && timeInterval !== 'yearly' && timeInterval !== 'all_time') {
+         validationErrors.push("invalid time interval");
+      } else if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
+        validationErrors.push("howMany invalid");
+      } else if (typeof(dontInclude) !== "object") {
+        validationErrors.push("dontInclude invalid");
+      }
+      return validationErrors;
+    } 
+
+    function getMostViewedArticlesJSON(dontInclude, howMany, timeInterval) {
+      const validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
+      if (validationErrors.length) {
+        throw validationErrors;
+      }
+
+      let prom = new Promise(function(resolve, reject) {
+        db.collection('summary_of_' + timeInterval, (err, summaryColl) => {
+          if (err !== null) {
+            reject(err);
+          } else {
+            summaryColl.find({
+              _id: {$nin: dontInclude}
+            }).sort([['views', -1]]).limit(howMany).project("_id").toArray(
+              function (err, articleIDs) {
+                if (err !== null) {
+                  reject(err);
+                } else {
+                  db.collection('article', (err, articleColl) => {
+                    if (err !== null) {
+                      reject(err);
+                    } else {
+                      const IDs = articleIDs.map(function(item) {
+                        return item._id;
+                      });
+                      articleColl.find({
+                        _id: {$in: IDs}
+                      }).toArray(
+                        function (err, articles) {
+                          if (err !== null) {
+                            reject(err);
+                          } else {
+                            //TODO sort
+                            articles.sort(function(a, b) {
+                              return IDs.indexOf(a._id) - IDs.indexOf(b._id);
+                            });
+                            resolve(articles);
+                          }
+                        }
+                      );
+                    }
+                  });
+                }
+              }
+            );
+          }
+        });
+      });
+      return prom;
+    }
+
+    // Uses post instead of get to get over query string length limitations
+    app.post('/most-viewed-articles', bodyParser.json(), (req, res, next) => {
+      const dontInclude = req.body.dont_include;
+      const howMany = req.body.how_many;
+      const timeInterval = req.body.time_interval;
+      const validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
+      if (validationErrors.length) {
+        res.status(400).send(validationErrors);
+      } else  {
+        getMostViewedArticlesJSON(dontInclude, howMany, timeInterval).then(
+          function(articlesJSON) {
+            res.send(articlesJSON);
+          }, 
+          function(err) {
+            res.status(500).send("Something went wrong.");
+          }
+        );
+      }
+    });
+
     
     function getAllArticlesJSON() {
       if (NODE_ENV !== 'development') {
@@ -205,7 +291,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               let articlesJSON = articles.toArray();
               resolve(articlesJSON);
             });
-          } });
+          }
+         });
       });
       return prom;
     }

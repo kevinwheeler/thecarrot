@@ -29,7 +29,7 @@ function createIndexesForTimeBucketCollections(db) {
             wtimeout: 15000,
           }
         ).then(function(result){
-          console.log("index created");
+          console.log("index created for " + collectionNames[i]);
           }, function(err) {
             if (err !== null) {
               console.error(err);
@@ -63,7 +63,7 @@ function createIndexesForSummaryCollections(db) {
             wtimeout: 15000,
           }
         ).then(function(result){
-          console.log("index created");
+          console.log("index created for " + collectionNames[i]);
           }, function(err) {
             if (err !== null) {
               console.error(err);
@@ -80,7 +80,7 @@ function createIndexesForSummaryCollections(db) {
             wtimeout: 15000,
           }
         ).then(function(result){
-          console.log("index created");
+          console.log("index created for " + collectionNames[i]);
           }, function(err) {
             if (err !== null) {
               console.error(err);
@@ -106,7 +106,7 @@ function createIndexesForAllTimeViews(db) {
           wtimeout: 15000,
         }
       ).then(function(result){
-        console.log("index created");
+        console.log("index created for summary_of_all_time");
         }, function(err) {
           if (err !== null) {
             console.error(err);
