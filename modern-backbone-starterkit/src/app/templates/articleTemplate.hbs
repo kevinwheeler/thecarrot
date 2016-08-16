@@ -1,12 +1,22 @@
 <nav class='NAV-STUB'></nav>
 <div class="container">
 
-  {{!-- Headline and subline already escaped in EJS --}}
+  {{!-- Headline, subline, and imageURL already escaped in EJS --}}
   <h1 id="kmw-headline">headline = {{{article.headline}}}</h1>
   <h2 id="kmw-subline">subline = {{{article.subline}}}</h2>
   <img src="{{{imageURL}}}" class="img-responsive">
   <div class="fb-like" data-href="{{{articleURL}}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
   <div class="fb-comments" data-href="{{{articleURL}}}" data-width="500" data-numposts="5"></div>
+  <div class="row">
+    <div class="col-xs-12 kmw-landing-copywriting">
+      New here? There are no actual articles on this website. Since 60% of the time when people share articles, they
+      never even clicked on or read the article <sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>,we have dedicated this
+      website to only headlines. This website is intended to be a satire news website, where the actual articles don’t
+      matter anyways. Now you don’t even have to feel bad about not having read the article before sharing it. You can
+      also easily <a href="/upload">create and share your own
+      headline</a>, or <a href="/">browse headlines that other people have created.</a>
+    </div>
+  </div>
 </div>
 {{!-- <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="200" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div> --}}
 
