@@ -2,10 +2,12 @@ const aws = require('aws-sdk');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const express = require('express');
+const FacebookStrategy = require('passport-facebook').Strategy;
 const getSlug = require('speakingurl');
 const MongoClient = require('mongodb').MongoClient;
 const mongoConcerns = require('./utils/mongoConcerns');
 const multer = require('multer');
+const passport = require('passport');
 const requester = require('request');
 const RateLimit = require('express-rate-limit');
 const session = require('express-session');
@@ -28,12 +30,24 @@ if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
 
 const MONGO_URI = process.env.MONGODB_URI;
 
+const logError = function(err) {
+  console.error(err.stack || err);
+
+  // If you pass an error handling function to another function as an async callback, you may have no idea where the error
+  // originated from, because the async code runs on a completely different stack frame -- the original
+  // stack frame is long gone and thus won't be in the stack trace. So, what we do is we
+  // use an inline/lambda function (let's call this function L) and pass that as the async callback argument.
+  // From function L we will call logError and logError will call console.trace(). That way the line number
+  // of this L will be captured/traced, and we can figure out where the error originated from.
+  // Note: We also use this in other cases besides just when passing in a lambda/inline function as an argument/callback
+  // to another function.
+  console.trace("Caught from:");
+}
+
 MongoClient.connect(MONGO_URI, (err, db) => {
   if (err !== null) {
-    if (db !== null) { //TODO add this check in other places
-      db.close();
-    }
-    throw "couldn't connect to db";
+    logError(err);
+    throw err;
   } else {
    
     //from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
@@ -56,38 +70,105 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         url: MONGO_URI
       }),
     }));
+    app.use(passport.initialize());
+    app.use(passport.session());
     app.set('port', (process.env.PORT || 5000));
     
     const sendIndex = function(request, response) {
-      response.sendFile(distDir + 'index.html');
+      response.render('pages/index', {
+        user: JSON.stringify(request.user)
+      });
     }
     
     const send404 = function(response) {
       response.status(404).send('Error 404. Page not found.');
     }
-    
+
+
     // IMPORTANT: Routes are duplicated in client side code.
     // Namely the router and the nav template.
     app.get('/', sendIndex);
     app.get('/business', sendIndex);
     app.get('/education', sendIndex);
+    //app.get('/login', sendIndex);
     app.get('/other', sendIndex);
     app.get('/politics', sendIndex);
     app.get('/sports', sendIndex);
     app.get('/spirituality', sendIndex);
     app.get('/technology', sendIndex);
+
+    app.get('/logout', function(req, res){
+      req.logout();
+      res.redirect('/');
+    });
+
+    passport.use(new FacebookStrategy({
+        clientID: process.env.FACEBOOK_APP_ID,
+        clientSecret: process.env.FACEBOOK_APP_SECRET,
+        callbackURL: 'http://' + process.env.DOMAIN_NAME + "/auth/facebook/callback"
+      },
+      function(accessToken, refreshToken, profile, done) {
+        db.collection('user', (err, userColl) => {
+          if (err !== null) {
+            logError(err);
+            done(err);
+          } else {
+            userColl.findOneAndUpdate( // find if exists, create if doesn't
+              //TODO create index on fbId
+              {fbId: profile.id},
+              {
+                displayName: profile.displayName,
+                fbAccessToken: accessToken,
+                fbId: profile.id
+              },
+              {
+                upsert: true,
+                returnOriginal: false
+              },
+              function(err, user) {
+                if (err !== null) {
+                  done(err);
+                } else {
+                  done(null, user.value);
+                }
+              }
+            );
+          }
+        });
+      }
+    ));
+
+    passport.serializeUser(function(user, done) {
+      done(null, user.fbId);
+    });
     
-    //function filenameIsValid(filename) {
-    //  const hexDigitRegex = '[a-f0-9]';
-    //  const fourHexDigits = `${hexDigitRegex}{4}`;
-    //  const eightHexDigits = `${hexDigitRegex}{8}`;
-    //  const twelveHexDigits = `${hexDigitRegex}{12}`;
-    //  const uuidRegex = '^' + eightHexDigits + '-' + fourHexDigits + '-' + 
-    //    fourHexDigits + '-' + fourHexDigits + '-' + twelveHexDigits + '$';
-    //  // uuidRegex should match strings of this form: 110ec58a-a0f2-4ac4-8393-c866d813b8d1
-    //
-    //  return filename.match(uuidRegex) !== null;
-    //}
+    passport.deserializeUser(function(userId, done) {
+      db.collection('user', (err, userColl) => {
+        if (err !== null) {
+          logError(err);
+          done(err);
+        } else {
+          userColl.find({fbId: userId}).next().then(
+            function(user) {
+              done(null, user);
+            },
+            function(err) {
+              done(err);
+            }
+          );
+        }
+      });
+    });
+
+    // we will call this to start the GitHub Login process
+    app.get('/auth/facebook', passport.authenticate('facebook'));
+    
+    // GitHub will call this URL
+    app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/why' }),//TODO /why
+      function(req, res) {
+        res.redirect('/');
+      }
+    );
     
     function fileTypeIsValid(fileType) {
       const imageMimeTypeRegex = /image\/.*/;
@@ -99,10 +180,12 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       let articleId = parseInt(articleSlug, 10); // extract leading integers
       db.collection('article', (err, collection) => {
         if (err !== null) {
+          logError(err);
           next(err);
         } else {
-          collection.findOne({'_id': articleId}, function(err, article) {
+          collection.find({'_id': articleId}).next( function(err, article) {
             if (err !== null) {
+              logError(err);
               next(err);
             } else {
               if (article === null) {
@@ -121,11 +204,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 } else {
                   description = article.headline;
                 }
-                //NOTE: BE CAREFUL TO HTML ESCAPE ANYTHING THAT ISNT ESCAPED VIA EJS
                 response.render('pages/article', {
                   article: article,
                   description: description,
-                  fbAppId: '1017606658346256', //Duplicated in facebooksdk.js
+                  fbAppId: process.env.FACEBOOK_APP_ID,
                   title: title,
                   url: request.protocol + '://' + request.get('host') + request.originalUrl //http://stackoverflow.com/a/10185427
                 });
@@ -138,63 +220,78 @@ MongoClient.connect(MONGO_URI, (err, db) => {
 
     const MAX_ARTICLES_PER_REQUEST = 50;
 
-    function getMostRecentArticlesJSON(maxId, howMany) {
-      // TODO validations
-       if (typeof(maxId) !== "number" || maxId < 0) {
-         throw "maxId invalid";
-       }
+    // Returns an error object or null. If error object isn't null, will have the property
+    // clientError set to true so that we can send a 4xx response instead of a 5xx response.
+    function validateMostRecentArticlesParams(maxId, howMany) {
+      let validationErrors = [];
+      if (typeof(maxId) !== "number" || Number.isNaN(maxId) || maxId < 0) {
+        validationErrors.push("maxId invalid");
+      }
 
-       if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
-         throw "howMany invalid";
-       }
+      if (typeof(howMany) !== "number" || Number.isNaN(howMany) || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
+        validationErrors.push("howMany invalid");
+      }
+      if (validationErrors.length) {
+        validationErrors = new Error(JSON.stringify(validationErrors));
+        validationErrors.clientError = true;
+      } else {
+        validationErrors = null;
+      }
+      return validationErrors;
+    }
+
+    function getMostRecentArticlesJSON(maxId, howMany) {
+      let validationErrors = validateMostRecentArticlesParams(maxId, howMany);
 
       let prom = new Promise(function(resolve, reject) {
-        db.collection('article', (err, collection) => {
-          if (err !== null) {
-            reject(err);
-          } else {
-            collection.find({
-              _id: {$lte: maxId}
-            }).sort([['_id', -1]]).limit(howMany).toArray(
-              function (err, articles) {
-                if (err !== null) {
-                  reject(err);
-                } else {
-                  resolve(articles);
+        if (validationErrors !== null) {
+          reject(validationErrors);
+        } else {
+          db.collection('article', (err, collection) => {
+            if (err !== null) {
+              reject(err);
+            } else {
+              collection.find({
+                _id: {$lte: maxId}
+              }).sort([['_id', -1]]).limit(howMany).toArray(
+                function (err, articles) {
+                  if (err !== null) {
+                    reject(err);
+                  } else {
+                    resolve(articles);
+                  }
                 }
-              }
-            );
-          }
-        });
+              );
+            }
+          });
+        }
       });
       return prom;
     }
 
     app.get('/most-recent-articles', (req, res, next) => {
-      const maxId = parseInt(req.query.max_id) || Number.MAX_SAFE_INTEGER;
-      const howMany = parseInt(req.query.how_many) || 10;
-      if (maxId < 0) {
-        res.status(400).send('Invalid maxId parameter');
-      }
-      if (howMany < 0) {
-        res.status(400).send('Invalid howMany parameter');
-      }
-      if (howMany > MAX_ARTICLES_PER_REQUEST) {
-        res.status(400).send('Too many articles requested');
-      }
+      const maxId = parseInt(req.query.max_id, 10);
+      const howMany = parseInt(req.query.how_many, 10);
       getMostRecentArticlesJSON(maxId, howMany).then(
         function(articlesJSON) {
           res.send(articlesJSON);
         }, 
         function(err) {
-          throw err;
+          if (err.clientError === true) {
+            res.status(400).send("Something went wrong.");
+          } else {
+            logError(err);
+            next(err);
+          }
         }
       );
     });
 
-    //returns an empty array if no validation errors, else an array of validation errors.
+    // Returns an error object or null. If error object isn't null, will have the property
+    // clientError set to true so that we can send a 4xx response instead of a 5xx response.
     function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval) {
-      const validationErrors = [];
+      let validationErrors = [];
+
       if (timeInterval !== 'daily' && timeInterval !== 'weekly' && timeInterval !== 'monthly' 
         && timeInterval !== 'yearly' && timeInterval !== 'all_time') {
          validationErrors.push("invalid time interval");
@@ -203,56 +300,64 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       } else if (typeof(dontInclude) !== "object") {
         validationErrors.push("dontInclude invalid");
       }
-      return validationErrors;
-    } 
 
-    function getMostViewedArticlesJSON(dontInclude, howMany, timeInterval) {
-      const validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
       if (validationErrors.length) {
-        throw validationErrors;
+        validationErrors = new Error(JSON.stringify(validationErrors));
+        validationErrors.clientError = true;
+      } else {
+        validationErrors = null;
       }
 
+      return validationErrors;
+    }
+
+    function getMostViewedArticlesJSON(dontInclude, howMany, timeInterval) {
+      let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
+
       let prom = new Promise(function(resolve, reject) {
-        db.collection('summary_of_' + timeInterval, (err, summaryColl) => {
-          if (err !== null) {
-            reject(err);
-          } else {
-            summaryColl.find({
-              _id: {$nin: dontInclude}
-            }).sort([['views', -1]]).limit(howMany).project("_id").toArray(
-              function (err, articleIDs) {
-                if (err !== null) {
-                  reject(err);
-                } else {
-                  db.collection('article', (err, articleColl) => {
-                    if (err !== null) {
-                      reject(err);
-                    } else {
-                      const IDs = articleIDs.map(function(item) {
-                        return item._id;
-                      });
-                      articleColl.find({
-                        _id: {$in: IDs}
-                      }).toArray(
-                        function (err, articles) {
-                          if (err !== null) {
-                            reject(err);
-                          } else {
-                            //TODO sort
-                            articles.sort(function(a, b) {
-                              return IDs.indexOf(a._id) - IDs.indexOf(b._id);
-                            });
-                            resolve(articles);
+        if (validationErrors !== null) {
+          reject(validationErrors)
+        } else {
+          db.collection('summary_of_' + timeInterval, (err, summaryColl) => {
+            if (err !== null) {
+              reject(err);
+            } else {
+              summaryColl.find({
+                _id: {$nin: dontInclude}
+              }).sort([['views', -1]]).limit(howMany).project("_id").toArray(
+                function (err, articleIDs) {
+                  if (err !== null) {
+                    reject(err);
+                  } else {
+                    db.collection('article', (err, articleColl) => {
+                      if (err !== null) {
+                        reject(err);
+                      } else {
+                        const IDs = articleIDs.map(function (item) {
+                          return item._id;
+                        });
+                        articleColl.find({
+                          _id: {$in: IDs}
+                        }).toArray(
+                          function (err, articles) {
+                            if (err !== null) {
+                              reject(err);
+                            } else {
+                              articles.sort(function (a, b) {
+                                return IDs.indexOf(a._id) - IDs.indexOf(b._id);
+                              });
+                              resolve(articles);
+                            }
                           }
-                        }
-                      );
-                    }
-                  });
+                        );
+                      }
+                    });
+                  }
                 }
-              }
-            );
-          }
-        });
+              );
+            }
+          });
+        }
       });
       return prom;
     }
@@ -262,22 +367,21 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       const dontInclude = req.body.dont_include;
       const howMany = req.body.how_many;
       const timeInterval = req.body.time_interval;
-      const validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
-      if (validationErrors.length) {
-        res.status(400).send(validationErrors);
-      } else  {
-        getMostViewedArticlesJSON(dontInclude, howMany, timeInterval).then(
-          function(articlesJSON) {
-            res.send(articlesJSON);
-          }, 
-          function(err) {
-            res.status(500).send("Something went wrong.");
+      getMostViewedArticlesJSON(dontInclude, howMany, timeInterval).then(
+        function(articlesJSON) {
+          res.send(articlesJSON);
+        },
+        function(err) {
+          if (err.clientError === true){
+            res.status(400).send("Something went wrong.");;
+          } else {
+            logError(err);
+            next(err);
           }
-        );
-      }
+        }
+      );
     });
 
-    
     function getAllArticlesJSON() {
       if (NODE_ENV !== 'development') {
         throw "NODE_ENV !== 'development'";
@@ -300,10 +404,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     //DEVELOPMENT ONLY ROUTE
     app.get('/all-articles', (req, res, next) => {
       getAllArticlesJSON().then(
-        function(articlesJSON){
+        function(articlesJSON) {
           res.send(articlesJSON);
         }, 
-        function(){
+        function() {
           throw "error in /all-articles";
         }
       );
@@ -311,11 +415,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     
     function getNextId() {
       var nextIdPromise = new Promise(function(resolve, reject) {
-        db.collection('counters').findAndModify(
+        db.collection('counters').findOneAndUpdate(
           {_id: 'articleId'},
-          [],
           {$inc: {seq:1}},
-          {},
+          {upsert: true},
           function(err, result) {
             if (err !== null) {
               reject(err);
@@ -387,7 +490,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       if (validationErrors) {
         next(validationErrors[0]);
       }
-    
+
       const insertArticleAndRedirect = function() {
         // id is the id to use for the new record we are inserting
         db.collection('article', (err, collection) => {
@@ -433,6 +536,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
           function(err, httpResponse, body) {
             if (err) {
+              logError(err);
               response.status(500).send('Something went wrong! Please try again.');
             }
             else {
@@ -453,50 +557,55 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     
     // Rate limit how many requests can come from one ip address.
     let s3Limiter = new RateLimit({
-      delayAfter: 3, // begin slowing down responses after the third request 
-      delayMs: 1000, // slow down subsequent responses by 1 second per request 
-      max: 50, // limit each IP to 30 requests per windowMs 
+      delayAfter: 3, // begin slowing down responses after the third request
+      delayMs: 1000, // slow down subsequent responses by 1 second per request
+      max: 50, // limit each IP to 30 requests per windowMs
       windowMs: 60*1000 // 1 minute
     });
     
     
     app.get('/sign-s3', s3Limiter, (req, res, next) => {
       getNextId().then(function(id) {
-        const filename = req.query['file-name'];
-        const slug = getFilenameSlug(id, filename);
-        let sess = req.session;
-        sess.articleId = id;
-        sess.imageSlug = slug;
-        id += ""; //convert from int to string
-        const s3 = new aws.S3();
-        const fileType = req.query['file-type'];
-        if (!fileTypeIsValid(fileType)) {
-          next("In /sign-s3 : File type is invalid"); 
-        }
-        const S3_BUCKET = process.env.S3_BUCKET;
-        const s3Params = {
-          Bucket: S3_BUCKET,
-          Key: slug,
-          Expires: 60,
-          ContentType: fileType
-        };
-        if (NODE_ENV === 'development') {
-          s3Params.ACL = 'public-read';
-        }
-    
-        s3.getSignedUrl('putObject', s3Params, (err, data) => {
-          if(err){
-            next(err);
-            return;
+          const filename = req.query['file-name'];
+          const slug = getFilenameSlug(id, filename);
+          let sess = req.session;
+          sess.articleId = id;
+          sess.imageSlug = slug;
+          id += ""; //convert from int to string
+          const s3 = new aws.S3();
+          const fileType = req.query['file-type'];
+          if (!fileTypeIsValid(fileType)) {
+            next("In /sign-s3 : File type is invalid");
           }
-          const returnData = {
-            signedRequest: data,
-            url: `https://${S3_BUCKET}.s3.amazonaws.com/${slug}`
+          const S3_BUCKET = process.env.S3_BUCKET;
+          const s3Params = {
+            Bucket: S3_BUCKET,
+            Key: slug,
+            Expires: 60,
+            ContentType: fileType
           };
-          res.write(JSON.stringify(returnData));
-          res.end();
-        });
-      });
+          if (NODE_ENV === 'development') {
+            s3Params.ACL = 'public-read';
+          }
+
+          s3.getSignedUrl('putObject', s3Params, (err, data) => {
+            if(err){
+              logError(err);
+              next(err);
+              return;
+            }
+            const returnData = {
+              signedRequest: data,
+              url: `https://${S3_BUCKET}.s3.amazonaws.com/${slug}`
+            };
+            res.write(JSON.stringify(returnData));
+            res.end();
+          });
+        }, function(err) {
+          logError(err);
+          next(err);
+        }
+      );
     });
     
     //DEVELOPMENT ROUTES
@@ -507,12 +616,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.use(function(req, res, next) {
       send404(res);
     });
-    
-    //const errorHandler = function(err, req, res, next) {
-    //  util.error(err);
-    //  res.status(500).send('Something went wrong. Please try again.');
-    //}
-    
+
     // views is directory for all template files
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');

@@ -36,11 +36,19 @@
         </li>
         <li>
           <a href="/other">Other</a>
-          <br>
         </li>
         <li>
           <a href="/upload">Create your own article</a>
         </li>
+        {{#if loggedIn}}
+          <li>
+            <a href="/account">Account</a>
+          </li>
+        {{else}}
+          <li>
+            <a href="/auth/facebook">Log in</a>
+          </li>
+        {{/if}}
       </ul>
     </nav>
     <hr class="kmw-nav-hr"/>

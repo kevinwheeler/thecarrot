@@ -22,7 +22,7 @@ export default Backbone.View.extend({
 
     //this.listenTo(options.routerEvents, 'routed', this.collapse);
     //this.updateHeightWhenBreakpointReached();
-    this.initialRender();
+    this.render();
     this.updateWhenBreakpointReached();
     this.toggleStickyOnScroll();
     this.setActiveElement();
@@ -38,7 +38,9 @@ export default Backbone.View.extend({
   template: template,
 
   render: function() {
-    //TODO render sub views
+    this.$el.html(this.template({
+      loggedIn: false
+    }));
     return this;
   },
 
@@ -57,21 +59,6 @@ export default Backbone.View.extend({
     this.$('.kmw-navbar-header').addClass('kmw-navbar-header-sticky');
     this.$('.kmw-navbar').addClass('kmw-navbar-sticky');
     this.$('.kmw-nav-hr').addClass('kmw-nav-hr-sticky');
-  },
-
-  initialRender: function() {
-    this.$el.html(this.template());
-    let $navItemsStub = this.$('.nav-items-stub');
-    let navItemElements = [];
-    _.forEach(this.options.navItems, function(nItem){
-      navItemElements.push(nItem.$el);
-    });
-    $navItemsStub.replaceWith(navItemElements);
-    if (this.isMobile()) {
-      this.$el.addClass('kmw-nav-mobile');
-    }
-    //this.renderAllSubViews();
-    //this.attachSubViews();
   },
 
   isMobile: function() {

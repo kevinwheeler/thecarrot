@@ -17,15 +17,10 @@
     <div id="content"></div>
     <script>
       window.kmw = {article: {}};
-      <%# 
-        NOTE: Make sure to escape these values in the js file so that we aren't vulnerable to inejction attacks.
-        I didn't escape them here in the template so that we have control over the escaping mechanism so that we can
-        unescape these values later in client side code (so that users dont see ugly text like &amp rather than an
-        ampersand in their headline/subline.)
-       %>
       window.kmw.article.headline = '<%= article.headline %>';
       window.kmw.article.subline = '<%= article.subline %>';
       window.kmw.article.imageURL = '<%= article.imageURL %>';
+      window.kmw.fbAppId = '<%= fbAppId %>';
       window.kmw.url = '<%= url %>';
     </script>
     <script src="/js/main.js" defer></script>

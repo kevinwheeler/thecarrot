@@ -6,9 +6,10 @@ const timebucket = require('timebucket');
 
 function handleError(err) {
   if (err !== null) {
-    console.error(err);
+    console.error(err.stack || err);
     console.trace("Caught from:");
-    process.exit(1);
+    // If error occurs and the fact that an article was viewed doesn't get accounted for, it's really not the
+    // end of the world. Just proceed as normal and don't crash.
   }
 }
 
@@ -28,7 +29,7 @@ function updateTimeBuckets(db, articleId, summaryName) {
   
   db.collection(collectionName, (err, tbCol) => {
     if (err !== null) {
-      handleError(err);      
+      handleError(err);
     } else {
       const curDate = new Date();
       const tBucket = timebucket(curDate).resize(timeIntervalSize).toDate();
@@ -43,13 +44,13 @@ function updateTimeBuckets(db, articleId, summaryName) {
         {
           upsert: true
         }
-      ).then(function(){}, function(err){
+      ).then(function(){}, function(err) {
         const duplicateKeyErrorCode = 11000;
         if (err.code !== duplicateKeyErrorCode) { //https://jira.mongodb.org/browse/SERVER-14322
-          handleError(err)
+          handleError(err);
         }
       });
-    }     
+    }
   });
 }
 
@@ -60,7 +61,7 @@ function insertIntoSummary(db, articleId, summaryName) {
   const collectionName = 'summary_of_' + summaryName;
   db.collection(collectionName, (err, summaryCol) => {
     if (err !== null) {
-      handleError(err);      
+      handleError(err);
     } else {
       summaryCol.insertOne(
         {
@@ -70,22 +71,20 @@ function insertIntoSummary(db, articleId, summaryName) {
           views: 1
         }
       ).then(function(result){}, function(err) {
-          const duplicateKeyErrorCode = 11000;
-          if (err.code === duplicateKeyErrorCode) {
-            return;
-          }
-          console.error(err);
-          console.trace("Caught from:");
-          throw err;
+        const duplicateKeyErrorCode = 11000;
+        if (err.code === duplicateKeyErrorCode) {
+          return;
+        }
+        handleError(err);
       });
-    }     
+    }
   });
 }
 
 function incrementAlltimeVews(db, articleId) {
   db.collection('summary_of_all_time', (err, summaryCol) => {
     if (err !== null) {
-      handleError(err);      
+      handleError(err);
     } else {
       summaryCol.updateOne(
         {
@@ -97,33 +96,29 @@ function incrementAlltimeVews(db, articleId) {
         {
           upsert: true
         }
-
       ).then(function(result){}, function(err) {
-          const duplicateKeyErrorCode = 11000;
-          if (err.code === duplicateKeyErrorCode) { //https://jira.mongodb.org/browse/SERVER-14322
-            return;
-          }
-          console.error(err);
-          console.trace("Caught from:");
-          throw err;
+        const duplicateKeyErrorCode = 11000;
+        if (err.code === duplicateKeyErrorCode) { //https://jira.mongodb.org/browse/SERVER-14322
+          return;
+        }
+        handleError(err);
       });
-    }     
+    }
   });
 }
-
 
 // Basically, when an article is viewed, this method will be called so that
 // We can do whatever logic we need to do so that we can have a list of 
 // most viewed articles by day/week/month/year
 function updateViewsCollections(db, articleId) {
-  updateTimeBuckets(db, articleId, 'daily'); 
-  updateTimeBuckets(db, articleId, 'weekly'); 
-  updateTimeBuckets(db, articleId, 'monthly'); 
-  updateTimeBuckets(db, articleId, 'yearly'); 
-  insertIntoSummary(db, articleId, 'daily'); 
-  insertIntoSummary(db, articleId, 'weekly'); 
-  insertIntoSummary(db, articleId, 'monthly'); 
-  insertIntoSummary(db, articleId, 'yearly'); 
+  updateTimeBuckets(db, articleId, 'daily');
+  updateTimeBuckets(db, articleId, 'weekly');
+  updateTimeBuckets(db, articleId, 'monthly');
+  updateTimeBuckets(db, articleId, 'yearly');
+  insertIntoSummary(db, articleId, 'daily');
+  insertIntoSummary(db, articleId, 'weekly');
+  insertIntoSummary(db, articleId, 'monthly');
+  insertIntoSummary(db, articleId, 'yearly');
   incrementAlltimeVews(db, articleId);
 }
 

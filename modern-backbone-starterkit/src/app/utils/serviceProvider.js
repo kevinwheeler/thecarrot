@@ -4,6 +4,7 @@ import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import HomeView from 'VIEWSDIR/homeView';
+import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
 import NavView from 'VIEWSDIR/navView';
 import Router from '../router';
@@ -49,6 +50,11 @@ var serviceProvider = {
     });
 
     return homeViewInst;
+  },
+
+  getLoginView() {
+    let loginViewInst = new LoginView();
+    return loginViewInst;
   },
 
   getNavView() {
