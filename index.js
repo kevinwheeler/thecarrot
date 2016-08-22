@@ -76,6 +76,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     
     const sendIndex = function(request, response) {
       response.render('pages/index', {
+        isLoggedIn: !!request.user,
         user: JSON.stringify(request.user)
       });
     }
@@ -88,6 +89,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     // IMPORTANT: Routes are duplicated in client side code.
     // Namely the router and the nav template.
     app.get('/', sendIndex);
+    app.get('/account', sendIndex);
     app.get('/business', sendIndex);
     app.get('/education', sendIndex);
     //app.get('/login', sendIndex);

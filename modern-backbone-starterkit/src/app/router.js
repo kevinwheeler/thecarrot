@@ -18,6 +18,7 @@ export default Backbone.Router.extend({
     '': 'homeRoute',
     'article/:articleid'       : 'articleRoute',
     'login'       : 'loginRoute',
+    'account'       : 'accountRoute',
     'upload': 'uploadRoute'
   },
 
@@ -68,6 +69,13 @@ export default Backbone.Router.extend({
     let homeViewInst = serviceProvider.getArticleView();
     homeViewInst.render();
     $('#js-app').empty().append(homeViewInst.$el);
+    this.afterRoute();
+  },
+
+  accountRoute() {
+    let accountViewInst = serviceProvider.getAccountView();
+    accountViewInst.render();
+    $('#js-app').empty().append(accountViewInst.$el);
     this.afterRoute();
   },
 

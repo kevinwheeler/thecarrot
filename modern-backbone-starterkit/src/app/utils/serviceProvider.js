@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 
+import AccountView from 'VIEWSDIR/accountView';
 import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
@@ -29,6 +30,11 @@ var serviceProvider = {
   getAboutView() {
     let aboutViewInst = new AboutView({navView: this.getNavView()});
     return aboutViewInst;
+  },
+
+  getAccountView() {
+    let accountViewInst = new AccountView();
+    return accountViewInst;
   },
 
   getArticleView() {

@@ -38,8 +38,9 @@ export default Backbone.View.extend({
   template: template,
 
   render: function() {
+    this.isLoggedIn = window.kmw.user !== undefined;
     this.$el.html(this.template({
-      loggedIn: false
+      loggedIn: this.isLoggedIn
     }));
     return this;
   },
