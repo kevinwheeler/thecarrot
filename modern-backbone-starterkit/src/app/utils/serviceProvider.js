@@ -1,9 +1,10 @@
 import Backbone from 'backbone';
 
-import AccountView from 'VIEWSDIR/accountView';
+import UserView from 'VIEWSDIR/userView';
 import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
+import CurrentUserModel from 'MODELSDIR/currentUserModel';
 import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
@@ -11,6 +12,7 @@ import NavView from 'VIEWSDIR/navView';
 import Router from '../router';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
+import UserModel from 'MODELSDIR/UserModel';
 
 var serviceProvider = {
   _createRouter(routerEvents) {
@@ -24,17 +26,17 @@ var serviceProvider = {
   },
 
   _createNavView() {
-    this.navView = new NavView({routerEvents: this.routerEvents});
+    const currentUser = new CurrentUserModel();
+    currentUser.fetchCurrentUser();
+    this.navView = new NavView({
+      currentUser: currentUser,
+      routerEvents: this.routerEvents
+    });
   },
 
   getAboutView() {
     let aboutViewInst = new AboutView({navView: this.getNavView()});
     return aboutViewInst;
-  },
-
-  getAccountView() {
-    let accountViewInst = new AccountView();
-    return accountViewInst;
   },
 
   getArticleView() {
@@ -78,6 +80,13 @@ var serviceProvider = {
   getUploadModel() {
     let uploadModelInst = new UploadModel();
     return uploadModelInst;
+  },
+
+  getUserView(userId) {
+    const userModel = new UserModel({userId: userId});
+    userModel.fetchUser();
+    let userViewInst = new UserView({userModel: userModel});
+    return userViewInst;
   },
 
   initialize() {

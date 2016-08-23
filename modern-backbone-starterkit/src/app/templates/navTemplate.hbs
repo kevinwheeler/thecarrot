@@ -40,15 +40,20 @@
         <li>
           <a href="/upload">Create your own article</a>
         </li>
-        {{#if loggedIn}}
+
+        {{#unless doneFetching}}
+             <li>
+               <a href="#">Loading...</a>
+             </li>
+        {{else if loggedIn}}
           <li>
-            <a href="/account">Account</a>
+            <a href="/user/{{userId}}">Account</a>
           </li>
         {{else}}
           <li>
             <a href="/auth/facebook">Log in</a>
           </li>
-        {{/if}}
+        {{/unless}}
       </ul>
     </nav>
     <hr class="kmw-nav-hr"/>

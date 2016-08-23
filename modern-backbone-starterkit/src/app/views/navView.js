@@ -20,6 +20,9 @@ export default Backbone.View.extend({
     _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     //TODO add nav item views to views array
 
+    this.currentUser = options.currentUser;
+    this.listenTo(this.currentUser, 'change', this.render);
+
     //this.listenTo(options.routerEvents, 'routed', this.collapse);
     //this.updateHeightWhenBreakpointReached();
     this.render();
@@ -38,9 +41,17 @@ export default Backbone.View.extend({
   template: template,
 
   render: function() {
-    this.isLoggedIn = window.kmw.user !== undefined;
+    //this.isLoggedIn = window.kmw.user !== undefined;
+    //let fbId;
+    //if (this.isLoggedIn) {
+    //  fbId = window.kmw.user.fbId;
+    //}
+    console.log("user = ");
+    console.log(this.currentUser);
     this.$el.html(this.template({
-      loggedIn: this.isLoggedIn
+      doneFetching: this.currentUser.get('doneFetching'),
+      loggedIn: this.currentUser.get('loggedIn'),
+      userId: this.currentUser.get('fbId')
     }));
     return this;
   },

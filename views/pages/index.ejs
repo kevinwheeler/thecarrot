@@ -10,9 +10,6 @@
     <div id="content"></div>
     <script>
       window.kmw = {};
-      <%if (isLoggedIn) { %>
-        window.kmw.user = <%- user %>; <%# may need to escape user in the future if we add fields %>
-      <% } %>
     </script>
     <script src="/js/main.js" defer></script>
   </body>

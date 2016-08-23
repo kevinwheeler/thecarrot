@@ -5,7 +5,7 @@ import Backbone from 'backbone';
 
 import $script from 'scriptjs';
 import Spinner from 'UTILSDIR/spin';
-import template from 'TEMPLATESDIR/accountTemplate.hbs';
+import template from 'TEMPLATESDIR/userTemplate.hbs';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -20,17 +20,14 @@ export default Backbone.View.extend({
     // http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render');
     this.views = [];
-    this.isLoggedIn = window.kmw.user !== undefined;
-    if (this.isLoggedIn) {
-      this.displayName =  window.kmw.user.displayName;
-    }
+    this.userModel = options.userModel;
+    this.listenTo(this.userModel, 'change', this.render);
     this.render();
   },
 
   render: function () {
     this.$el.html(template({
-      displayName: this.displayName,
-      isLoggedIn: this.isLoggedIn
+      displayName: this.userModel.get('displayName'),
     }));
     //_.forEach(this.views, function(view) {
     //  view.render();

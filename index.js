@@ -76,8 +76,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     
     const sendIndex = function(request, response) {
       response.render('pages/index', {
-        isLoggedIn: !!request.user,
-        user: JSON.stringify(request.user)
+        //isLoggedIn: !!request.user,
+        //user: JSON.stringify(request.user)
       });
     }
     
@@ -89,7 +89,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     // IMPORTANT: Routes are duplicated in client side code.
     // Namely the router and the nav template.
     app.get('/', sendIndex);
-    app.get('/account', sendIndex);
+    app.get('/user/:userid', sendIndex);
     app.get('/business', sendIndex);
     app.get('/education', sendIndex);
     //app.get('/login', sendIndex);
@@ -99,10 +99,13 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.get('/spirituality', sendIndex);
     app.get('/technology', sendIndex);
 
-    app.get('/logout', function(req, res){
+    app.get('/logout', function(req, res) {
       req.logout();
       res.redirect('/');
     });
+
+
+
 
     passport.use(new FacebookStrategy({
         clientID: process.env.FACEBOOK_APP_ID,
@@ -479,6 +482,42 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     }
     
     //API ROUTES
+    app.get('/userinfo', function(req, res, next) {
+      //req.user, get parameters userId
+      let userToGet = req.query.user_id;
+      let userIdToGet;
+      if (userToGet === 'currentUser') {
+        if (req.user) {
+          userIdToGet = req.user.fbId;
+        } else {
+          res.json({}); // wanted current user, but current user isn't logged in.
+          return;
+        }
+      } else {
+        userIdToGet = userToGet;
+      }
+      db.collection('user', (err, userColl) => {
+        if (err !== null) {
+          logError(err);
+          next(err);
+        } else {
+          userColl.find({fbId: userIdToGet}).project({
+            _id: false,
+            displayName: true,
+            fbId: true
+          }).next().then(
+            function (user) {
+              res.json(user);
+            },
+            function (err) {
+              logError(err)
+              next(err);
+            }
+          );
+        }
+      });
+    });
+
     app.post('/article', bodyParser.urlencoded(), function(request, response, next) {
       const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
     
