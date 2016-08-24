@@ -4,6 +4,7 @@ import UserView from 'VIEWSDIR/userView';
 import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
+import ArticleModel from 'MODELSDIR/articleModel';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
 import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
@@ -40,8 +41,18 @@ var serviceProvider = {
   },
 
   getArticleView() {
-    let articleViewInst = new ArticleView({navView: this.getNavView()});
+    const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
+    articleModelInst.fetch();
+    const articleViewInst = new ArticleView({
+      navView: this.getNavView(),
+      articleModel: articleModelInst
+    });
     return articleViewInst;
+  },
+
+  getArticleModel(options) {
+    let articleModelInst = new ArticleModel(options);
+    return articleModelInst;
   },
 
   getHomeView() {

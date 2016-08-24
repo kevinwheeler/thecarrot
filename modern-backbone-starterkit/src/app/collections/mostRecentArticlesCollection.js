@@ -6,7 +6,9 @@ export default Backbone.Collection.extend({
   initialize: function(options) {
     this.minId = Number.MAX_SAFE_INTEGER;
   },
+
   model: ArticleModel,
+
   parse: function(response, options) {
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
@@ -17,6 +19,7 @@ export default Backbone.Collection.extend({
     }
     return response;
   },
+
   url: '/most-recent-articles',
 
   // Attributes below this line are not standard Backbone attributes, they are custom.

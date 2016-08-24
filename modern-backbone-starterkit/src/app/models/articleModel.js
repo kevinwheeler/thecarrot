@@ -14,8 +14,29 @@ export default Backbone.Model.extend({
     subline: null
   },
 
+  idAttribute: "_id",
+
+  initialize: function(options) {
+    window.kmwmod = this;
+    if (options.setIdToCurrentArticle === true) {
+      // TODO move url code out to router file
+      let url = window.location.href;
+      if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
+        url = url.substr(0, url.length - 1);
+      }
+      let articleSlug = url.substring(url.lastIndexOf('/') + 1);
+      this._id = parseInt(articleSlug, 10);
+    }
+  },
+
+  url: function() {
+    return "/api/article/" + this._id;
+  },
+
   parse: function(articleJSON, options) {
     articleJSON.articleURL = '/' + serviceProvider.getRouter().exports.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
+    console.log("in parse. articlejson = ")
+    console.log(articleJSON);
     return articleJSON;
   }
 });

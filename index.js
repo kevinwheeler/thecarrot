@@ -74,15 +74,15 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.use(passport.session());
     app.set('port', (process.env.PORT || 5000));
     
-    const sendIndex = function(request, response) {
-      response.render('pages/index', {
-        //isLoggedIn: !!request.user,
-        //user: JSON.stringify(request.user)
+    const sendIndex = function(req, res) {
+      res.render('pages/index', {
+        //isLoggedIn: !!req.user,
+        //user: JSON.stringify(req.user)
       });
     }
     
-    const send404 = function(response) {
-      response.status(404).send('Error 404. Page not found.');
+    const send404 = function(res) {
+      res.status(404).send('Error 404. Page not found.');
     }
 
 
@@ -124,7 +124,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               {
                 displayName: profile.displayName,
                 fbAccessToken: accessToken,
-                fbId: profile.id
+                fbId: profile.id,
+                userType: 'user'
               },
               {
                 upsert: true,
@@ -180,8 +181,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       return fileType.match(imageMimeTypeRegex) !== null;
     }
 
-    app.get('/article/:articleSlug', function(request, response, next) {
-      let articleSlug = request.params.articleSlug;
+    app.get('/:admin((admin/)?)article/:articleSlug', function(req, res, next) {
+      const adminPage = !!req.params.admin;
+      let articleSlug = req.params.articleSlug;
       let articleId = parseInt(articleSlug, 10); // extract leading integers
       db.collection('article', (err, collection) => {
         if (err !== null) {
@@ -194,28 +196,78 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               next(err);
             } else {
               if (article === null) {
-                send404(response);
+                send404(res);
               } else if (articleSlug !== article.articleURLSlug) {
                 // Even if the articleId corresponds to a valid article,
                 // send a 404 unless the rest of the slug matches as well.
                 // This will avoid duplicate content SEO issues.
-                send404(response);
+                send404(res);
               } else {
-                updateViewsCollections(db, articleId);
-                let title = article.headline;
-                let description;
-                if (article.subline.length) {
-                  description = article.subline;
+                if (adminPage || article.visibility === 'visible') {
+                  updateViewsCollections(db, articleId);
+                  let title = article.headline;
+                  let description;
+                  if (article.subline.length) {
+                    description = article.subline;
+                  } else {
+                    description = article.headline;
+                  }
+                  res.render('pages/article', {
+                    article: article,
+                    description: description,
+                    fbAppId: process.env.FACEBOOK_APP_ID,
+                    title: title,
+                    url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
+                    articleVisibility: article.visibility,
+                  });
                 } else {
-                  description = article.headline;
+                  res.render('pages/article', {
+                    articleVisibility: article.visibility,
+                  });
                 }
-                response.render('pages/article', {
-                  article: article,
-                  description: description,
-                  fbAppId: process.env.FACEBOOK_APP_ID,
-                  title: title,
-                  url: request.protocol + '://' + request.get('host') + request.originalUrl //http://stackoverflow.com/a/10185427
-                });
+              }
+            }
+          });
+        }
+      });
+    });
+
+    app.get('/api/article/:articleId', function(req, res, next) {
+      //const adminPage = !!req.params.admin;
+      //let articleSlug = req.params.articleSlug;
+      console.log("in get route");
+      let articleId = parseInt(req.params.articleId, 10);
+      db.collection('article', (err, collection) => {
+        if (err !== null) {
+          logError(err);
+          next(err);
+        } else {
+          collection.find({'_id': articleId}).next( function(err, article) {
+            if (err !== null) {
+              logError(err);
+              next(err);
+            } else {
+              if (article === null) {
+                console.log("sending 404");
+                send404(res);
+              } else {
+                // TODO restrict article visibility
+                //if (adminPage || article.visibility === 'visible') {
+                // TODO don't sent unfiltered article
+                  res.json(article)
+                //  res.json({
+                //    article: article,
+                    //description: description,
+                    //fbAppId: process.env.FACEBOOK_APP_ID,
+                    //title: title,
+                    //url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
+                    //articleVisibility: article.visibility,
+                  //});
+                //} else {
+                //  res.json({
+                //    articleVisibility: article.visibility,
+                //  });
+                //}
               }
             }
           });
@@ -518,15 +570,14 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       });
     });
 
-    app.post('/article', bodyParser.urlencoded(), function(request, response, next) {
+    app.post('/article', bodyParser.urlencoded(), function(req, res, next) {
       const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
     
-      const sess = request.session;
+      const sess = req.session;
       const articleId = sess.articleId;
       const imageSlug = sess.imageSlug;
-      const headline = request.body.headline;
-      const subline = request.body.subline;
-      const articleBody = request.body.articleBody;
+      const headline = req.body.headline;
+      const subline = req.body.subline;
       validationErrors = validations.validateEverything(headline, subline);
       if (validationErrors) {
         next(validationErrors[0]);
@@ -551,7 +602,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               dateCreated: new Date(),
               headline: headline,
               imageURL: imageURL,
-              subline: subline
+              sessionIdOfAuthor: req.sessionID,
+              subline: subline,
+              visibility: 'unapproved'
             }
             collection.insert(doc, {
                 w: "majority",
@@ -561,24 +614,24 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 if (error !== null) {
                   next(error);
                 } else {
-                  response.redirect('/article/' + articleURLSlug);
+                  res.redirect('/article/' + articleURLSlug);
                 }
               }); 
           }
         });
       }
 
-      if (request.body['kmw-bypass-recaptcha-secret'] === process.env.BYPASS_RECAPTCHA_SECRET) {
+      if (req.body['kmw-bypass-recaptcha-secret'] === process.env.BYPASS_RECAPTCHA_SECRET) {
         insertArticleAndRedirect();
       } else {
-        const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: request.body['g-recaptcha-response']};
+        const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: req.body['g-recaptcha-response']};
      
         //id = the id to use for the new record we are inserting.
         requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
           function(err, httpResponse, body) {
             if (err) {
               logError(err);
-              response.status(500).send('Something went wrong! Please try again.');
+              res.status(500).send('Something went wrong! Please try again.');
             }
             else {
               var bodyJSON = JSON.parse(body);
@@ -588,7 +641,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               }
               else {
                 // Captcha failed.
-                response.redirect('/upload?captcha=fail'); //TODO
+                res.redirect('/upload?captcha=fail'); //TODO
               }
             }
           });

@@ -16,7 +16,7 @@ export default Backbone.Router.extend({
     'technology'    : 'categoryRoute',
 
     '': 'homeRoute',
-    'article/:articleid'       : 'articleRoute',
+    'article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
     'user/:userId'       : 'userRoute',
     'upload': 'uploadRoute'

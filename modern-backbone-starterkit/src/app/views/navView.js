@@ -46,8 +46,6 @@ export default Backbone.View.extend({
     //if (this.isLoggedIn) {
     //  fbId = window.kmw.user.fbId;
     //}
-    console.log("user = ");
-    console.log(this.currentUser);
     this.$el.html(this.template({
       doneFetching: this.currentUser.get('doneFetching'),
       loggedIn: this.currentUser.get('loggedIn'),
