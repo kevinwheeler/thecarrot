@@ -2,58 +2,21 @@
 <div class="container">
 
   {{!-- Headline, subline, and imageURL already escaped in EJS --}}
-  {{#if authorOrApprovedOrAdminRoute}}
-    <h1 id="kmw-headline">headline = {{article.headline}}</h1>
-    <h2 id="kmw-subline">subline = {{article.subline}}</h2>
-    <img src="{{imageURL}}" class="img-responsive">
-  {{/if}}
-
-  {{#if approvalPendingAndAuthor}}
-    This headline is awaiting review to make sure that it complies with facebook's guidelines. No one else can see it yet.
-    To be notified after it has been reviewed, you may enter your email address. Otherwise, please check back later. <br>
-  {{/if}}
-
-  {{#if approvalPendingAndNotAuthor}}
-    This headline is awaiting review to make sure that it complies with facebook's guidelines. It will be visible after
-    approval. To be notified after it has been reviewed, you may enter your email address. Otherwise, please check back later.<br>
-  {{/if}}
-
-  {{! TODO post a link to facebook's community guidelines }}
-  {{#if approvalDenied}}
-    Sorry, this article was NOT approved. Please make sure that any headlines you create comply with Facebook's guidelines.<br>
-  {{/if}}
-
-  {{#if isAdminRoute}}
-    is admin route <br>
-    Approval Status: {{approvalStatus}} <br>
-    <form action="/article-approval" method="post">
-      <!--<input type="hidden" id="kmw-bypass-recaptcha-secret" name="kmw-bypass-recaptcha-secret" value="whatt">-->
-
-      <label for="kmw-approval">Change approval status.</label>
-      <select id="kmw-approval" name="kmw-approval">
-        <option value="Approved">Approve</option>
-        <option value="Approved">Deny</option>
-      </select>
-
-      <input type="submit" id="kmw-approval-submit">
-
-    </form>
-  {{/if}}
-
-  {{#if approved}}
-    <div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
-    <div class="fb-comments" data-href="{{articleURL}}" data-width="500" data-numposts="5"></div>
-    <div class="row">
-      <div class="col-xs-12 kmw-landing-copywriting">
-        New here? There are no actual articles on this website. Since 60% of the time when people share articles, they
-        never even clicked on or read the article<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
-        website to only headlines. This website is intended to be a satire news website, where the actual articles don’t
-        matter anyways. Now you don’t even have to feel bad about not having read the article before sharing it. You can
-        also easily <a href="/upload">create and share your own
-        headline</a>, or <a href="/">browse headlines that other people have created.</a>
-      </div>
+  <h1 id="kmw-headline">headline = {{{article.headline}}}</h1>
+  <h2 id="kmw-subline">subline = {{{article.subline}}}</h2>
+  <img src="{{{imageURL}}}" class="img-responsive">
+  <div class="fb-like" data-href="{{{articleURL}}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+  <div class="fb-comments" data-href="{{{articleURL}}}" data-width="500" data-numposts="5"></div>
+  <div class="row">
+    <div class="col-xs-12 kmw-landing-copywriting">
+      New here? There are no actual articles on this website. Since 60% of the time when people share articles, they
+      never even clicked on or read the article<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
+      website to only headlines. This website is intended to be a satire news website, where the actual articles don’t
+      matter anyways. Now you don’t even have to feel bad about not having read the article before sharing it. You can
+      also easily <a href="/upload">create and share your own
+      headline</a>, or <a href="/">browse headlines that other people have created.</a>
     </div>
-  {{/if}}
+  </div>
 </div>
 {{!-- <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="200" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div> --}}
 

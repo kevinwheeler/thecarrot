@@ -19,7 +19,13 @@ export default Backbone.Model.extend({
   initialize: function(options) {
     window.kmwmod = this;
     if (options.setIdToCurrentArticle === true) {
-      this._id = serviceProvider.getRouter().getArticleIdOfCurrentRoute();
+      // TODO move url code out to router file
+      let url = window.location.href;
+      if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
+        url = url.substr(0, url.length - 1);
+      }
+      let articleSlug = url.substring(url.lastIndexOf('/') + 1);
+      this._id = parseInt(articleSlug, 10);
     }
   },
 
