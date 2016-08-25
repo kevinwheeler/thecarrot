@@ -2,6 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
 
+import serviceProvider from 'UTILSDIR/serviceProvider';
 import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import 'STYLESDIR/stylus/article.css';
 import 'UTILSDIR/facebooksdk';
@@ -40,13 +41,31 @@ export default Backbone.View.extend({
     //  imageURL: window.kmw.article.imageURL
     //}));
 
+    const viewerIsAuthor = this.articleModel.get('viewerIsAuthor');
+    const approved = this.articleModel.get('approval') === 'approved';
+    const approvalDenied = this.articleModel.get('approval') === 'denied';
+    const approvalPending = this.articleModel.get('approval') === 'pending';
+    const approvalPendingAndAuthor = approvalPending && viewerIsAuthor;
+    const approvalPendingAndNotAuthor = approvalPending && !viewerIsAuthor;
+    const approvalStatus= this.articleModel.get('approval');
+    const isAdminRoute = serviceProvider.getRouter().currentRouteIsAdminArticleRoute();
+
+    const authorOrApprovedOrAdminRoute = viewerIsAuthor || approved || isAdminRoute;
+
     this.$el.html(template({
+      authorOrApprovedOrAdminRoute: authorOrApprovedOrAdminRoute,
+      approved: approved,
+      approvalDenied: approvalDenied,
+      approvalPending: approvalPending,
+      approvalPendingAndAuthor: approvalPendingAndAuthor,
+      approvalPendingAndNotAuthor: approvalPendingAndNotAuthor,
+      approvalStatus: approvalStatus,
       article: this.articleModel.toJSON(),
       //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
-      articleURL: this.articleModel.get('articleURL'),
-      //articleURL: [location.protocol, '//', location.host, location.pathname].join(''),
+      articleURL: [location.protocol, '//', location.host, location.pathname].join(''),
       citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
-      imageURL: this.articleModel.get('imageURL')
+      imageURL: this.articleModel.get('imageURL'),
+      isAdminRoute: serviceProvider.getRouter().currentRouteIsAdminArticleRoute(),
     }));
     return this;
   },
