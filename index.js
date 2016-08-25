@@ -76,6 +76,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     
     const sendIndex = function(req, res) {
       res.render('pages/index', {
+        fbAppId: process.env.FACEBOOK_APP_ID
         //isLoggedIn: !!req.user,
         //user: JSON.stringify(req.user)
       });
@@ -110,7 +111,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     passport.use(new FacebookStrategy({
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: 'http://' + process.env.DOMAIN_NAME + "/auth/facebook/callback"
+        callbackURL: process.env.DOMAIN + "/auth/facebook/callback"
       },
       function(accessToken, refreshToken, profile, done) {
         db.collection('user', (err, userColl) => {
@@ -203,7 +204,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // This will avoid duplicate content SEO issues.
                 send404(res);
               } else {
-                if (adminPage || article.visibility === 'visible') {
+                if (adminPage || article.approval === 'approved') {
                   updateViewsCollections(db, articleId);
                   let title = article.headline;
                   let description;
@@ -218,11 +219,12 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                     fbAppId: process.env.FACEBOOK_APP_ID,
                     title: title,
                     url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
-                    articleVisibility: article.visibility,
+                    articleApproval: article.approval
                   });
                 } else {
                   res.render('pages/article', {
-                    articleVisibility: article.visibility,
+                    articleApproval: article.approval,
+                    fbAppId: process.env.FACEBOOK_APP_ID,
                   });
                 }
               }
@@ -254,6 +256,11 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 // TODO restrict article visibility
                 //if (adminPage || article.visibility === 'visible') {
                 // TODO don't sent unfiltered article
+                if ((req.user && req.user.fbId === article.authorId || req.sessionID === article.sidOfAuthor)) {
+                  article.viewerIsAuthor = true;
+                } else {
+                  article.viewerIsAuthor = false;
+                }
                   res.json(article)
                 //  res.json({
                 //    article: article,
@@ -578,8 +585,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       const imageSlug = sess.imageSlug;
       const headline = req.body.headline;
       const subline = req.body.subline;
-      validationErrors = validations.validateEverything(headline, subline);
-      if (validationErrors) {
+      const validationErrors = validations.validateEverything(headline, subline);
+      if (validationErrors) { //TODO this could be better, instead of just returning the first error.
         next(validationErrors[0]);
       }
 
@@ -598,13 +605,16 @@ MongoClient.connect(MONGO_URI, (err, db) => {
             const articleURLSlug = getURLSlug(articleId, headline);
             const doc = {
               _id: articleId,
+              approval: 'pending',
               articleURLSlug: articleURLSlug,
               dateCreated: new Date(),
               headline: headline,
               imageURL: imageURL,
-              sessionIdOfAuthor: req.sessionID,
-              subline: subline,
-              visibility: 'unapproved'
+              sidOfAuthor: req.sessionID,
+              subline: subline
+            }
+            if (req.user) { // TODO make sure not posting anonymously
+              doc.authorId = req.user.fbId;
             }
             collection.insert(doc, {
                 w: "majority",

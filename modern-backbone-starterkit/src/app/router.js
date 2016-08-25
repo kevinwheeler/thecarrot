@@ -17,6 +17,7 @@ export default Backbone.Router.extend({
 
     '': 'homeRoute',
     'article/:articleSlug'       : 'articleRoute',
+    'admin/article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
     'user/:userId'       : 'userRoute',
     'upload': 'uploadRoute'
@@ -64,6 +65,36 @@ export default Backbone.Router.extend({
   //    }
   //  });
   //},
+
+  getArticleIdOfCurrentRoute() {
+    let url = window.location.pathname;
+    if ((url.indexOf('/article') !== 0) && (url.indexOf('/admin/article') !== 0)) {
+      throw "Called getArticleIdOfCurrentRoute() when not in an article route";
+    }
+
+    if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
+      url = url.substr(0, url.length - 1);
+    }
+
+    let articleSlug = url.substring(url.lastIndexOf('/') + 1);
+    const id = parseInt(articleSlug, 10);
+    return id;
+  },
+
+  currentRouteIsAdminArticleRoute() {
+    let url = window.location.pathname;
+
+    console.log("in is admin route?");
+    console.log(url.indexOf('/admin/article'));
+    if (url.indexOf('/admin/article') === 0) {
+      return true;
+    } else {
+      if ((url.indexOf('/article') !== 0) && (url.indexOf('/admin/article') !== 0)) {
+        throw "Called currentRouteIsAdminArticleRoute when not in an article route"
+      }
+      return false;
+    }
+  },
 
   articleRoute() {
     let homeViewInst = serviceProvider.getArticleView();
