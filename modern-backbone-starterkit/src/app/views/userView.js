@@ -3,15 +3,13 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import $script from 'scriptjs';
-import Spinner from 'UTILSDIR/spin';
 import template from 'TEMPLATESDIR/userTemplate.hbs';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
   // The first few attributes are all standard backbone attributes that can be
   // found in the backbone documentation.
-  className: 'kmw-login-view',
+  className: 'kmw-user-view',
 
   events: {
   },

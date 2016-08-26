@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 
-import UserView from 'VIEWSDIR/userView';
+import AdminView from 'VIEWSDIR/adminView';
 import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
@@ -14,6 +14,7 @@ import Router from '../router';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
+import UserView from 'VIEWSDIR/userView';
 
 var serviceProvider = {
   _createRouter(routerEvents) {
@@ -38,6 +39,14 @@ var serviceProvider = {
   getAboutView() {
     let aboutViewInst = new AboutView({navView: this.getNavView()});
     return aboutViewInst;
+  },
+
+  getAdminView() {
+    //const userModel = new UserModel({userId: userId});
+    //userModel.fetchUser();
+    const articleGridViewInst = new ArticleGridView();
+    let adminViewInst = new AdminView({articleGridView: articleGridViewInst});
+    return adminViewInst;
   },
 
   getArticleView() {

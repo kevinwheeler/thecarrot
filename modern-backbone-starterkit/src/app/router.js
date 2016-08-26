@@ -16,6 +16,7 @@ export default Backbone.Router.extend({
     'technology'    : 'categoryRoute',
 
     '': 'homeRoute',
+    'admin'       : 'adminRoute',
     'article/:articleSlug'       : 'articleRoute',
     'admin/article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
@@ -100,6 +101,13 @@ export default Backbone.Router.extend({
     let homeViewInst = serviceProvider.getArticleView();
     homeViewInst.render();
     $('#js-app').empty().append(homeViewInst.$el);
+    this.afterRoute();
+  },
+
+  adminRoute() {
+    const adminViewInst = serviceProvider.getAdminView();
+    adminViewInst.render();
+    $('#js-app').empty().append(adminViewInst.$el);
     this.afterRoute();
   },
 

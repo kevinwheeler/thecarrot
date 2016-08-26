@@ -13,7 +13,7 @@ const RateLimit = require('express-rate-limit');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const timebucket = require('timebucket');
-const updateViewsCollections = require('./utils/updateViewsCollections');
+const updateSumarries = require('./utils/updateViewsCollections');
 const url = require('url');
 const util = require('util');
 const validations = require('./modern-backbone-starterkit/src/isomorphic/articleValidations.js');
@@ -90,6 +90,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     // IMPORTANT: Routes are duplicated in client side code.
     // Namely the router and the nav template.
     app.get('/', sendIndex);
+    app.get('/admin', sendIndex);
     app.get('/user/:userid', sendIndex);
     app.get('/business', sendIndex);
     app.get('/education', sendIndex);
@@ -176,6 +177,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         res.redirect('/');
       }
     );
+
+
     
     function fileTypeIsValid(fileType) {
       const imageMimeTypeRegex = /image\/.*/;
@@ -205,7 +208,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 send404(res);
               } else {
                 if (adminPage || article.approval === 'approved') {
-                  updateViewsCollections(db, articleId);
+                  updateSumarries.incrementViews(db, articleId);
                   let title = article.headline;
                   let description;
                   if (article.subline.length) {
@@ -237,7 +240,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.get('/api/article/:articleId', function(req, res, next) {
       //const adminPage = !!req.params.admin;
       //let articleSlug = req.params.articleSlug;
-      console.log("in get route");
       let articleId = parseInt(req.params.articleId, 10);
       db.collection('article', (err, collection) => {
         if (err !== null) {
@@ -315,8 +317,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
             if (err !== null) {
               reject(err);
             } else {
+              //TODO consider a compound index on approval, id.
               collection.find({
-                _id: {$lte: maxId}
+                _id: {$lte: maxId},
+                approval: 'approved'
               }).sort([['_id', -1]]).limit(howMany).toArray(
                 function (err, articles) {
                   if (err !== null) {
@@ -577,6 +581,82 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       });
     });
 
+    app.post('/article-approval', bodyParser.urlencoded(), function(req, res, next) {
+
+      if (req.user && req.user.userType === 'admin') {
+        const articleURLSlug = req.body['article_url_slug'];
+        const articleId = parseInt(articleURLSlug, 10);
+        const approvalVerdict = req.body['approval_verdict'];
+
+        db.collection('article', (err, articleColl) => {
+          if (err !== null) {
+            next(err);
+          } else {
+            // Since we have the approval attribute in both the summary collections and the article collection
+            // and we can't update these all atomically, we first set the approval attribute in the article collection
+            // to 'inTransaction', then we set the approval attribute to the correct value in all of the summary collections,
+            // then finally, we set the approval attribute to the correct value in the article collection. If the process
+            // fails in the middle somewhere, the approval attribute in the article collection should still be in the state
+            // 'inTransaction', and we will tell the admin/initiator that he should retry the operation.
+            articleColl.updateOne(
+              {
+                _id: articleId
+              },
+              {
+                $set: {approval: 'inTransaction'}
+              },
+              {
+                wtimeout: mongoConcerns.WTIMEOUT,
+                w: 'majority'
+              }
+            ).then(function(result) {
+                updateSumarries.setApprovalStatus(db, articleId, approvalVerdict).then(
+                  function(result) {
+                    const approvalLogEntry = {
+                      approverFbId: req.user.fbId,
+                      timestamp: new Date(),
+                      verdict: approvalVerdict
+                    };
+                    articleColl.updateOne(
+                      {
+                        _id: articleId
+                      },
+                      {
+                        $set: {approval: approvalVerdict},
+                        $push: {approvalLog: approvalLogEntry}
+                      },
+                      {
+                        wtimeout: mongoConcerns.WTIMEOUT,
+                        w: 'majority'
+                      }
+                    ).then(function(result) {
+                        res.redirect('/admin/article/' + articleURLSlug);
+                      },
+                      function(err) {
+                        logError(err);
+                        next(err);
+                      }
+                    );
+                  },
+                  function(err) {
+                    logError(err);
+                    next(err);
+                  }
+                );
+              },
+              function(err) {
+                logError(err);
+                next(err);
+              }
+            );
+          }
+        });
+
+      } else {
+        res.status(403).send('You are not an admin or are not logged in.');
+      }
+    });
+
     app.post('/article', bodyParser.urlencoded(), function(req, res, next) {
       const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
     
@@ -624,6 +704,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 if (error !== null) {
                   next(error);
                 } else {
+                  // Pretend the article has been viewed once, so that it will be inserted into the most popular
+                  // by day/week/month/year lists. Since views don't get counted until the article has been approved,
+                  // the redirect won't add a view, so we add one manually here.
+                  updateSumarries.incrementViews(db, articleId);
                   res.redirect('/article/' + articleURLSlug);
                 }
               }); 
@@ -728,6 +812,5 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.listen(app.get('port'), function() {
       console.log('Node app is running on port', app.get('port'));
     });
- 
   }
 });
