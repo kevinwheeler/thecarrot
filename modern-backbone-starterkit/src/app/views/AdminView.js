@@ -4,7 +4,7 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from 'TEMPLATESDIR/adminTemplate.hbs';
-import MostRecentArticlesCollection from 'COLLECTIONSDIR/mostRecentArticlesCollection';
+import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -19,10 +19,10 @@ export default Backbone.View.extend({
     // http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render');
     this.views = [];
-    this.mostRecentArticlesCollection = new MostRecentArticlesCollection();
-    this.mostRecentArticlesCollection.fetchNextArticles();
+    this.articlesCollection = new ArticlesThatNeedApprovalCollection();
+    this.articlesCollection.fetchNextArticles();
     this.articleGridView = options.articleGridView;
-    this.articleGridView.setArticleCollection(this.mostRecentArticlesCollection);
+    this.articleGridView.setArticleCollection(this.articlesCollection);
     //this.userModel = options.userModel;
     //this.listenTo(this.userModel, 'change', this.render);
     this.render();
