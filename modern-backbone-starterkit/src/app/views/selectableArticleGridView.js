@@ -3,11 +3,11 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import template from 'TEMPLATESDIR/articleGridTemplate.hbs';
+import template from 'TEMPLATESDIR/selectableArticleGridTemplate.hbs';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-  className: 'kmw-article-grid-view',
+  className: 'kmw-selectable-article-grid-view',
 
   events: {
     'click #kmw-fetch-more': 'fetchMoreResults'
@@ -31,6 +31,8 @@ export default Backbone.View.extend({
       this.$el.html(template({
         articles: this.articleCollection.toJSON()
       }));
+      console.log("json = ");
+      console.log(this.articleCollection.toJSON());
 
       return this;
     }, 16

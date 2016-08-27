@@ -117,7 +117,7 @@ function incrementAlltimeVews(db, articleId, approval) {
             handleError(err);
           }
         }
-      );
+      ).then(function(){}, function(err){handleError(err)});
 
     }
   });
@@ -164,9 +164,14 @@ function setApprovalStatus(db, articleId, approval) {
         if (err !== null) {
           reject(err);
         } else {
+          console.log("about to set approval");
+          console.log("article id = ");
+          console.log(typeof(articleId));
+          console.log("approval = ");
+          console.log(approval);
           summaryColl.updateOne(
             {
-              articleId: articleId,
+              _id: articleId,
             },
             {
               $set: {approval: approval}
@@ -207,7 +212,7 @@ function incrementViews(db, articleId) {
     function(err) {
       handleError(err);
     }
-  );
+  ).then(function(){}, function(err){handleError(err)});
 }
 
 module.exports = {

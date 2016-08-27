@@ -26,8 +26,11 @@
   {{#if isAdminRoute}}
     is admin route <br>
     Approval Status: {{approvalStatus}} <br>
-    <form action="/article-approval" method="post">
-      <input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">
+
+    {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}
+    <form action="/approve-articles" method="post">
+      <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
+      <input type="hidden" name="article_ids[]" value="{{article._id}}">
 
       <label for="kmw-approval">Change approval status.</label>
       <select id="kmw-article-view-approval" name="approval_verdict">

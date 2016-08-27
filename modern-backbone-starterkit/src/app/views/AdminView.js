@@ -21,8 +21,8 @@ export default Backbone.View.extend({
     this.views = [];
     this.articlesCollection = new ArticlesThatNeedApprovalCollection();
     this.articlesCollection.fetchNextArticles();
-    this.articleGridView = options.articleGridView;
-    this.articleGridView.setArticleCollection(this.articlesCollection);
+    this.selectableArticleGridView = options.selectableArticleGridView;
+    this.selectableArticleGridView.setArticleCollection(this.articlesCollection);
     //this.userModel = options.userModel;
     //this.listenTo(this.userModel, 'change', this.render);
     this.render();
@@ -41,6 +41,6 @@ export default Backbone.View.extend({
   // Attributes below aren't standard backbone attributes. They are custom.
   attachSubViews: function() {
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');
-    $articleGrid.replaceWith(this.articleGridView.$el);
+    $articleGrid.replaceWith(this.selectableArticleGridView.$el);
   },
 });

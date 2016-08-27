@@ -11,6 +11,7 @@ import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
 import NavView from 'VIEWSDIR/navView';
 import Router from '../router';
+import SelectableArticleGridView from 'VIEWSDIR/selectableArticleGridView';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
@@ -44,8 +45,8 @@ var serviceProvider = {
   getAdminView() {
     //const userModel = new UserModel({userId: userId});
     //userModel.fetchUser();
-    const articleGridViewInst = new ArticleGridView();
-    let adminViewInst = new AdminView({articleGridView: articleGridViewInst});
+    const selectableArticleGridViewInst = new SelectableArticleGridView();
+    let adminViewInst = new AdminView({selectableArticleGridView: selectableArticleGridViewInst});
     return adminViewInst;
   },
 

@@ -13,7 +13,7 @@ const RateLimit = require('express-rate-limit');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const timebucket = require('timebucket');
-const updateSumarries = require('./utils/updateViewsCollections');
+const updateSummaries = require('./utils/updateSummaries');
 const url = require('url');
 const util = require('util');
 const validations = require('./modern-backbone-starterkit/src/isomorphic/articleValidations.js');
@@ -208,7 +208,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 send404(res);
               } else {
                 if (adminPage || article.approval === 'approved') {
-                  updateSumarries.incrementViews(db, articleId);
+                  updateSummaries.incrementViews(db, articleId);
                   let title = article.headline;
                   let description;
                   if (article.subline.length) {
@@ -252,7 +252,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               next(err);
             } else {
               if (article === null) {
-                console.log("sending 404");
                 send404(res);
               } else {
                 // TODO restrict article visibility
@@ -448,6 +447,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       return validationErrors;
     }
 
+    //TODO move any logic that deals with the summary collections out of this file.
     function getMostViewedArticlesJSON(dontInclude, howMany, timeInterval) {
       let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
 
@@ -460,7 +460,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
               reject(err);
             } else {
               summaryColl.find({
-                _id: {$nin: dontInclude}
+                _id: {
+                  $nin: dontInclude
+                },
+                approval: 'approved'
               }).sort([['views', -1]]).limit(howMany).project("_id").toArray(
                 function (err, articleIDs) {
                   if (err !== null) {
@@ -555,7 +558,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         db.collection('counters').findOneAndUpdate(
           {_id: 'articleId'},
           {$inc: {seq:1}},
-          {upsert: true},
+          {
+            upsert: true,
+            returnOriginal: false
+          },
           function(err, result) {
             if (err !== null) {
               reject(err);
@@ -650,23 +656,21 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       });
     });
 
-    app.post('/article-approval', bodyParser.urlencoded(), function(req, res, next) {
-
-      if (req.user && req.user.userType === 'admin') {
-        const articleURLSlug = req.body['article_url_slug'];
-        const articleId = parseInt(articleURLSlug, 10);
-        const approvalVerdict = req.body['approval_verdict'];
-
+    function setApproval (approvalVerdict, articleId, approverFbId, res, next) {
+      // Since we have the approval attribute in both the summary collections and the article collection
+      // and we can't update these all atomically, we first set the approval attribute in the article collection
+      // to 'inTransaction', then we set the approval attribute to the correct value in all of the summary collections,
+      // then finally, we set the approval attribute to the correct value in the article collection. If the process
+      // fails in the middle somewhere, the approval attribute in the article collection should still be in the state
+      // 'inTransaction', and we will tell the admin/initiator that he should retry the operation.
+      const rejectOnError = function(err) {
+        reject(err);
+      }
+      const prom = new Promise(function(resolve, reject) {
         db.collection('article', (err, articleColl) => {
           if (err !== null) {
-            next(err);
+            reject(err);
           } else {
-            // Since we have the approval attribute in both the summary collections and the article collection
-            // and we can't update these all atomically, we first set the approval attribute in the article collection
-            // to 'inTransaction', then we set the approval attribute to the correct value in all of the summary collections,
-            // then finally, we set the approval attribute to the correct value in the article collection. If the process
-            // fails in the middle somewhere, the approval attribute in the article collection should still be in the state
-            // 'inTransaction', and we will tell the admin/initiator that he should retry the operation.
             articleColl.updateOne(
               {
                 _id: articleId
@@ -678,11 +682,11 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                 wtimeout: mongoConcerns.WTIMEOUT,
                 w: 'majority'
               }
-            ).then(function(result) {
-                updateSumarries.setApprovalStatus(db, articleId, approvalVerdict).then(
-                  function(result) {
+            ).then(function (result) {
+                updateSummaries.setApprovalStatus(db, articleId, approvalVerdict).then(
+                  function (result) {
                     const approvalLogEntry = {
-                      approverFbId: req.user.fbId,
+                      approverFbId: approverFbId,
                       timestamp: new Date(),
                       verdict: approvalVerdict
                     };
@@ -695,32 +699,45 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                         $push: {approvalLog: approvalLogEntry}
                       },
                       {
-                        wtimeout: mongoConcerns.WTIMEOUT,
-                        w: 'majority'
+                        w: 'majority',
+                        wtimeout: mongoConcerns.WTIMEOUT
                       }
-                    ).then(function(result) {
-                        res.redirect('/admin/article/' + articleURLSlug);
-                      },
-                      function(err) {
-                        logError(err);
-                        next(err);
-                      }
-                    );
-                  },
-                  function(err) {
-                    logError(err);
-                    next(err);
-                  }
-                );
-              },
-              function(err) {
-                logError(err);
-                next(err);
-              }
-            );
+                    ).then(function (result) {
+                        resolve(result);
+                      }, rejectOnError
+                    ).then(function(){}, rejectOnError);
+                  },rejectOnError
+                ).then(function(){}, rejectOnError);
+              }, rejectOnError
+            ).then(function(){}, rejectOnError);
           }
         });
+      });
+      return prom;
+    };
 
+    //TODO change route name to 'approve-articles'
+    //TODO a different route to approve a single article, that redirects to the updated article?
+    app.post('/approve-articles', bodyParser.urlencoded({extended: true}), function(req, res, next) {
+      if (req.user && req.user.userType === 'admin') {
+        const IDs = req.body['article_ids'];
+        const approverFbId = req.user.fbId
+        //const articleURLSlug = req.body['article_url_slug'];
+        const approvalVerdict = req.body['approval_verdict'];
+        const promises = [];
+        for (let i=0; i < IDs.length; i++) {
+          const articleID = parseInt(IDs[i], 10);
+          promises.push(setApproval(approvalVerdict, articleID, approverFbId, res, next));
+        }
+        Promise.all(promises).then(
+          function(result){
+            res.redirect('/admin');
+          },
+          function(err){
+            logError(err);
+            next(err);
+          }
+        );
       } else {
         res.status(403).send('You are not an admin or are not logged in.');
       }
@@ -776,7 +793,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
                   // Pretend the article has been viewed once, so that it will be inserted into the most popular
                   // by day/week/month/year lists. Since views don't get counted until the article has been approved,
                   // the redirect won't add a view, so we add one manually here.
-                  updateSumarries.incrementViews(db, articleId);
+                  updateSummaries.incrementViews(db, articleId);
                   res.redirect('/article/' + articleURLSlug);
                 }
               }); 
