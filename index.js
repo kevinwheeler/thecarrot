@@ -33,6 +33,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     throw err;
   } else {
     const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
+    const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
 
     setupInitialConfiguration(app);
 
@@ -70,51 +71,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
 
     app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
 
-    app.get('/api/article/:articleId', function(req, res, next) {
-      //const adminPage = !!req.params.admin;
-      //let articleSlug = req.params.articleSlug;
-      let articleId = parseInt(req.params.articleId, 10);
-      db.collection('article', (err, collection) => {
-        if (err !== null) {
-          logError(err);
-          next(err);
-        } else {
-          collection.find({'_id': articleId}).next( function(err, article) {
-            if (err !== null) {
-              logError(err);
-              next(err);
-            } else {
-              if (article === null) {
-                send404(res);
-              } else {
-                // TODO restrict article visibility
-                //if (adminPage || article.visibility === 'visible') {
-                // TODO don't sent unfiltered article
-                if ((req.user && req.user.fbId === article.authorId || req.sessionID === article.sidOfAuthor)) {
-                  article.viewerIsAuthor = true;
-                } else {
-                  article.viewerIsAuthor = false;
-                }
-                  res.json(article)
-                //  res.json({
-                //    article: article,
-                    //description: description,
-                    //fbAppId: process.env.FACEBOOK_APP_ID,
-                    //title: title,
-                    //url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
-                    //articleVisibility: article.visibility,
-                  //});
-                //} else {
-                //  res.json({
-                //    articleVisibility: article.visibility,
-                //  });
-                //}
-              }
-            }
-          });
-        }
-      });
-    });
+    app.get('/api/article/:articleId', getArticleJSON);
 
     const MAX_ARTICLES_PER_REQUEST = 50;
 
