@@ -1,19 +1,20 @@
 const aws = require('aws-sdk');
 const bodyParser = require('body-parser');
-const compression = require('compression');
 const express = require('express');
-const FacebookStrategy = require('passport-facebook').Strategy;
 const getSlug = require('speakingurl');
+const logError = require('./server_code/utils').logError;
 const MongoClient = require('mongodb').MongoClient;
-const mongoConcerns = require('./utils/mongoConcerns');
+const mongoConcerns = require('./server_code/mongoConcerns');
 const multer = require('multer');
 const passport = require('passport');
 const requester = require('request');
 const RateLimit = require('express-rate-limit');
+const send404 = require('./server_code/utils').send404;
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const setupAuthentication = require('./server_code/authentication');
+const setupInitialConfiguration = require('./server_code/configuration');
 const timebucket = require('timebucket');
-const updateSummaries = require('./utils/updateSummaries');
+const updateSummaries = require('./server_code/updateSummaries');
 const url = require('url');
 const util = require('util');
 const validations = require('./modern-backbone-starterkit/src/isomorphic/articleValidations.js');
@@ -24,56 +25,17 @@ const upload = multer();
 const distDir = __dirname + '/modern-backbone-starterkit/dist/'
 
 const NODE_ENV = process.env.NODE_ENV;
-if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
-  throw "NODE_ENV environment variable not set.";
-}
-
 const MONGO_URI = process.env.MONGODB_URI;
-
-const logError = function(err) {
-  console.error(err.stack || err);
-
-  // If you pass an error handling function to another function as an async callback, you may have no idea where the error
-  // originated from, because the async code runs on a completely different stack frame -- the original
-  // stack frame is long gone and thus won't be in the stack trace. So, what we do is we
-  // use an inline/lambda function (let's call this function L) and pass that as the async callback argument.
-  // From function L we will call logError and logError will call console.trace(). That way the line number
-  // of this L will be captured/traced, and we can figure out where the error originated from.
-  // Note: We also use this in other cases besides just when passing in a lambda/inline function as an argument/callback
-  // to another function.
-  console.trace("Caught from:");
-}
 
 MongoClient.connect(MONGO_URI, (err, db) => {
   if (err !== null) {
     logError(err);
     throw err;
   } else {
-   
-    //from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
-    var forceSsl = function (req, res, next) {
-       if (req.headers['x-forwarded-proto'] !== 'https') {
-         return res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
-       }
-       return next();
-    };
-    
-    if (NODE_ENV === 'production') {
-        app.use(forceSsl);
-    }
-    
-    app.enable('trust proxy'); // Needed for rate limiter.
-    app.use(compression());
-    app.use(session({
-      secret: process.env.SESSION_SECRET,
-      store: new MongoStore({
-        url: MONGO_URI
-      }),
-    }));
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.set('port', (process.env.PORT || 5000));
-    
+    const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
+
+    setupInitialConfiguration(app);
+
     const sendIndex = function(req, res) {
       res.render('pages/index', {
         fbAppId: process.env.FACEBOOK_APP_ID
@@ -81,161 +43,32 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         //user: JSON.stringify(req.user)
       });
     }
-    
-    const send404 = function(res) {
-      res.status(404).send('Error 404. Page not found.');
-    }
+
+    setupAuthentication(app, db);
 
 
     // IMPORTANT: Routes are duplicated in client side code.
     // Namely the router and the nav template.
     app.get('/', sendIndex);
     app.get('/admin', sendIndex);
+    app.get('/admin/yo', sendIndex);
+    app.get('/admin/my-approval-history', sendIndex);
     app.get('/user/:userid', sendIndex);
     app.get('/business', sendIndex);
     app.get('/education', sendIndex);
-    //app.get('/login', sendIndex);
     app.get('/other', sendIndex);
     app.get('/politics', sendIndex);
     app.get('/sports', sendIndex);
     app.get('/spirituality', sendIndex);
     app.get('/technology', sendIndex);
+    app.get('/upload', sendIndex);
 
     app.get('/logout', function(req, res) {
       req.logout();
       res.redirect('/');
     });
 
-
-
-
-    passport.use(new FacebookStrategy({
-        clientID: process.env.FACEBOOK_APP_ID,
-        clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: process.env.DOMAIN + "/auth/facebook/callback"
-      },
-      function(accessToken, refreshToken, profile, done) {
-        db.collection('user', (err, userColl) => {
-          if (err !== null) {
-            logError(err);
-            done(err);
-          } else {
-            userColl.findOneAndUpdate( // find if exists, create if doesn't
-              //TODO create index on fbId
-              {fbId: profile.id},
-              {
-                displayName: profile.displayName,
-                fbAccessToken: accessToken,
-                fbId: profile.id,
-                userType: 'user'
-              },
-              {
-                upsert: true,
-                returnOriginal: false
-              },
-              function(err, user) {
-                if (err !== null) {
-                  done(err);
-                } else {
-                  done(null, user.value);
-                }
-              }
-            );
-          }
-        });
-      }
-    ));
-
-    passport.serializeUser(function(user, done) {
-      done(null, user.fbId);
-    });
-    
-    passport.deserializeUser(function(userId, done) {
-      db.collection('user', (err, userColl) => {
-        if (err !== null) {
-          logError(err);
-          done(err);
-        } else {
-          userColl.find({fbId: userId}).next().then(
-            function(user) {
-              done(null, user);
-            },
-            function(err) {
-              done(err);
-            }
-          );
-        }
-      });
-    });
-
-    // we will call this to start the GitHub Login process
-    app.get('/auth/facebook', passport.authenticate('facebook'));
-    
-    // GitHub will call this URL
-    app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/why' }),//TODO /why
-      function(req, res) {
-        res.redirect('/');
-      }
-    );
-
-
-    
-    function fileTypeIsValid(fileType) {
-      const imageMimeTypeRegex = /image\/.*/;
-      return fileType.match(imageMimeTypeRegex) !== null;
-    }
-
-    app.get('/:admin((admin/)?)article/:articleSlug', function(req, res, next) {
-      const adminPage = !!req.params.admin;
-      let articleSlug = req.params.articleSlug;
-      let articleId = parseInt(articleSlug, 10); // extract leading integers
-      db.collection('article', (err, collection) => {
-        if (err !== null) {
-          logError(err);
-          next(err);
-        } else {
-          collection.find({'_id': articleId}).next( function(err, article) {
-            if (err !== null) {
-              logError(err);
-              next(err);
-            } else {
-              if (article === null) {
-                send404(res);
-              } else if (articleSlug !== article.articleURLSlug) {
-                // Even if the articleId corresponds to a valid article,
-                // send a 404 unless the rest of the slug matches as well.
-                // This will avoid duplicate content SEO issues.
-                send404(res);
-              } else {
-                if (adminPage || article.approval === 'approved') {
-                  updateSummaries.incrementViews(db, articleId);
-                  let title = article.headline;
-                  let description;
-                  if (article.subline.length) {
-                    description = article.subline;
-                  } else {
-                    description = article.headline;
-                  }
-                  res.render('pages/article', {
-                    article: article,
-                    description: description,
-                    fbAppId: process.env.FACEBOOK_APP_ID,
-                    title: title,
-                    url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
-                    articleApproval: article.approval
-                  });
-                } else {
-                  res.render('pages/article', {
-                    articleApproval: article.approval,
-                    fbAppId: process.env.FACEBOOK_APP_ID,
-                  });
-                }
-              }
-            }
-          });
-        }
-      });
-    });
+    app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
 
     app.get('/api/article/:articleId', function(req, res, next) {
       //const adminPage = !!req.params.admin;
@@ -342,7 +175,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       getMostRecentArticlesJSON(maxId, howMany).then(
         function(articlesJSON) {
           res.send(articlesJSON);
-        }, 
+        },
         function(err) {
           if (err.clientError === true) {
             res.status(400).send("Something went wrong.");
@@ -353,6 +186,90 @@ MongoClient.connect(MONGO_URI, (err, db) => {
         }
       );
     });
+
+    function getMyApprovalHistoryArticlesJSON(maxId, howMany, approverFbId) {
+      let validationErrors = validateMostRecentArticlesParams(maxId, howMany); //TODO rename or something
+
+
+      let prom = new Promise(function(resolve, reject) {
+        if (validationErrors !== null) {
+          reject(validationErrors);
+        } else {
+          db.collection('approvalLog', (err, approvalLogColl) => {
+            if (err !== null) {
+              reject(err);
+            } else {
+              //TODO consider a compound index on approval, id.
+              approvalLogColl.find({
+                _id: {$lte: maxId},
+                approverFbId: approverFbId,
+              }).sort([['_id', -1]]).limit(howMany).project({
+                _id: false,
+                articleId: true
+              }).toArray(
+                function (err, articleIDs) {
+                  if (err !== null) {
+                    reject(err);
+                  } else {
+                    const IDs = articleIDs.map(function (item) {
+                      return item.articleId;
+                    });
+                    db.collection('article', (err, articleColl) => {
+                      if (err !== null) {
+                        reject(err);
+                      } else {
+                        articleColl.find({
+                          _id: {$in: IDs}
+                        }).toArray(
+                          function (err, articles) {
+                            if (err !== null) {
+                              reject(err);
+                            } else {
+                              articles.sort(function (a, b) {
+                                return IDs.indexOf(a._id) - IDs.indexOf(b._id);
+                              });
+                              resolve(articles);
+                            }
+                          }
+                        );
+                      }
+                    });
+                  }
+                }
+              );
+            }
+          });
+        }
+      });
+      return prom;
+    }
+
+    app.get('/api/my-approval-history', (req, res, next) => {
+      const maxId = parseInt(req.query.max_id, 10);
+      const howMany = parseInt(req.query.how_many, 10);
+      if (req.user && req.user.userType === 'admin') {
+        const approverFbId = req.user.fbId
+        getMyApprovalHistoryArticlesJSON(maxId, howMany, approverFbId).then(
+          function (articlesJSON) {
+            res.send(articlesJSON);
+          },
+          function (err) {
+            if (err.clientError === true) {
+              res.status(400).send("Something went wrong.");
+            } else {
+              logError(err);
+              next(err);
+            }
+          }
+        );
+      } else {
+        res.status(403).send("You are either not logged on or not an admin.");
+      }
+    });
+
+
+
+
 
     // Returns an error object or null. If error object isn't null, will have the property
     // clientError set to true so that we can send a 4xx response instead of a 5xx response.
@@ -375,7 +292,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     }
 
     function getNeedApprovalArticlesJSON(minId, howMany) {
-      let validationErrors = validateMostRecentArticlesParams(minId, howMany);
+      let validationErrors = validateMostRecentArticlesParams(minId, howMany); //TODO
 
       let prom = new Promise(function(resolve, reject) {
         if (validationErrors !== null) {
@@ -428,7 +345,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval) {
       let validationErrors = [];
 
-      if (timeInterval !== 'daily' && timeInterval !== 'weekly' && timeInterval !== 'monthly' 
+      if (timeInterval !== 'daily' && timeInterval !== 'weekly' && timeInterval !== 'monthly'
         && timeInterval !== 'yearly' && timeInterval !== 'all_time') {
          validationErrors.push("invalid time interval");
       } else if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
@@ -540,23 +457,23 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       });
       return prom;
     }
-    
+
     //DEVELOPMENT ONLY ROUTE
     app.get('/all-articles', (req, res, next) => {
       getAllArticlesJSON().then(
         function(articlesJSON) {
           res.send(articlesJSON);
-        }, 
+        },
         function() {
           throw "error in /all-articles";
         }
       );
     });
-    
-    function getNextId() {
+
+    function getNextId(counterName) {
       var nextIdPromise = new Promise(function(resolve, reject) {
         db.collection('counters').findOneAndUpdate(
-          {_id: 'articleId'},
+          {_id: counterName},
           {$inc: {seq:1}},
           {
             upsert: true,
@@ -656,7 +573,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       });
     });
 
-    function setApproval (approvalVerdict, articleId, approverFbId, res, next) {
+    function setApproval (approvalVerdict, articleId, approverFbId) {
       // Since we have the approval attribute in both the summary collections and the article collection
       // and we can't update these all atomically, we first set the approval attribute in the article collection
       // to 'inTransaction', then we set the approval attribute to the correct value in all of the summary collections,
@@ -685,27 +602,52 @@ MongoClient.connect(MONGO_URI, (err, db) => {
             ).then(function (result) {
                 updateSummaries.setApprovalStatus(db, articleId, approvalVerdict).then(
                   function (result) {
-                    const approvalLogEntry = {
-                      approverFbId: approverFbId,
-                      timestamp: new Date(),
-                      verdict: approvalVerdict
-                    };
-                    articleColl.updateOne(
-                      {
-                        _id: articleId
-                      },
-                      {
-                        $set: {approval: approvalVerdict},
-                        $push: {approvalLog: approvalLogEntry}
-                      },
-                      {
-                        w: 'majority',
-                        wtimeout: mongoConcerns.WTIMEOUT
+                    db.collection('approvalLog', (err, approvalLogColl) => {
+                      if (err !== null) {
+                        reject(err);
+                      } else {
+                        getNextId("approvalLogId").then(
+                          function(id){
+                            //TODO compound index on approverFbId, _id
+                            approvalLogColl.insertOne(
+                              {
+                                _id: id,
+                                approverFbId: approverFbId,
+                                articleId: articleId,
+                                timestamp: new Date(),
+                                verdict: approvalVerdict
+                              },
+                              {
+                                w: 'majority',
+                                wtimeout: mongoConcerns.WTIMEOUT
+                              }
+                            ).then(
+                              function(result) {
+                                articleColl.updateOne(
+                                  {
+                                    _id: articleId
+                                  },
+                                  {
+                                    $set: {approval: approvalVerdict},
+                                  },
+                                  {
+                                    w: 'majority',
+                                    wtimeout: mongoConcerns.WTIMEOUT
+                                  }
+                                ).then(function (result) {
+                                    resolve(result);
+                                  }, rejectOnError
+                                )
+                              }, rejectOnError
+                            ).then(function(){}, rejectOnError);
+
+                          },
+                          function(err){
+
+                          }
+                        );
                       }
-                    ).then(function (result) {
-                        resolve(result);
-                      }, rejectOnError
-                    ).then(function(){}, rejectOnError);
+                    });
                   },rejectOnError
                 ).then(function(){}, rejectOnError);
               }, rejectOnError
@@ -716,8 +658,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       return prom;
     };
 
-    //TODO change route name to 'approve-articles'
-    //TODO a different route to approve a single article, that redirects to the updated article?
     app.post('/approve-articles', bodyParser.urlencoded({extended: true}), function(req, res, next) {
       if (req.user && req.user.userType === 'admin') {
         const IDs = req.body['article_ids'];
@@ -836,10 +776,14 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       max: 50, // limit each IP to 30 requests per windowMs
       windowMs: 60*1000 // 1 minute
     });
-    
-    
+
+    function fileTypeIsValid(fileType) {
+      const imageMimeTypeRegex = /image\/.*/;
+      return fileType.match(imageMimeTypeRegex) !== null;
+    }
+
     app.get('/sign-s3', s3Limiter, (req, res, next) => {
-      getNextId().then(function(id) {
+      getNextId("articleId").then(function(id) {
           const filename = req.query['file-name'];
           const slug = getFilenameSlug(id, filename);
           let sess = req.session;
@@ -882,9 +826,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       );
     });
     
-    //DEVELOPMENT ROUTES
-    app.get('/upload', sendIndex);
-    
+
     app.use(express.static(distDir));
     
     app.use(function(req, res, next) {

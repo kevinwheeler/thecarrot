@@ -17,6 +17,7 @@ export default Backbone.Router.extend({
 
     '': 'homeRoute',
     'admin'       : 'adminRoute',
+    'admin/my-approval-histor:y'       : 'adminRoute',
     'article/:articleSlug'       : 'articleRoute',
     'admin/article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
@@ -104,8 +105,14 @@ export default Backbone.Router.extend({
     this.afterRoute();
   },
 
-  adminRoute() {
-    const adminViewInst = serviceProvider.getAdminView();
+  adminRoute(param) {
+    console.log("in admin route");
+    let adminViewInst;
+    if (param === "y") {
+       adminViewInst = serviceProvider.getAdminView("approvalHistory");
+    } else {
+       adminViewInst = serviceProvider.getAdminView("needApproval");
+    }
     adminViewInst.render();
     $('#js-app').empty().append(adminViewInst.$el);
     this.afterRoute();

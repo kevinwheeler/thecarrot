@@ -5,10 +5,12 @@ import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import ArticleModel from 'MODELSDIR/articleModel';
+import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
 import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
+import MyApprovalHistoryCollection from 'COLLECTIONSDIR/myApprovalHistoryCollection';
 import NavView from 'VIEWSDIR/navView';
 import Router from '../router';
 import SelectableArticleGridView from 'VIEWSDIR/selectableArticleGridView';
@@ -42,10 +44,18 @@ var serviceProvider = {
     return aboutViewInst;
   },
 
-  getAdminView() {
-    //const userModel = new UserModel({userId: userId});
-    //userModel.fetchUser();
+  getAdminView(collectionToUse) {
+
+    let articlesCollection;
+    if (collectionToUse === "approvalHistory") {
+      articlesCollection = new MyApprovalHistoryCollection();
+    } else if (collectionToUse === "needApproval") {
+      articlesCollection = new ArticlesThatNeedApprovalCollection();
+    }
+    articlesCollection.fetchNextArticles();
     const selectableArticleGridViewInst = new SelectableArticleGridView();
+    selectableArticleGridViewInst.setArticleCollection(articlesCollection);
+
     let adminViewInst = new AdminView({selectableArticleGridView: selectableArticleGridViewInst});
     return adminViewInst;
   },

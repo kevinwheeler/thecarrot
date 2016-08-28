@@ -4,7 +4,6 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from 'TEMPLATESDIR/adminTemplate.hbs';
-import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -19,10 +18,8 @@ export default Backbone.View.extend({
     // http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render');
     this.views = [];
-    this.articlesCollection = new ArticlesThatNeedApprovalCollection();
-    this.articlesCollection.fetchNextArticles();
     this.selectableArticleGridView = options.selectableArticleGridView;
-    this.selectableArticleGridView.setArticleCollection(this.articlesCollection);
+    this.views.push(this.selectableArticleGridView);
     //this.userModel = options.userModel;
     //this.listenTo(this.userModel, 'change', this.render);
     this.render();
@@ -42,5 +39,5 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');
     $articleGrid.replaceWith(this.selectableArticleGridView.$el);
-  },
+  }
 });

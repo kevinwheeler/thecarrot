@@ -10,7 +10,7 @@ export default Backbone.View.extend({
   className: 'kmw-article-grid-view',
 
   events: {
-    'click #kmw-fetch-more': 'fetchMoreResults'
+    'click .kmw-fetch-more': 'fetchMoreResults'
   },
 
   initialize: function(options = {}) {
@@ -37,6 +37,7 @@ export default Backbone.View.extend({
   ),
 
   fetchMoreResults: function() {
+    console.log("should be fetching");
     this.articleCollection.fetchNextArticles();
   },
 
