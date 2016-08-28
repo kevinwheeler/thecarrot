@@ -1,10 +1,6 @@
 const logError = require('../utils').logError;
 const updateSummaries = require('../updateSummaries');
 
-
-
-
-
 function getRouteFunction(db) {
 
   const MAX_ARTICLES_PER_REQUEST = 50;
