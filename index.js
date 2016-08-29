@@ -28,15 +28,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     logError(err);
     throw err;
   } else {
-    const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
-    const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
-    const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
-    const getMostRecentArticlesJSON = require('./server_code/routeFunctions/getMostRecentArticlesJSON')(db);
-    const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
-    const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
-    const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
-    const postArticle = require('./server_code/routeFunctions/postArticle')(db);
-    const signS3 = require('./server_code/routeFunctions/signS3')(db);
 
     setupInitialConfiguration(app);
 
@@ -72,13 +63,25 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       res.redirect('/');
     });
 
+    const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
+    const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
+    const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
+    const getMostRecentArticlesJSON = require('./server_code/routeFunctions/getMostRecentArticlesJSON')(db);
+    const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
+    const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
+    const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
+    const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
+    const postArticle = require('./server_code/routeFunctions/postArticle')(db);
+    const signS3 = require('./server_code/routeFunctions/signS3')(db);
+
     app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
     app.get('/api/article/:articleId', getArticleJSON);
     app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
     app.get('/most-recent-articles', getMostRecentArticlesJSON);
     app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
     app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
-    // Uses post instead of get to get over query string length limitations
+    app.get('/userinfo', getUserInfo);
+    // most-viewed-articles uses post instead of get to get over query string length limitations
     app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
     app.post('/article', bodyParser.urlencoded(), postArticle);
     let s3Limiter = new RateLimit({
@@ -88,52 +91,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       windowMs: 60*1000 // 1 minute
     });
     app.get('/sign-s3', s3Limiter, signS3);
-
-
-
-
-
-
-    //API ROUTES
-    app.get('/userinfo', function(req, res, next) {
-      //req.user, get parameters userId
-      let userToGet = req.query.user_id;
-      let userIdToGet;
-      if (userToGet === 'currentUser') {
-        if (req.user) {
-          userIdToGet = req.user.fbId;
-        } else {
-          res.json({}); // wanted current user, but current user isn't logged in.
-          return;
-        }
-      } else {
-        userIdToGet = userToGet;
-      }
-      db.collection('user', (err, userColl) => {
-        if (err !== null) {
-          logError(err);
-          next(err);
-        } else {
-          userColl.find({fbId: userIdToGet}).project({
-            _id: false,
-            displayName: true,
-            fbId: true
-          }).next().then(
-            function (user) {
-              res.json(user);
-            },
-            function (err) {
-              logError(err)
-              next(err);
-            }
-          );
-        }
-      });
-    });
-
-
-
-
 
 
     app.use(express.static(distDir));
