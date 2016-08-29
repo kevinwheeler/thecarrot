@@ -1,3 +1,24 @@
+function getNextId(db, counterName) {
+  var nextIdPromise = new Promise(function(resolve, reject) {
+    db.collection('counters').findOneAndUpdate(
+      {_id: counterName},
+      {$inc: {seq:1}},
+      {
+        upsert: true,
+        returnOriginal: false
+      },
+      function(err, result) {
+        if (err !== null) {
+          reject(err);
+        } else {
+          resolve(result.value.seq);
+        }
+      }
+    );
+  });
+  return nextIdPromise;
+}
+
 const logError = function(err) {
   console.error(err.stack || err);
 
@@ -17,6 +38,7 @@ const send404 = function(res) {
 }
 
 module.exports = {
+  getNextId: getNextId,
   logError: logError,
   send404: send404
 };

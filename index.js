@@ -22,7 +22,7 @@ const validations = require('./modern-backbone-starterkit/src/isomorphic/article
 const app = express();
 const upload = multer();
 
-const distDir = __dirname + '/modern-backbone-starterkit/dist/'
+const distDir = __dirname + '/modern-backbone-starterkit/dist/';
 
 const NODE_ENV = process.env.NODE_ENV;
 const MONGO_URI = process.env.MONGODB_URI;
@@ -32,8 +32,9 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     logError(err);
     throw err;
   } else {
-    const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
+    const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
     const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
+    const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
     const getMostRecentArticlesJSON = require('./server_code/routeFunctions/getMostRecentArticlesJSON')(db);
     const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
     const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
@@ -80,66 +81,8 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
     // Uses post instead of get to get over query string length limitations
     app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
+    app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
 
-    const MAX_ARTICLES_PER_REQUEST = 50;
-
-
-
-
-    //TODO move any logic that deals with the summary collections out of this file.
-
-    function getAllArticlesJSON() {
-      if (NODE_ENV !== 'development') {
-        throw "NODE_ENV !== 'development'";
-      }
-      let prom = new Promise(function(resolve, reject) {
-        db.collection('article', (err, collection) => {
-          if (err !== null) {
-            reject("couldn't get article collection");
-          } else {
-            collection.find({}, function(err, articles) {
-              let articlesJSON = articles.toArray();
-              resolve(articlesJSON);
-            });
-          }
-         });
-      });
-      return prom;
-    }
-
-    //DEVELOPMENT ONLY ROUTE
-    app.get('/all-articles', (req, res, next) => {
-      getAllArticlesJSON().then(
-        function(articlesJSON) {
-          res.send(articlesJSON);
-        },
-        function() {
-          throw "error in /all-articles";
-        }
-      );
-    });
-
-    function getNextId(counterName) {
-      var nextIdPromise = new Promise(function(resolve, reject) {
-        db.collection('counters').findOneAndUpdate(
-          {_id: counterName},
-          {$inc: {seq:1}},
-          {
-            upsert: true,
-            returnOriginal: false
-          },
-          function(err, result) {
-            if (err !== null) {
-              reject(err);
-            } else {
-              resolve(result.value.seq);
-            }
-          }
-        );
-      });
-      return nextIdPromise;
-    }
-    
     let getExtension = function(filename) {
       // http://stackoverflow.com/questions/190852/how-can-i-get-file-extensions-with-javascript
       return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
@@ -222,115 +165,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       });
     });
 
-    function setApproval (approvalVerdict, articleId, approverFbId) {
-      // Since we have the approval attribute in both the summary collections and the article collection
-      // and we can't update these all atomically, we first set the approval attribute in the article collection
-      // to 'inTransaction', then we set the approval attribute to the correct value in all of the summary collections,
-      // then finally, we set the approval attribute to the correct value in the article collection. If the process
-      // fails in the middle somewhere, the approval attribute in the article collection should still be in the state
-      // 'inTransaction', and we will tell the admin/initiator that he should retry the operation.
-      const rejectOnError = function(err) {
-        reject(err);
-      }
-      const prom = new Promise(function(resolve, reject) {
-        db.collection('article', (err, articleColl) => {
-          if (err !== null) {
-            reject(err);
-          } else {
-            articleColl.updateOne(
-              {
-                _id: articleId
-              },
-              {
-                $set: {approval: 'inTransaction'}
-              },
-              {
-                wtimeout: mongoConcerns.WTIMEOUT,
-                w: 'majority'
-              }
-            ).then(function (result) {
-                updateSummaries.setApprovalStatus(db, articleId, approvalVerdict).then(
-                  function (result) {
-                    db.collection('approvalLog', (err, approvalLogColl) => {
-                      if (err !== null) {
-                        reject(err);
-                      } else {
-                        getNextId("approvalLogId").then(
-                          function(id){
-                            //TODO compound index on approverFbId, _id
-                            approvalLogColl.insertOne(
-                              {
-                                _id: id,
-                                approverFbId: approverFbId,
-                                articleId: articleId,
-                                timestamp: new Date(),
-                                verdict: approvalVerdict
-                              },
-                              {
-                                w: 'majority',
-                                wtimeout: mongoConcerns.WTIMEOUT
-                              }
-                            ).then(
-                              function(result) {
-                                articleColl.updateOne(
-                                  {
-                                    _id: articleId
-                                  },
-                                  {
-                                    $set: {approval: approvalVerdict},
-                                  },
-                                  {
-                                    w: 'majority',
-                                    wtimeout: mongoConcerns.WTIMEOUT
-                                  }
-                                ).then(function (result) {
-                                    resolve(result);
-                                  }, rejectOnError
-                                )
-                              }, rejectOnError
-                            ).then(function(){}, rejectOnError);
-
-                          },
-                          function(err){
-
-                          }
-                        );
-                      }
-                    });
-                  },rejectOnError
-                ).then(function(){}, rejectOnError);
-              }, rejectOnError
-            ).then(function(){}, rejectOnError);
-          }
-        });
-      });
-      return prom;
-    };
-
-    app.post('/approve-articles', bodyParser.urlencoded({extended: true}), function(req, res, next) {
-      if (req.user && req.user.userType === 'admin') {
-        const IDs = req.body['article_ids'];
-        const approverFbId = req.user.fbId
-        //const articleURLSlug = req.body['article_url_slug'];
-        const approvalVerdict = req.body['approval_verdict'];
-        const promises = [];
-        for (let i=0; i < IDs.length; i++) {
-          const articleID = parseInt(IDs[i], 10);
-          promises.push(setApproval(approvalVerdict, articleID, approverFbId, res, next));
-        }
-        Promise.all(promises).then(
-          function(result){
-            res.redirect('/admin');
-          },
-          function(err){
-            logError(err);
-            next(err);
-          }
-        );
-      } else {
-        res.status(403).send('You are not an admin or are not logged in.');
-      }
-    });
 
     app.post('/article', bodyParser.urlencoded(), function(req, res, next) {
       const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
@@ -431,8 +265,10 @@ MongoClient.connect(MONGO_URI, (err, db) => {
       return fileType.match(imageMimeTypeRegex) !== null;
     }
 
+
+    //TODO import getNextId
     app.get('/sign-s3', s3Limiter, (req, res, next) => {
-      getNextId("articleId").then(function(id) {
+      getNextId(db, "articleId").then(function(id) {
           const filename = req.query['file-name'];
           const slug = getFilenameSlug(id, filename);
           let sess = req.session;

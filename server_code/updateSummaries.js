@@ -164,11 +164,6 @@ function setApprovalStatus(db, articleId, approval) {
         if (err !== null) {
           reject(err);
         } else {
-          console.log("about to set approval");
-          console.log("article id = ");
-          console.log(typeof(articleId));
-          console.log("approval = ");
-          console.log(approval);
           summaryColl.updateOne(
             {
               _id: articleId,
