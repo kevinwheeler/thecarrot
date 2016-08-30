@@ -172,7 +172,7 @@ function monitorSumarriesHealth(db) {
                     }
                   ).count().then(function(count){
                       if (count) {
-                        if (NODE_ENV !== 'development') {
+                        if (process.env.NODE_ENV !== 'development') {
                           sendgrid.send({
                               to: process.env.ALERT_EMAIL_ADDRESS,
                               from: 'noreply@' + process.env.DOMAIN_NAME,

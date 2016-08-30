@@ -85,17 +85,14 @@ function getRouteFunction(db) {
 
 
   const routeFunction = function (req, res, next) {
-    console.log("in approve articles");
     const dontInclude = req.body.dont_include;
     const howMany = req.body.how_many;
     const timeInterval = req.body.time_interval;
     getMostViewedArticlesJSON(dontInclude, howMany, timeInterval).then(
       function(articlesJSON) {
-        console.log("in then");
         res.send(articlesJSON);
       },
       function(err) {
-        console.log("in err");
         if (err.clientError === true){
           res.status(400).send("Something went wrong.");;
         } else {

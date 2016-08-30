@@ -24,7 +24,7 @@ export default Backbone.Collection.extend({
 
   // Attributes below this line are not standard Backbone attributes, they are custom.
   fetchNextArticles: function() {
-    console.log("fetching");
+    console.log("fetching approval history");
     this.fetch({
       data: $.param({
         how_many: 10,

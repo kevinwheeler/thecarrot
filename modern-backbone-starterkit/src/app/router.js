@@ -68,21 +68,6 @@ export default Backbone.Router.extend({
   //  });
   //},
 
-  getArticleIdOfCurrentRoute() {
-    let url = window.location.pathname;
-    if ((url.indexOf('/article') !== 0) && (url.indexOf('/admin/article') !== 0)) {
-      throw "Called getArticleIdOfCurrentRoute() when not in an article route";
-    }
-
-    if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
-      url = url.substr(0, url.length - 1);
-    }
-
-    let articleSlug = url.substring(url.lastIndexOf('/') + 1);
-    const id = parseInt(articleSlug, 10);
-    return id;
-  },
-
   currentRouteIsAdminArticleRoute() {
     let url = window.location.pathname;
 
@@ -98,6 +83,21 @@ export default Backbone.Router.extend({
     }
   },
 
+  getArticleIdOfCurrentRoute() {
+    let url = window.location.pathname;
+    if ((url.indexOf('/article') !== 0) && (url.indexOf('/admin/article') !== 0)) {
+      throw "Called getArticleIdOfCurrentRoute() when not in an article route";
+    }
+
+    if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
+      url = url.substr(0, url.length - 1);
+    }
+
+    let articleSlug = url.substring(url.lastIndexOf('/') + 1);
+    const id = parseInt(articleSlug, 10);
+    return id;
+  },
+
   articleRoute() {
     let homeViewInst = serviceProvider.getArticleView();
     homeViewInst.render();
@@ -106,7 +106,6 @@ export default Backbone.Router.extend({
   },
 
   adminRoute(param) {
-    console.log("in admin route");
     let adminViewInst;
     if (param === "y") {
        adminViewInst = serviceProvider.getAdminView("approvalHistory");

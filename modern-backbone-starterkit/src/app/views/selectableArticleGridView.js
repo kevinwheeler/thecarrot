@@ -10,10 +10,11 @@ export default Backbone.View.extend({
   className: 'kmw-selectable-article-grid-view',
 
   events: {
-    'click .kmw-fetch-more': 'fetchMoreResults'
+    'click .kmw-fetch-more': 'fetchMoreResults',
   },
 
   initialize: function(options = {}) {
+    window.kmwEl = this.el;
     console.log("initializing");
     // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
@@ -25,20 +26,32 @@ export default Backbone.View.extend({
     //this.render();
   },
 
-  render: _.throttle(function() {
-      //TODO this gets called once for every article
-      const articleCollectionJSON = this.articleCollection.toJSON();
+  render: function() {
       this.$el.html(template({
         articles: this.articleCollection.toJSON()
       }));
 
+      this.delegateEvents();
       return this;
-    }, 16
-  ),
+    },
+
+  //render: _.throttle(function() {
+  //    this.$el.html(template({
+  //      articles: this.articleCollection.toJSON()
+  //    }));
+  //
+  //    this.delegateEvents();
+  //    return this;
+  //  }, 16
+  //),
 
   fetchMoreResults: function() {
     console.log("should be fetching");
     this.articleCollection.fetchNextArticles();
+  },
+
+  remove: function() {
+    console.log("REMOVING!");
   },
 
   setArticleCollection: function(articleCollection) {

@@ -4,8 +4,9 @@ import ArticleModel from 'MODELSDIR/articleModel';
 export default Backbone.Collection.extend({
   //These first few attributes are standard backbone attrbibutes that can be read about in the docs.
   initialize: function(options) {
-    this.timeInterval = options.timeInterval;
     this.articleIDs = [];
+    this.skipAheadAmount = options.skipAheadAmount;
+    this.timeInterval = options.timeInterval;
   },
   model: ArticleModel,
   parse: function(response, options) {
@@ -25,6 +26,7 @@ export default Backbone.Collection.extend({
       data: JSON.stringify({
         dont_include: this.articleIDs,
         how_many: 10,
+        skip_ahead_amount: this.skipAheadAmount,
         time_interval: this.timeInterval
       }),
       remove: false,

@@ -26,6 +26,7 @@ export default Backbone.View.extend({
   },
 
   render: function () {
+    this.$el.children().detach();
     this.$el.html(template({
       //displayName: this.userModel.get('displayName'),
     }));

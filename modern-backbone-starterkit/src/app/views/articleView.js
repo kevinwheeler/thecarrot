@@ -52,6 +52,7 @@ export default Backbone.View.extend({
 
     const authorOrApprovedOrAdminRoute = viewerIsAuthor || approved || isAdminRoute;
 
+    this.$el.children().detach();
     this.$el.html(template({
       authorOrApprovedOrAdminRoute: authorOrApprovedOrAdminRoute,
       approved: approved,
