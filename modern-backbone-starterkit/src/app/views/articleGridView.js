@@ -34,7 +34,6 @@ export default Backbone.View.extend({
   ),
 
   fetchMoreResults: function() {
-    console.log("should be fetching");
     this.articleCollection.fetchNextArticles();
   },
 

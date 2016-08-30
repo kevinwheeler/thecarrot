@@ -27,6 +27,7 @@ export default Backbone.View.extend({
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
     this.render();
     this.update();
+    this.infiniteScroll();
   },
 
   render: function() {
@@ -37,7 +38,20 @@ export default Backbone.View.extend({
     return this;
   },
 
-  debouncedUpdate: _.debounce(function(){
+  infiniteScroll: function() {
+    const self = this;
+    const onScrollFunction = function() {
+      const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
+      console.log("distance from bottom = " + distanceFromBottom + " " + typeof(distanceFromBottom));
+      if(distanceFromBottom < 500)  {
+        self.articleGridView.fetchMoreResults();
+      }
+    };
+
+    $(window).scroll(_.throttle(onScrollFunction, 50));
+  },
+
+  debouncedUpdate: _.debounce(function() {
       this.update();
     }, 500
   ),

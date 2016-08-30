@@ -7,9 +7,11 @@ export default Backbone.Collection.extend({
     this.articleIDs = [];
     this.skipAheadAmount = options.skipAheadAmount;
     this.timeInterval = options.timeInterval;
+    this.currentlyFetching = false;
   },
   model: ArticleModel,
   parse: function(response, options) {
+    this.currentlyFetching = false;
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
       const articleId = parseInt(articleJSON._id, 10);
@@ -21,16 +23,19 @@ export default Backbone.Collection.extend({
 
   // Attributes below this line are not standard Backbone attributes, they are custom.
   fetchNextArticles: function() {
-    this.fetch({
-      contentType: "application/json",
-      data: JSON.stringify({
-        dont_include: this.articleIDs,
-        how_many: 10,
-        skip_ahead_amount: this.skipAheadAmount,
-        time_interval: this.timeInterval
-      }),
-      remove: false,
-      type: 'POST'
-    });
+    if (!this.currentlyFetching) {
+      this.currentlyFetching = true;
+      this.fetch({
+        contentType: "application/json",
+        data: JSON.stringify({
+          dont_include: this.articleIDs,
+          how_many: 10,
+          skip_ahead_amount: this.skipAheadAmount,
+          time_interval: this.timeInterval
+        }),
+        remove: false,
+        type: 'POST'
+      });
+    }
   }
 });
