@@ -68,7 +68,6 @@ function getRouteFunction(db) {
     const maxId = parseInt(req.query.max_id, 10);
     const howMany = parseInt(req.query.how_many, 10);
     const skipAheadAmount = parseInt(req.query.skip_ahead_amount, 10);
-    console.log("skip ahead amount = " + skipAheadAmount);
     getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount).then(
       function(articlesJSON) {
         res.send(articlesJSON);

@@ -4,19 +4,28 @@ const logError = require('../utils').logError;
 function getRouteFunction(db) {
 
   const MAX_ARTICLES_PER_REQUEST = 50;
+  const MAX_SKIP_AHEAD_AMOUNT = 1000;
 
   // Returns an error object or null. If error object isn't null, will have the property
   // clientError set to true so that we can send a 4xx response instead of a 5xx response.
-  function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval) {
+  function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount) {
     let validationErrors = [];
+
+    if (typeof(dontInclude) !== "object") {
+      validationErrors.push("dontInclude invalid");
+    }
+
+    if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
+      validationErrors.push("howMany invalid");
+    }
 
     if (timeInterval !== 'daily' && timeInterval !== 'weekly' && timeInterval !== 'monthly'
       && timeInterval !== 'yearly' && timeInterval !== 'all_time') {
       validationErrors.push("invalid time interval");
-    } else if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
-      validationErrors.push("howMany invalid");
-    } else if (typeof(dontInclude) !== "object") {
-      validationErrors.push("dontInclude invalid");
+    }
+
+    if (typeof(skipAheadAmount) !== "number" || Number.isNaN(skipAheadAmount) || skipAheadAmount < 0 || skipAheadAmount > MAX_SKIP_AHEAD_AMOUNT) {
+      validationErrors.push("skipAheadAmount invalid");
     }
 
     if (validationErrors.length) {
@@ -29,8 +38,8 @@ function getRouteFunction(db) {
     return validationErrors;
   }
 
-  function getMostViewedArticlesJSON(dontInclude, howMany, timeInterval) {
-    let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval);
+  function getMostViewedArticlesJSON(dontInclude, howMany, timeInterval, skipAheadAmount) {
+    let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount);
 
     let prom = new Promise(function(resolve, reject) {
       if (validationErrors !== null) {
@@ -45,7 +54,7 @@ function getRouteFunction(db) {
                 $nin: dontInclude
               },
               approval: 'approved'
-            }).sort([['views', -1]]).limit(howMany).project("_id").toArray(
+            }).sort([['views', -1]]).skip(skipAheadAmount).limit(howMany).project("_id").toArray(
               function (err, articleIDs) {
                 if (err !== null) {
                   reject(err);
@@ -88,7 +97,8 @@ function getRouteFunction(db) {
     const dontInclude = req.body.dont_include;
     const howMany = req.body.how_many;
     const timeInterval = req.body.time_interval;
-    getMostViewedArticlesJSON(dontInclude, howMany, timeInterval).then(
+    const skipAheadAmount = parseInt(req.body.skip_ahead_amount, 10);
+    getMostViewedArticlesJSON(dontInclude, howMany, timeInterval, skipAheadAmount).then(
       function(articlesJSON) {
         res.send(articlesJSON);
       },

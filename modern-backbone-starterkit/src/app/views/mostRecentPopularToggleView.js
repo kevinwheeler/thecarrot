@@ -43,7 +43,6 @@ export default Backbone.View.extend({
   ),
 
   update: function() {
-    console.log("in update");
     const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
     const $skipAhead = this.$(".kmw-skip-ahead");
     let skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
@@ -62,7 +61,6 @@ export default Backbone.View.extend({
       $skipAhead.val(0);
       skipAheadAmount = 0;
     }
-    console.log("skip ahead amount = " + skipAheadAmount);
 
     if (recentOrPopular === 'most-recent') {
       //if (this.mostRecentArticlesCollection === undefined) {
