@@ -40,7 +40,7 @@ function getRouteFunction(db) {
               _id: {$lte: maxId},
               approverFbId: approverFbId,
             }).sort([['_id', -1]]).limit(howMany).project({
-              _id: false,
+              _id: true,
               articleId: true,
               verdict: true,
               timestamp: true
@@ -72,7 +72,7 @@ function getRouteFunction(db) {
                             // since articles array doesn't have duplicates, but approvalLogEntries
                             // does have duplicates, and because the order of articles array doesn't
                             // match the order of approvalLogEntries, we construct a new articles array.
-                            // Also, we augment each article with a couple of extra properties.
+                            // Also, we augment each article with a few extra properties.
                             const returnValue = [];
                             for (let i=0; i < approvalLogEntries.length; i++) {
                               const approvalLogEntry = approvalLogEntries[i];
@@ -80,18 +80,9 @@ function getRouteFunction(db) {
                               const article = _.cloneDeep(articleMap[approvalLogEntry.articleId]);
                               article.historicalApprovalVerdict = approvalLogEntry.verdict;
                               article.historicalApprovalTimestamp = approvalLogEntry.timestamp;
+                              article.approvalId = approvalLogEntry._id;
                               returnValue.push(article);
                             }
-                            //articles.sort(function (a, b) {
-                            //  return IDs.indexOf(a._id) - IDs.indexOf(b._id);
-                            //});
-                            //for (let i = 0; i < articles.length; i++) {
-                            //  //augment article doc with two extra properties
-                            //  const article = articles[i];
-                            //  const approvalLogEntry = approvalLogEntries[i];
-                            //  article.historicalApprovalVerdict = approvalLogEntry.verdict;
-                            //  article.historicalApprovalTimestamp = approvalLogEntry.timestamp;
-                            //}
                             resolve(returnValue);
                           }
                         }

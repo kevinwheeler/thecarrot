@@ -9,17 +9,18 @@ const validations = require('../../modern-backbone-starterkit/src/isomorphic/art
 function getRouteFunction(db) {
 
   const notifyAdminViaEmail = function(articleURLSlug) {
-    sendgrid.send({
-        to: "kevinwheeler2@yahoo.com",
-        from: 'noreply@' + process.env.PRODUCTION_DOMAIN_NAME,
-        subject: process.env.DOMAIN_NAME + ' article in need of approval',
-        html: `article needs approval. <a href="${process.env.DOMAIN}/admin/article/${articleURLSlug}">view here.</a>`
-      }, function (err, json) {
-        if (err) {
-          logError(err);
-        }
-      }
-    );
+    // TODO enable this for production
+    //sendgrid.send({
+    //    to: "kevinwheeler2@yahoo.com",
+    //    from: 'noreply@' + process.env.PRODUCTION_DOMAIN_NAME,
+    //    subject: process.env.DOMAIN_NAME + ' article in need of approval',
+    //    html: `article needs approval. <a href="${process.env.DOMAIN}/admin/article/${articleURLSlug}">view here.</a>`
+    //  }, function (err, json) {
+    //    if (err) {
+    //      logError(err);
+    //    }
+    //  }
+    //);
   }
 
 

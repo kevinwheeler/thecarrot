@@ -12,8 +12,8 @@ export default Backbone.Collection.extend({
   parse: function(response, options) {
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
-      const articleId = parseInt(articleJSON._id, 10);
-      if (articleId > this.minId) {
+      const articleId = articleJSON._id;
+      if (articleId > this.maxId) {
         this.maxId = articleId;
       }
     }
