@@ -9,7 +9,7 @@ import 'UTILSDIR/facebooksdk';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-  className: 'rwc-article-view',
+  className: 'kmw-article-view',
 
   initialize: function(options = {}) {
     this.views = [];
@@ -17,30 +17,19 @@ export default Backbone.View.extend({
     this.views.push(options.navView);
     this.navView = options.navView;
     this.articleModel = options.articleModel;
+    this.currentUserModel = options.currentUserModel;
     this.listenTo(this.articleModel, 'change', this.render);
+    this.listenTo(this.currentUserModel, 'change', this.render);
+    //TODO do we need to stop listening to avoid memory leaks?
 
-    // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+    // http://arturadib.com/hello-backbonejs/docs/1.html
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
 
-    this.attachSubViews();
     this.render();
   },
 
   //TODO throttle
   render: function() {
-    console.log("rendering article view");
-    //_.forEach(this.views, function(view) {
-    //  view.render();
-    //});
-
-    //this.$el.html(template({
-    //  article: window.kmw.article,
-    //  //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
-    //  articleURL: [location.protocol, '//', location.host, location.pathname].join(''),
-    //  citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
-    //  imageURL: window.kmw.article.imageURL
-    //}));
-
     const viewerIsAuthor = this.articleModel.get('viewerIsAuthor');
     const approved = this.articleModel.get('approval') === 'approved';
     const approvalDenied = this.articleModel.get('approval') === 'denied';
@@ -48,13 +37,17 @@ export default Backbone.View.extend({
     const approvalPendingAndAuthor = approvalPending && viewerIsAuthor;
     const approvalPendingAndNotAuthor = approvalPending && !viewerIsAuthor;
     const approvalStatus= this.articleModel.get('approval');
+    const currentUserDoneFetching = this.currentUserModel.get('doneFetching') === true;
     const isAdminRoute = serviceProvider.getRouter().currentRouteIsAdminArticleRoute();
+    const isAdmin = this.currentUserModel.get('userType') === 'admin';
 
-    const authorOrApprovedOrAdminRoute = viewerIsAuthor || approved || isAdminRoute;
+    const authorOrApprovedOrAdmin = viewerIsAuthor || approved || isAdmin;
+    const isAdminRouteAndNotDoneFetching = isAdminRoute && !currentUserDoneFetching;
+    const isAdminRouteAndNotAdmin = isAdminRoute && currentUserDoneFetching && !isAdmin;
 
     this.$el.children().detach();
     this.$el.html(template({
-      authorOrApprovedOrAdminRoute: authorOrApprovedOrAdminRoute,
+      authorOrApprovedOrAdmin: authorOrApprovedOrAdmin,
       approved: approved,
       approvalDenied: approvalDenied,
       approvalPending: approvalPending,
@@ -65,9 +58,14 @@ export default Backbone.View.extend({
       //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
       articleURL: [location.protocol, '//', location.host, location.pathname].join(''),
       citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
+      currentUserDoneFetching: currentUserDoneFetching,
       imageURL: this.articleModel.get('imageURL'),
-      isAdminRoute: serviceProvider.getRouter().currentRouteIsAdminArticleRoute(),
+      isAdmin: isAdmin,
+      isAdminRoute: isAdminRoute,
+      isAdminRouteAndNotAdmin: isAdminRouteAndNotAdmin,
+      isAdminRouteAndNotDoneFetching: isAdminRouteAndNotDoneFetching,
     }));
+    this.attachSubViews();
     return this;
   },
 

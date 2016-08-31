@@ -57,21 +57,25 @@ function getRouteFunction(db) {
   }
 
   const routeFunction = function (req, res, next) {
-    const minId = parseInt(req.query.min_id, 10);
-    const howMany = parseInt(req.query.how_many, 10);
-    getNeedApprovalArticlesJSON(minId, howMany).then(
-      function(articlesJSON) {
-        res.send(articlesJSON);
-      },
-      function(err) {
-        if (err.clientError === true) {
-          res.status(400).send("Something went wrong.");
-        } else {
-          logError(err);
-          next(err);
+    if (req.user && req.user.userType === 'admin') {
+      const minId = parseInt(req.query.min_id, 10);
+      const howMany = parseInt(req.query.how_many, 10);
+      getNeedApprovalArticlesJSON(minId, howMany).then(
+        function (articlesJSON) {
+          res.send(articlesJSON);
+        },
+        function (err) {
+          if (err.clientError === true) {
+            res.status(400).send("Something went wrong.");
+          } else {
+            logError(err);
+            next(err);
+          }
         }
-      }
-    );
+      );
+    } else {
+        res.status(403).send("You are either not logged on or not an admin.");
+    }
   };
 
   return routeFunction;

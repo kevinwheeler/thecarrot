@@ -27,7 +27,8 @@ function getRouteFunction(db) {
           userColl.find({fbId: userIdToGet}).project({
             _id: false,
             displayName: true,
-            fbId: true
+            fbId: true,
+            userType: true
           }).next().then(
             function (user) {
               res.json(user);

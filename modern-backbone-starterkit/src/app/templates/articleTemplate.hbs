@@ -1,8 +1,16 @@
 <nav class='NAV-STUB'></nav>
 <div class="container">
 
+  {{#if isAdminRouteAndNotDoneFetching}}
+    Verifying that you are an admin. Please wait..
+  {{/if}}
+
+  {{#if isAdminRouteAndNotAdmin}}
+    You are either not logged in or not an admin.
+  {{/if}}
+
   {{!-- Headline, subline, and imageURL already escaped in EJS --}}
-  {{#if authorOrApprovedOrAdminRoute}}
+  {{#if authorOrApprovedOrAdmin}}
     <h1 id="kmw-headline">headline = {{article.headline}}</h1>
     <h2 id="kmw-subline">subline = {{article.subline}}</h2>
     <img src="{{imageURL}}" class="img-responsive">
@@ -23,8 +31,7 @@
     Sorry, this article was NOT approved. Please make sure that any headlines you create comply with Facebook's guidelines.<br>
   {{/if}}
 
-  {{#if isAdminRoute}}
-    is admin route <br>
+  {{#if isAdmin}}
     Approval Status: {{approvalStatus}} <br>
 
     {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}

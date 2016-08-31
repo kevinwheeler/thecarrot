@@ -28,7 +28,6 @@ export default Backbone.Collection.extend({
 
       // Keep track of minimum ID out of all the articles in this collection.
       const approvalId = parseInt(articleJSON.approvalId, 10);
-      console.log("aproval id = " + approvalId);
       if (approvalId < this.minId) {
         this.minId = approvalId;
       }

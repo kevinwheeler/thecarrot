@@ -1,7 +1,7 @@
 import Backbone from 'backbone';
 
 import AdminView from 'VIEWSDIR/adminView';
-import AllArticlesCollection from 'COLLECTIONSDIR/allArticlesCollection';
+import ApprovalHistoryArticleGridView from 'VIEWSDIR/approvalHistoryArticleGridView';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import ArticleModel from 'MODELSDIR/articleModel';
@@ -12,8 +12,8 @@ import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
 import MyApprovalHistoryCollection from 'COLLECTIONSDIR/myApprovalHistoryCollection';
 import NavView from 'VIEWSDIR/navView';
+import NeedApprovalArticleGridView from 'VIEWSDIR/needApprovalArticleGridView';
 import Router from '../router';
-import SelectableArticleGridView from 'VIEWSDIR/selectableArticleGridView';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
@@ -47,25 +47,30 @@ var serviceProvider = {
   getAdminView(collectionToUse) {
 
     let articlesCollection;
+    let articleGridView;
     if (collectionToUse === "approvalHistory") {
       articlesCollection = new MyApprovalHistoryCollection();
+      articleGridView = new ApprovalHistoryArticleGridView();
     } else if (collectionToUse === "needApproval") {
       articlesCollection = new ArticlesThatNeedApprovalCollection();
+      articleGridView = new NeedApprovalArticleGridView();
     }
     articlesCollection.fetchNextArticles();
-    const selectableArticleGridViewInst = new SelectableArticleGridView();
-    selectableArticleGridViewInst.setArticleCollection(articlesCollection);
+    articleGridView.setArticleCollection(articlesCollection);
 
-    let adminViewInst = new AdminView({selectableArticleGridView: selectableArticleGridViewInst});
+    let adminViewInst = new AdminView({selectableArticleGridView: articleGridView});
     return adminViewInst;
   },
 
   getArticleView() {
+    const currentUserModel = new CurrentUserModel();
+    currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
     articleModelInst.fetch();
     const articleViewInst = new ArticleView({
-      navView: this.getNavView(),
-      articleModel: articleModelInst
+      articleModel: articleModelInst,
+      currentUserModel: currentUserModel,
+      navView: this.getNavView()
     });
     return articleViewInst;
   },
