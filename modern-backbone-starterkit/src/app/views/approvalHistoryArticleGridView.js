@@ -11,6 +11,7 @@ export default Backbone.View.extend({
   className: 'kmw-selectable-article-grid-view',
 
   events: {
+    'click .kmw-fetch-more': 'fetchMoreResults',
   },
 
   initialize: function(options = {}) {
