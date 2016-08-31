@@ -8,10 +8,15 @@ export default Backbone.Collection.extend({
     this.skipAheadAmount = options.skipAheadAmount;
     this.timeInterval = options.timeInterval;
     this.currentlyFetching = false;
+    this.noMoreResults = false;
   },
   model: ArticleModel,
   parse: function(response, options) {
     this.currentlyFetching = false;
+    if (!response.length) {
+      this.noMoreResults = true;
+      this.trigger('noMoreResults');
+    }
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
       const articleId = parseInt(articleJSON._id, 10);
@@ -23,7 +28,7 @@ export default Backbone.Collection.extend({
 
   // Attributes below this line are not standard Backbone attributes, they are custom.
   fetchNextArticles: function() {
-    if (!this.currentlyFetching) {
+    if (!this.currentlyFetching && !this.noMoreResults) {
       this.currentlyFetching = true;
       this.fetch({
         contentType: "application/json",
@@ -37,5 +42,13 @@ export default Backbone.Collection.extend({
         type: 'POST'
       });
     }
-  }
+  },
+
+  getCurrentlyFetching: function() {
+    return this.currentlyFetching;
+  },
+
+  getNoMoreResults: function() {
+    return this.noMoreResults;
+  },
 });

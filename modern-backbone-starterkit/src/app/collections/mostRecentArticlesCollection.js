@@ -6,11 +6,18 @@ export default Backbone.Collection.extend({
   initialize: function(options) {
     this.minId = Number.MAX_SAFE_INTEGER;
     this.skipAheadAmount = options.skipAheadAmount;
+    this.currentlyFetching = false;
+    this.noMoreResults = false;
   },
 
   model: ArticleModel,
 
   parse: function(response, options) {
+    this.currentlyFetching = false;
+    if (!response.length) {
+      this.noMoreResults = true;
+      this.trigger('noMoreResults');
+    }
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
       const articleId = parseInt(articleJSON._id, 10);
@@ -25,13 +32,24 @@ export default Backbone.Collection.extend({
 
   // Attributes below this line are not standard Backbone attributes, they are custom.
   fetchNextArticles: function() {
-    this.fetch({
-      data: $.param({
-        how_many: 10,
-        max_id: this.minId - 1,
-        skip_ahead_amount: this.skipAheadAmount,
-      }),
-      remove: false
-    });
-  }
+    if (!this.currentlyFetching && !this.noMoreResults) {
+      this.currentlyFetching = true;
+      this.fetch({
+        data: $.param({
+          how_many: 10,
+          max_id: this.minId - 1,
+          skip_ahead_amount: this.skipAheadAmount,
+        }),
+        remove: false
+      });
+    }
+  },
+
+  getCurrentlyFetching: function() {
+    return this.currentlyFetching;
+  },
+
+  getNoMoreResults: function() {
+    return this.noMoreResults;
+  },
 });

@@ -10,7 +10,15 @@
       </a>
     {{/each}}
   </div>
-  <div style="text-align: center;">
-    <button type="button" class="kmw-fetch-more" style="margin-top: 10px; margin-bottom: 30px;">Fetch more results</button>
-  </div>
+
+  {{#if fetchingMoreResults}}
+    <div style="text-align: center;">
+      Loading more results...
+    </div>
+  {{/if}}
+  {{#if noMoreResults}}
+    <div style="text-align: center;">
+      No More results.
+    </div>
+  {{/if}}
 </div>

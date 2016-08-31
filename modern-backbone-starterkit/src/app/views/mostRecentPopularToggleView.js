@@ -42,7 +42,6 @@ export default Backbone.View.extend({
     const self = this;
     const onScrollFunction = function() {
       const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
-      console.log("distance from bottom = " + distanceFromBottom + " " + typeof(distanceFromBottom));
       if(distanceFromBottom < 500)  {
         self.articleGridView.fetchMoreResults();
       }

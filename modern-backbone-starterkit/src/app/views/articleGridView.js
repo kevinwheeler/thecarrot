@@ -10,7 +10,6 @@ export default Backbone.View.extend({
   className: 'kmw-article-grid-view',
 
   events: {
-    'click .kmw-fetch-more': 'fetchMoreResults'
   },
 
   initialize: function(options = {}) {
@@ -26,7 +25,9 @@ export default Backbone.View.extend({
 
   render: _.throttle(function() {
       this.$el.html(template({
-        articles: this.articleCollection.toJSON()
+        articles: this.articleCollection.toJSON(),
+        fetchingMoreResults: this.articleCollection.getCurrentlyFetching(),
+        noMoreResults: this.articleCollection.getNoMoreResults()
       }));
 
       return this;
@@ -43,6 +44,7 @@ export default Backbone.View.extend({
     }
     this.articleCollection = articleCollection;
     this.listenTo(this.articleCollection, 'change add', this.render);
+    this.listenTo(this.articleCollection, 'noMoreResults', this.render);
     this.render();
   }
 });
