@@ -30,7 +30,8 @@ export default Backbone.Router.extend({
   },
 
   exports: {
-    articleRoutePrefix: 'article'
+    articleRoutePrefix: 'article',
+    adminArticleRoutePrefix: 'admin/article'
   },
 
   initialize(options) {

@@ -2,13 +2,16 @@
   <div class="container">
     <div class="row">
       {{#each articles}}
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-xs-12 col-sm-6" style="border: 2px solid black;">
           <img src="{{this.imageURL}}" class="img-responsive">
-          <input type="checkbox" name="article_ids[]" value="{{this._id}}" />
-          <a href="{{this.articleURL}}">
+          <input type="checkbox" name="article_ids[]" value="{{this._id}}"/>
+          <a href="{{this.adminArticleURL}}">
             <h2 class="">{{this.headline}}</h2>
           </a>
           <h3 class="">{{this.subline}}</h3>
+          <h4>Your approval verdict: {{this.historicalApprovalVerdict}}</h4>
+          <h4>When you made this verdict: {{this.historicalApprovalTimestamp}}</h4>
+          <h4>Current Approval Status: {{this.approval}}</h4>
         </div>
       {{/each}}
     </div>

@@ -1,4 +1,5 @@
 const logError = require('../utils').logError;
+const _ = require('lodash');
 
 function getRouteFunction(db) {
 
@@ -40,13 +41,15 @@ function getRouteFunction(db) {
               approverFbId: approverFbId,
             }).sort([['_id', -1]]).limit(howMany).project({
               _id: false,
-              articleId: true
+              articleId: true,
+              verdict: true,
+              timestamp: true
             }).toArray(
-              function (err, articleIDs) {
+              function (err, approvalLogEntries) {
                 if (err !== null) {
                   reject(err);
                 } else {
-                  const IDs = articleIDs.map(function (item) {
+                  const IDs = approvalLogEntries.map(function (item) {
                     return item.articleId;
                   });
                   db.collection('article', (err, articleColl) => {
@@ -60,10 +63,36 @@ function getRouteFunction(db) {
                           if (err !== null) {
                             reject(err);
                           } else {
-                            articles.sort(function (a, b) {
-                              return IDs.indexOf(a._id) - IDs.indexOf(b._id);
-                            });
-                            resolve(articles);
+                            // articleID => article
+                            const articleMap = {};
+                            for (let i=0; i < articles.length; i++) {
+                              const article = articles[i];
+                              articleMap[article._id] = article;
+                            }
+                            // since articles array doesn't have duplicates, but approvalLogEntries
+                            // does have duplicates, and because the order of articles array doesn't
+                            // match the order of approvalLogEntries, we construct a new articles array.
+                            // Also, we augment each article with a couple of extra properties.
+                            const returnValue = [];
+                            for (let i=0; i < approvalLogEntries.length; i++) {
+                              const approvalLogEntry = approvalLogEntries[i];
+                              // clone so we don't clobber in the case of duplicates
+                              const article = _.cloneDeep(articleMap[approvalLogEntry.articleId]);
+                              article.historicalApprovalVerdict = approvalLogEntry.verdict;
+                              article.historicalApprovalTimestamp = approvalLogEntry.timestamp;
+                              returnValue.push(article);
+                            }
+                            //articles.sort(function (a, b) {
+                            //  return IDs.indexOf(a._id) - IDs.indexOf(b._id);
+                            //});
+                            //for (let i = 0; i < articles.length; i++) {
+                            //  //augment article doc with two extra properties
+                            //  const article = articles[i];
+                            //  const approvalLogEntry = approvalLogEntries[i];
+                            //  article.historicalApprovalVerdict = approvalLogEntry.verdict;
+                            //  article.historicalApprovalTimestamp = approvalLogEntry.timestamp;
+                            //}
+                            resolve(returnValue);
                           }
                         }
                       );
