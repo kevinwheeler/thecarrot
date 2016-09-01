@@ -1,7 +1,4 @@
-const getNextId = require('../utils').getNextId;
 const logError = require('../utils').logError;
-const mongoConcerns = require('../mongoConcerns');
-const updateSummaries = require('../updateSummaries');
 
 function getRouteFunction(db) {
 

@@ -1,24 +1,26 @@
-<div class="container">
-  <div class="row">
-    {{#each articles}}
-      <a href="{{this.articleURL}}">
-        <div class="col-xs-12 col-sm-6">
-          <img src="{{this.imageURL}}" class="img-responsive">
-          <h2 class="">{{this.headline}}</h2>
-          <h3 class="">{{this.subline}}</h3>
-        </div>
-      </a>
-    {{/each}}
-  </div>
+<div class="diff-dom-wrapper">
+  <div class="container">
+    <div class="row">
+      {{#each articles}}
+        <a href="{{this.articleURL}}">
+          <div class="col-xs-12 col-sm-6">
+            <img src="{{this.imageURL}}" class="img-responsive">
+            <h2 class="">{{this.headline}}</h2>
+            <h3 class="">{{this.subline}}</h3>
+          </div>
+        </a>
+      {{/each}}
+    </div>
 
-  {{#if fetchingMoreResults}}
-    <div style="text-align: center;">
-      Loading more results...
-    </div>
-  {{/if}}
-  {{#if noMoreResults}}
-    <div style="text-align: center;">
-      No More results.
-    </div>
-  {{/if}}
+    {{#if fetchingMoreResults}}
+      <div style="text-align: center;">
+        Loading more results...
+      </div>
+    {{/if}}
+    {{#if noMoreResults}}
+      <div style="text-align: center;">
+        No More results.
+      </div>
+    {{/if}}
+</div>
 </div>

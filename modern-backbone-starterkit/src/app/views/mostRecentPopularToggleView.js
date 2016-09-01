@@ -44,6 +44,7 @@ export default Backbone.View.extend({
       const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
       if(distanceFromBottom < 500)  {
         self.articleGridView.fetchMoreResults();
+        self.articleGridView.render();
       }
     };
 

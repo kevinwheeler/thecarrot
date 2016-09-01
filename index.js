@@ -20,7 +20,6 @@ const upload = multer();
 
 const distDir = __dirname + '/modern-backbone-starterkit/dist/';
 
-const NODE_ENV = process.env.NODE_ENV;
 const MONGO_URI = process.env.MONGODB_URI;
 
 MongoClient.connect(MONGO_URI, (err, db) => {
@@ -34,8 +33,6 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     const sendIndex = function(req, res) {
       res.render('pages/index', {
         fbAppId: process.env.FACEBOOK_APP_ID
-        //isLoggedIn: !!req.user,
-        //user: JSON.stringify(req.user)
       });
     }
 
@@ -68,6 +65,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
     const getMostRecentArticlesJSON = require('./server_code/routeFunctions/getMostRecentArticlesJSON')(db);
     const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
+    const getMyAuthoredArticles = require('./server_code/routeFunctions/getMyAuthoredArticles')(db);
     const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
     const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
     const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
@@ -79,6 +77,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
     app.get('/most-recent-articles', getMostRecentArticlesJSON);
     app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
+    app.get('/my-authored-articles', getMyAuthoredArticles);
     app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
     app.get('/userinfo', getUserInfo);
     // most-viewed-articles uses post instead of get to get over query string length limitations

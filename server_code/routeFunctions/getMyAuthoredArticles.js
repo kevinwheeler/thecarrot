@@ -7,7 +7,7 @@ function getRouteFunction(db) {
 
   // Returns an error object or null. If error object isn't null, will have the property
   // clientError set to true so that we can send a 4xx response instead of a 5xx response.
-  function validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount) {
+  function validateMyAuthoredArticlesParams(maxId, howMany, skipAheadAmount, fbId) {
     let validationErrors = [];
     if (typeof(maxId) !== "number" || Number.isNaN(maxId) || maxId < 0) {
       validationErrors.push("maxId invalid");
@@ -30,9 +30,8 @@ function getRouteFunction(db) {
     return validationErrors;
   }
 
-
-  function getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount) {
-    let validationErrors = validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount);
+  function getMyAuthoredArticlesJSON(maxId, howMany, skipAheadAmount, fbId) {
+    let validationErrors = validateMyAuthoredArticlesParams(maxId, howMany, skipAheadAmount, fbId);
 
     let prom = new Promise(function(resolve, reject) {
       if (validationErrors !== null) {
@@ -45,7 +44,7 @@ function getRouteFunction(db) {
             //TODO consider a compound index on approval, id.
             collection.find({
               _id: {$lte: maxId},
-              approval: 'approved'
+              authorId: fbId
             }).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
               function (err, articles) {
                 if (err !== null) {
@@ -64,22 +63,27 @@ function getRouteFunction(db) {
 
 
   const routeFunction = function (req, res, next) {
-    const maxId = parseInt(req.query.max_id, 10);
-    const howMany = parseInt(req.query.how_many, 10);
-    const skipAheadAmount = parseInt(req.query.skip_ahead_amount, 10);
-    getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount).then(
-      function(articlesJSON) {
-        res.send(articlesJSON);
-      },
-      function(err) {
-        if (err.clientError === true) {
-          res.status(400).send("Something went wrong.");
-        } else {
-          logError(err);
-          next(err);
+    if (req.user) {
+      const maxId = parseInt(req.query.max_id, 10);
+      const howMany = parseInt(req.query.how_many, 10);
+      const skipAheadAmount = parseInt(req.query.skip_ahead_amount, 10);
+      const fbId = req.user.fbId;
+      getMyAuthoredArticlesJSON(maxId, howMany, skipAheadAmount, fbId).then(
+        function (articlesJSON) {
+          res.send(articlesJSON);
+        },
+        function (err) {
+          if (err.clientError === true) {
+            res.status(400).send("Invalid parameters.");
+          } else {
+            logError(err);
+            next(err);
+          }
         }
-      }
-    );
+      );
+    } else {
+      res.status(403).send("You are not logged in.");
+    }
   };
 
   return routeFunction;

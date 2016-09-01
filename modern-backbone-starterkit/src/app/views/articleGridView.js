@@ -4,6 +4,7 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from 'TEMPLATESDIR/articleGridTemplate.hbs';
+import dd from 'UTILSDIR/diffDOM';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -24,12 +25,19 @@ export default Backbone.View.extend({
   },
 
   render: _.throttle(function() {
-      this.$el.html(template({
+      const newHTMLString = template({
         articles: this.articleCollection.toJSON(),
         fetchingMoreResults: this.articleCollection.getCurrentlyFetching(),
         noMoreResults: this.articleCollection.getNoMoreResults()
-      }));
-
+      });
+      const newEl = $.parseHTML(newHTMLString)[0];
+      const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);
+      if (diffDomWrapper !== undefined) {
+        const diff = dd.diff(diffDomWrapper, newEl);
+        dd.apply(diffDomWrapper, diff);
+      } else {
+        this.$el.html(newHTMLString);
+      }
       return this;
     }, 16
   ),

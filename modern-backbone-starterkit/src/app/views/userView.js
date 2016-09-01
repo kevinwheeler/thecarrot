@@ -19,6 +19,8 @@ export default Backbone.View.extend({
     _.bindAll(this, 'render');
     this.views = [];
     this.userModel = options.userModel;
+
+    this.articleGridView = options.articleGridView;
     this.listenTo(this.userModel, 'change', this.render);
     this.render();
   },
@@ -27,10 +29,13 @@ export default Backbone.View.extend({
     this.$el.html(template({
       displayName: this.userModel.get('displayName'),
     }));
-    //_.forEach(this.views, function(view) {
-    //  view.render();
-    //});
+    this.attachSubViews();
     return this;
   },
+
   // Attributes below aren't standard backbone attributes. They are custom.
+  attachSubViews: function() {
+    const $articleGrid = this.$('.ARTICLE-GRID-STUB');
+    $articleGrid.replaceWith(this.articleGridView.$el);
+  },
 });

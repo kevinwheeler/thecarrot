@@ -4,7 +4,7 @@ import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
 import template from 'TEMPLATESDIR/needApprovalArticleGridTemplate.hbs';
-import diffDOM from 'diff-dom';
+import dd from 'UTILSDIR/diffDOM';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -14,27 +14,22 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    this.dd = new diffDOM({
-      valueDiffing: false
-    });
     this.displayApprovalHistory = options.displayApprovalHistory;
-    this.hasRenderedOnce = false;
     _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
   },
 
   render: function() {
-   const newHTMLString = template({
-     articles: this.articleCollection.toJSON()
-   });
-   if (this.hasRenderedOnce) {
+     const newHTMLString = template({
+       articles: this.articleCollection.toJSON()
+     });
      const newEl = $.parseHTML(newHTMLString)[0];
      const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);
-     const diff = this.dd.diff(diffDomWrapper, newEl);
-     this.dd.apply(diffDomWrapper, diff);
-   } else {
-     this.hasRenderedOnce = true;
-     this.$el.html(newHTMLString);
-   }
+     if (diffDomWrapper !== undefined) {
+       const diff = dd.diff(diffDomWrapper, newEl);
+       dd.apply(diffDomWrapper, diff);
+     } else {
+       this.$el.html(newHTMLString);
+     }
 
    this.delegateEvents();
    return this;

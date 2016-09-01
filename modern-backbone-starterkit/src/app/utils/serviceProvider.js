@@ -11,6 +11,7 @@ import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
 import MyApprovalHistoryCollection from 'COLLECTIONSDIR/myApprovalHistoryCollection';
+import MyAuthoredArticlesCollection from 'COLLECTIONSDIR/myAuthoredArticlesCollection';
 import NavView from 'VIEWSDIR/navView';
 import NeedApprovalArticleGridView from 'VIEWSDIR/needApprovalArticleGridView';
 import Router from '../router';
@@ -119,9 +120,18 @@ var serviceProvider = {
   },
 
   getUserView(userId) {
+    const articleGridViewInst = new ArticleGridView();
+    const myAuthoredArticlesCollection = new MyAuthoredArticlesCollection({});
+    myAuthoredArticlesCollection.fetchNextArticles();
+    articleGridViewInst.setArticleCollection(myAuthoredArticlesCollection);
+
     const userModel = new UserModel({userId: userId});
     userModel.fetchUser();
-    let userViewInst = new UserView({userModel: userModel});
+
+    let userViewInst = new UserView({
+      articleGridView: articleGridViewInst,
+      userModel: userModel
+    });
     return userViewInst;
   },
 

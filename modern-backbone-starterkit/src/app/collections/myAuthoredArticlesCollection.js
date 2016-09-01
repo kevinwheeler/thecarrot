@@ -10,7 +10,7 @@ export default Backbone.Collection.extend({
     this.noMoreResults = false;
   },
 
-  //model: ArticleModel,
+  model: ArticleModel,
 
   parse: function(response, options) {
     this.currentlyFetching = false;
@@ -18,28 +18,17 @@ export default Backbone.Collection.extend({
       this.noMoreResults = true;
       this.trigger('noMoreResults');
     }
-    // '/api/my-approval-history' augments the articles returned with two extra attributes,
-    // 'historicalApprovalVerdict' and 'historicalApprovalTimestamp'
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
-
-      articleJSON.adminArticleURL = '/' + serviceProvider.getRouter().exports.adminArticleRoutePrefix + '/' + articleJSON.articleURLSlug;
-
-      // convert to a more human readable representation.
-      const timestamp = new Date(Date.parse(articleJSON.historicalApprovalTimestamp)).toString();
-      articleJSON.historicalApprovalTimestamp = timestamp;
-
-
-      // Keep track of minimum ID out of all the articles in this collection.
-      const approvalId = parseInt(articleJSON.approvalId, 10);
-      if (approvalId < this.minId) {
-        this.minId = approvalId;
+      const articleId = parseInt(articleJSON._id, 10);
+      if (articleId < this.minId) {
+        this.minId = articleId;
       }
     }
     return response;
   },
 
-  url: '/api/my-approval-history',
+  url: '/my-authored-articles',
 
   // Attributes below this line are not standard Backbone attributes, they are custom.
   fetchNextArticles: function() {
@@ -48,10 +37,19 @@ export default Backbone.Collection.extend({
       this.fetch({
         data: $.param({
           how_many: 10,
-          max_id: this.minId - 1
+          max_id: this.minId - 1,
+          skip_ahead_amount: 0
         }),
         remove: false
       });
     }
-  }
+  },
+
+  getCurrentlyFetching: function() {
+    return this.currentlyFetching;
+  },
+
+  getNoMoreResults: function() {
+    return this.noMoreResults;
+  },
 });
