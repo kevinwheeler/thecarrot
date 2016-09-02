@@ -16,7 +16,6 @@
     "express-rate-limit": "2.x.x",
     "express-session": "1.x.x",
     "helmet": "2.x.x",
-    "http-status": "0.x.x",
     "lodash": "4.15.0",
     "mongodb": "2.x.x",
     "multer": "1.x.x",

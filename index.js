@@ -93,7 +93,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
 
 
     app.use(express.static(distDir));
-    
+
     app.use(function(req, res, next) {
       send404(res);
     });
@@ -101,7 +101,7 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     // views is directory for all template files
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
-    
+
     app.listen(app.get('port'), function() {
       console.log('Node app is running on port', app.get('port'));
     });
