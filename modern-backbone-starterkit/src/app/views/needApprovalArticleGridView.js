@@ -14,26 +14,25 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    this.displayApprovalHistory = options.displayApprovalHistory;
-    _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
   },
 
-  render: function() {
-     const newHTMLString = template({
-       articles: this.articleCollection.toJSON()
-     });
-     const newEl = $.parseHTML(newHTMLString)[0];
-     const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);
-     if (diffDomWrapper !== undefined) {
-       const diff = dd.diff(diffDomWrapper, newEl);
-       dd.apply(diffDomWrapper, diff);
-     } else {
-       this.$el.html(newHTMLString);
-     }
+  render: _.throttle(function() {
+      const newHTMLString = template({
+        articles: this.articleCollection.toJSON()
+      });
+      const newEl = $.parseHTML(newHTMLString)[0];
+      const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);
+      if (diffDomWrapper !== undefined) {
+        const diff = dd.diff(diffDomWrapper, newEl);
+        dd.apply(diffDomWrapper, diff);
+      } else {
+        this.$el.html(newHTMLString);
+      }
 
-   this.delegateEvents();
-   return this;
-  },
+      this.delegateEvents();
+      return this;
+    }, 16
+  ),
 
   fetchMoreResults: function() {
     this.articleCollection.fetchNextArticles();

@@ -10,29 +10,12 @@ export default Backbone.View.extend({
   className: 'rwc-home-view',
 
   initialize: function(options = {}) {
-    this.views = [];
-
-    this.views.push(options.navView);
     this.navView = options.navView;
-
-    this.views.push(options.mostRecentPopularToggleView);
     this.mostRecentPopularToggleView = options.mostRecentPopularToggleView;
-
-    this.views.push(options.articleGridView);
     this.articleGridView = options.articleGridView;
 
-   // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
-   _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
     this.$el.html(template());
     this.attachSubViews();
-    this.render();
-  },
-
-  render: function() {
-    _.forEach(this.views, function(view) {
-      view.render();
-    });
-    return this;
   },
 
   attachSubViews: function() {

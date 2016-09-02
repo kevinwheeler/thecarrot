@@ -15,27 +15,11 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    // http://arturadib.com/hello-backbonejs/docs/1.html
-    _.bindAll(this, 'render');
-    this.views = [];
     this.selectableArticleGridView = options.selectableArticleGridView;
-    this.views.push(this.selectableArticleGridView);
-    //this.userModel = options.userModel;
-    //this.listenTo(this.userModel, 'change', this.render);
-    this.render();
+    this.$el.html(template());
+    this.attachSubViews();
   },
 
-  render: function () {
-    this.$el.children().detach();
-    this.$el.html(template({
-      //displayName: this.userModel.get('displayName'),
-    }));
-    this.attachSubViews();
-    //_.forEach(this.views, function(view) {
-    //  view.render();
-    //});
-    return this;
-  },
   // Attributes below aren't standard backbone attributes. They are custom.
   attachSubViews: function() {
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');

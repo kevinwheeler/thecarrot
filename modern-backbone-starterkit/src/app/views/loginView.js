@@ -17,18 +17,8 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    // http://arturadib.com/hello-backbonejs/docs/1.html
-    _.bindAll(this, 'render');
-    this.views = [];
-    this.render();
+    this.$el.html(template());
   },
 
-  render: function () {
-    this.$el.html(template());
-    //_.forEach(this.views, function(view) {
-    //  view.render();
-    //});
-    return this;
-  },
   // Attributes below aren't standard backbone attributes. They are custom.
 });

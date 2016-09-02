@@ -14,14 +14,6 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    // kmw: http://arturadib.com/hello-backbonejs/docs/1.html
-    _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
-
-    //this.articleCollection = options.articleCollection;
-
-    //this.listenTo(this.articleCollection, 'change add', this.render);
-
-    //this.render();
   },
 
   render: _.throttle(function() {
@@ -44,6 +36,7 @@ export default Backbone.View.extend({
 
   fetchMoreResults: function() {
     this.articleCollection.fetchNextArticles();
+    this.render();
   },
 
   setArticleCollection: function(articleCollection) {

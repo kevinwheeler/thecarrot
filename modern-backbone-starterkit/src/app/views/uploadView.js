@@ -27,14 +27,7 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    // http://arturadib.com/hello-backbonejs/docs/1.html
-    let self = this;
-    _.bindAll(this, 'render');
-    this.views = [];
-
-    this.views.push(options.navView);
     this.navView = options.navView;
-
     this.$el.html(template());
     this.attachSubViews();
     window.kmwrecaptcha = this.$('.kmw-recaptcha').get(0);
@@ -42,14 +35,6 @@ export default Backbone.View.extend({
     // run recaptcha script
     $script(recaptchaURL);
     this.bindToModel();
-    this.render();
-  },
-
-  render: function () {
-    _.forEach(this.views, function(view) {
-      view.render();
-    });
-    return this;
   },
 
   // Attributes below aren't standard backbone attributes. They are custom.

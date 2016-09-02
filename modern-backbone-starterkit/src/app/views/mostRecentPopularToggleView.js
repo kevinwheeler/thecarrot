@@ -20,22 +20,11 @@ export default Backbone.View.extend({
 
   initialize: function(options = {}) {
     this.options = options;
-    this.views = [];
     this.articleGridView = options.articleGridView;
 
-    //kmw: http://arturadib.com/hello-backbonejs/docs/1.html
-    _.bindAll(this, 'render'); //comment came with code example: fixes loss of context for 'this' within methods
-    this.render();
+    this.$el.html(template());
     this.update();
     this.infiniteScroll();
-  },
-
-  render: function() {
-    _.forEach(this.views, function(view) {
-      view.render();
-    });
-    this.$el.html(template());
-    return this;
   },
 
   infiniteScroll: function() {
@@ -44,7 +33,6 @@ export default Backbone.View.extend({
       const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
       if(distanceFromBottom < 500)  {
         self.articleGridView.fetchMoreResults();
-        self.articleGridView.render();
       }
     };
 

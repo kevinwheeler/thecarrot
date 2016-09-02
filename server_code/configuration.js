@@ -1,4 +1,6 @@
+const _ = require('lodash');
 const compression = require('compression');
+const helmet = require('helmet');
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -21,14 +23,33 @@ function exportVal(app) {
     app.use(forceSsl);
   }
 
-  app.enable('trust proxy'); // Needed for rate limiter.
-  app.use(compression());
-  app.use(session({
+  const sessionOptions = {
+    domain: process.env.DOMAIN_NAME,
+    httpOnly: true,
+    name: 'kmwSid',
     secret: process.env.SESSION_SECRET,
     store: new MongoStore({
       url: process.env.MONGODB_URI
     }),
+  };
+
+  const extraOptionsForProduction = {
+    cookie : {
+      secure : true,
+      maxAge: 2592000000 // 1 month
+    }
+  };
+
+  if (NODE_ENV === 'production') {
+    _.merge(sessionOptions, extraOptionsForProduction);
+  }
+
+  app.enable('trust proxy'); // Needed for rate limiter. Although technically we should probably only trust the 1st few proxies.
+  app.use(compression());
+  app.use(helmet({
+    noCache: false
   }));
+  app.use(session(sessionOptions));
   app.use(passport.initialize());
   app.use(passport.session());
   app.set('port', (process.env.PORT || 5000));

@@ -100,9 +100,8 @@ export default Backbone.Router.extend({
   },
 
   articleRoute() {
-    let homeViewInst = serviceProvider.getArticleView();
-    homeViewInst.render();
-    $('#js-app').empty().append(homeViewInst.$el);
+    let articleViewInst = serviceProvider.getArticleView();
+    $('#js-app').empty().append(articleViewInst.$el);
     this.afterRoute();
   },
 
@@ -113,42 +112,36 @@ export default Backbone.Router.extend({
     } else {
        adminViewInst = serviceProvider.getAdminView("needApproval");
     }
-    adminViewInst.render();
     $('#js-app').empty().append(adminViewInst.$el);
     this.afterRoute();
   },
 
   userRoute(userId) {
     let userViewInst = serviceProvider.getUserView(userId);
-    userViewInst.render();
     $('#js-app').empty().append(userViewInst.$el);
     this.afterRoute();
   },
 
   categoryRoute() {
     let homeViewInst = serviceProvider.getHomeView();
-    homeViewInst.render();
     $('#js-app').empty().append(homeViewInst.$el);
     this.afterRoute();
   },
 
   homeRoute() {
     let homeViewInst = serviceProvider.getHomeView();
-    homeViewInst.render();
     $('#js-app').empty().append(homeViewInst.$el);
     this.afterRoute();
   },
 
   loginRoute() {
     let loginViewInst = serviceProvider.getLoginView();
-    loginViewInst.render();
     $('#js-app').empty().append(loginViewInst.$el);
     this.afterRoute();
   },
 
   uploadRoute() {
     let uploadViewInst = serviceProvider.getUploadView();
-    uploadViewInst.render();
     $('#js-app').empty().append(uploadViewInst.$el);
     this.afterRoute();
   },

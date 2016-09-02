@@ -16,15 +16,10 @@ export default Backbone.View.extend({
 
   initialize: function(options = {}) {
     this.options = options;
-    this.views = [];
-    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
-    //TODO add nav item views to views array
 
     this.currentUser = options.currentUser;
     this.listenTo(this.currentUser, 'change', this.render);
 
-    //this.listenTo(options.routerEvents, 'routed', this.collapse);
-    //this.updateHeightWhenBreakpointReached();
     this.render();
     this.updateWhenBreakpointReached();
     this.toggleStickyOnScroll();
@@ -33,26 +28,27 @@ export default Backbone.View.extend({
     let self = this;
     //setInterval(function(){self.disableSticky()},750);
 
-    _.bindAll(this, 'collapse', 'render');//kmw: http://arturadib.com/hello-backbonejs/docs/1.html
+    _.bindAll(this, 'collapse');
   },
 
   tagName: 'nav',
 
   template: template,
 
-  render: function() {
-    //this.isLoggedIn = window.kmw.user !== undefined;
-    //let fbId;
-    //if (this.isLoggedIn) {
-    //  fbId = window.kmw.user.fbId;
-    //}
-    this.$el.html(this.template({
-      doneFetching: this.currentUser.get('doneFetching'),
-      loggedIn: this.currentUser.get('loggedIn'),
-      userId: this.currentUser.get('fbId')
-    }));
-    return this;
-  },
+  render: _.throttle(function() {
+      //this.isLoggedIn = window.kmw.user !== undefined;
+      //let fbId;
+      //if (this.isLoggedIn) {
+      //  fbId = window.kmw.user.fbId;
+      //}
+      this.$el.html(this.template({
+        doneFetching: this.currentUser.get('doneFetching'),
+        loggedIn: this.currentUser.get('loggedIn'),
+        userId: this.currentUser.get('fbId')
+      }));
+      return this;
+    }, 16
+  ),
 
   // All of the following properties are not standard backbone properties.
   collapse: function() {
