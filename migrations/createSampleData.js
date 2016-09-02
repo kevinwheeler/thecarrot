@@ -32,7 +32,7 @@ const download = function(url, dest, cb) {
 const NUM_ARTICLES_TO_CREATE = 50;
 const IMAGE_DIR = __dirname + '/images/';
 
-for (var i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
+for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
   download(`http://dummyimage.com/1200x630/000/fff&text=${i}`, __dirname + '/images/' + i + '.png', function(err) {
     if (err !== undefined) {
       throw `error downloading image ${i}`;
@@ -46,34 +46,55 @@ for (var i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
 
 const webdriver = require('selenium-webdriver');
 require('dotenv').config({path: __dirname + '/../.env'});
-console.log('session secret = ' + process.env.BYPASS_RECAPTCHA_SECRET);
 
 By = webdriver.By;
 let driver = new webdriver.Builder()
   .forBrowser('chrome')
   .build();
 
-for (var i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
+for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
   //driver.get('https://www.createaheadline.com/upload');
   driver.get('http://localhost:5000/upload');
   driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
   driver.findElement(By.id('kmw-headline-input')).sendKeys("headline " + i);
   driver.findElement(By.id('kmw-subline-input')).sendKeys("subline " + i);
-  const script = `
-  
-    var kmwRecaptcha = document.getElementById("kmw-bypass-recaptcha-secret");
-    kmwRecaptcha.value= "${process.env.BYPASS_RECAPTCHA_SECRET}";
-    jQuery('.kmw-upload-view').on("doneUploading", function(){
-      document.getElementById('kmw-article-upload-form').submit();
-    });
-    return null;
-  `
-  driver.executeScript(script).then(function(returnValue) {
+  const selectList = driver.findElement(By.id('kmw-category-select'));
+  const optionsPromise = selectList.findElements(By.css('option'));
+  optionsPromise.then(function(options) {
+      // skip the first option because it isn't selectable.
+      // select between other options in round robin fashion.
+      const index = (i % (options.length - 1)) + 1;
+      const elToSelect = options[index];
+      elToSelect.click();
+    }, function(err) {
+      console.error("error1!");
+      process.exit(1);
+    }
+  ).then(function(){
+      const script = `
+      
+        var kmwRecaptcha = document.getElementById("kmw-bypass-recaptcha-secret");
+        kmwRecaptcha.value= "${process.env.BYPASS_RECAPTCHA_SECRET}";
+        jQuery('.kmw-upload-view').on("doneUploading", function(){
+          document.getElementById('kmw-article-upload-form').submit();
+        });
+        return null;
+      `
+      driver.executeScript(script).then(function(returnValue) {
+      });
+    }, function(err){
+    console.error("error2!");
+    process.exit(1);
+    }
+  ).then(function(){}, function(err){
+    console.error("error3!");
+    process.exit(1);
   });
   driver.wait(function () {
-      return driver.isElementPresent(By.className("rwc-article-view"));
+      return driver.isElementPresent(By.className("kmw-article-view"));
     }, 10*1000
   );
 }
+
 
 driver.quit();

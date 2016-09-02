@@ -1,4 +1,16 @@
 let exportVal = {
+  validateCategory: function(category) {
+    if (typeof(category) !== "string") {
+      return "Category isn't a string.";
+    }
+    if (
+      category !== "politics" &&
+      category !== "spirituality"
+    ) {
+      return "Category invalid.";
+    }
+  },
+
   validateHeadline: function(headline) {
     if (typeof(headline) !== "string") {
       return "Headline isn't a string."; 
@@ -20,15 +32,19 @@ let exportVal = {
     }
   },
 
-  validateEverything(headline, subline) {
-    let validationErrors = [];
-    let headlineError = exportVal.validateHeadline(headline);
-    let sublineError = exportVal.validateSubline(subline);
+  validateEverything(headline, subline, category) {
+    const validationErrors = [];
+    const headlineError = exportVal.validateHeadline(headline);
+    const sublineError = exportVal.validateSubline(subline);
+    const categoryError = exportVal.validateCategory(category);
     if (headlineError) {
       validationErrors.push(headlineError); 
     }
     if (sublineError) {
       validationErrors.push(sublineError); 
+    }
+    if (categoryError) {
+      validationErrors.push(categoryError);
     }
     if (validationErrors.length) {
       return validationErrors;

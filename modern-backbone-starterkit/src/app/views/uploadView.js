@@ -105,12 +105,14 @@ export default Backbone.View.extend({
     this.setModelFields();
     let validationErrors = this.model.validate();
     if (validationErrors) {
-      e.preventDefault();
+      //e.preventDefault();
       this.displayValidationErrors(validationErrors);
+      return false;
     }
   },
 
   setModelFields: function() {
+    this.model.set('category', this.$("#kmw-category-select").val());
     this.model.set('headline', this.$("#kmw-headline-input").val());
     this.model.set('subline', this.$("#kmw-subline-input").val());
   },

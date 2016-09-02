@@ -35,9 +35,10 @@ function getRouteFunction(db) {
     const imageSlug = sess.imageSlug;
     const headline = req.body.headline;
     const subline = req.body.subline;
-    const validationErrors = validations.validateEverything(headline, subline);
-    if (validationErrors) { //TODO this could be better, instead of just returning the first error.
-      next(validationErrors[0]);
+    const category = req.body.category;
+    const validationErrors = validations.validateEverything(headline, subline, category);
+    if (validationErrors) {
+      next(validationErrors.join(", "));
     }
 
     const insertArticleAndRedirect = function() {
@@ -57,10 +58,12 @@ function getRouteFunction(db) {
             _id: articleId,
             approval: 'pending',
             articleURLSlug: articleURLSlug,
+            category: category,
             dateCreated: new Date(),
             headline: headline,
             imageURL: imageURL,
             sidOfAuthor: req.sessionID,
+            staffPick: false,
             subline: subline
           };
           if (req.user) { // TODO make sure not posting anonymously

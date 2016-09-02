@@ -67,7 +67,7 @@ export default Backbone.Model.extend({
   },
 
   validate: function() {
-    let validationErrors = articleValidations.validateEverything(this.get('headline'), this.get('subline')) || [];
+    let validationErrors = articleValidations.validateEverything(this.get('headline'), this.get('subline'), this.get('category')) || [];
     if (this.get('uploading')) {
       validationErrors.push("Image not finished uploading.");
     } else if (!this.get('uploaded')) {
