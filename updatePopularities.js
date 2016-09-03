@@ -3,7 +3,6 @@ const MongoClient = require('mongodb').MongoClient;
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 
 // TODO create an index on any field that needs one. IE all the date fields.
-// TODO make sure things can't timeout or whatever. mongo concerns.
 
 function handleError(err) {
   if (err !== null) {

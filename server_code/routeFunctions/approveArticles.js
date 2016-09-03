@@ -1,85 +1,79 @@
 // TODO removed the  updateSummarries, need to double check that everything is right.
 // Might as well clean up promise code while we are at it.
-const getNextId = require('../utils').getNextId;
 const logError = require('../utils').logError;
-const mongoConcerns = require('../mongoConcerns');
 
 function getRouteFunction(db) {
+  const getNextApprovalLogId = require('../utils').getNextId.bind(null, db, "approvalLogId");
   function setApproval (approvalVerdict, articleId, approverFbId) {
-    // Since we have the approval attribute in both the summary collections and the article collection
-    // and we can't update these all atomically, we first set the approval attribute in the article collection
-    // to 'inTransaction', then we set the approval attribute to the correct value in all of the summary collections,
-    // then finally, we set the approval attribute to the correct value in the article collection. If the process
-    // fails in the middle somewhere, the approval attribute in the article collection should still be in the state
-    // 'inTransaction', and we will tell the admin/initiator that he should retry the operation.
+    let articleColl;
+    let approvalLogColl;
+
+    function getArticleColl() {
+      const prom = new Promise(function(resolve,reject) {
+        db.collection('article', (err, coll) => {
+          if (err !== null) {
+            reject(err);
+          } else {
+            articleColl = coll;
+            resolve();
+          }
+        });
+      })
+      return prom;
+    }
+
+    function getApprovalLogColl() {
+      const prom = new Promise(function(resolve,reject) {
+        db.collection('approvalLog', (err, coll) => {
+          if (err !== null) {
+            reject(err);
+          } else {
+            approvalLogColl = coll;
+            resolve();
+          }
+        });
+      })
+      return prom;
+    }
+
     const prom = new Promise(function(resolve, reject) {
-
-      const rejectOnError = function(err) {
-        reject(err);
-      }
-
-      db.collection('article', (err, articleColl) => {
-        if (err !== null) {
-          reject(err);
-        } else {
-          articleColl.updateOne(
+      getArticleColl(
+      ).then(
+        getApprovalLogColl
+      ).then(
+        getNextApprovalLogId
+      ).then(
+        function insertApprovalLogEntry(id) {
+          //TODO compound index on approverFbId, _id
+          return approvalLogColl.insertOne(
             {
-              _id: articleId
+              _id: id,
+              approverFbId: approverFbId,
+              articleId: articleId,
+              timestamp: new Date(),
+              verdict: approvalVerdict
             },
             {
-              $set: {approval: 'inTransaction'}
-            },
-            {
-              wtimeout: mongoConcerns.WTIMEOUT,
               w: 'majority'
             }
-          ).then(function (result) {
-                  db.collection('approvalLog', (err, approvalLogColl) => {
-                    if (err !== null) {
-                      reject(err);
-                    } else {
-                      getNextId(db, "approvalLogId").then(
-                        function(id){
-                          //TODO compound index on approverFbId, _id
-                          approvalLogColl.insertOne(
-                            {
-                              _id: id,
-                              approverFbId: approverFbId,
-                              articleId: articleId,
-                              timestamp: new Date(),
-                              verdict: approvalVerdict
-                            },
-                            {
-                              w: 'majority',
-                              wtimeout: mongoConcerns.WTIMEOUT
-                            }
-                          ).then(
-                            function(result) {
-                              articleColl.updateOne(
-                                {
-                                  _id: articleId
-                                },
-                                {
-                                  $set: {approval: approvalVerdict},
-                                },
-                                {
-                                  w: 'majority',
-                                  wtimeout: mongoConcerns.WTIMEOUT
-                                }
-                              ).then(function (result) {
-                                  resolve(result);
-                                }, rejectOnError
-                              )
-                            }, rejectOnError
-                          ).then(function(){}, rejectOnError);
-
-                        }, rejectOnError
-                      );
-                    }
-                  });
-            }, rejectOnError
-          ).then(function(){}, rejectOnError);
+          )
         }
+      ).then(function updateArticleApproval() {
+        return articleColl.updateOne(
+          {
+            _id: articleId
+          },
+          {
+            $set: {approval: approvalVerdict},
+          },
+          {
+            w: 'majority',
+          }
+        );
+      }).then(function success(){
+        resolve();
+      }).catch(function(err) {
+        reject(err);
       });
     });
     return prom;
@@ -89,7 +83,6 @@ function getRouteFunction(db) {
     if (req.user && req.user.userType === 'admin') {
       const IDs = req.body['article_ids'];
       const approverFbId = req.user.fbId
-      //const articleURLSlug = req.body['article_url_slug'];
       const approvalVerdict = req.body['approval_verdict'];
       const promises = [];
       for (let i=0; i < IDs.length; i++) {
