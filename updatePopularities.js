@@ -89,21 +89,22 @@ function processOneInterval(db, viewsTimeInterval) {
   // NOTE: if you change these values, you may also need to change the acceptable amount of time
   // that an entry can go without being updated (look in monitorSummariesHealth() )
   let howOftenToUpdate;
-  if (viewsTimeInterval === 'daily_views') {
-    howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/; // one hour
-  } else if (viewsTimeInterval === 'weekly_views') {
-    howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // seven hours
-  } else if (viewsTimeInterval === 'monthly_views') {
-    howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
-  } else if (viewsTimeInterval === 'yearly_views') {
-    howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
+  if (process.env.NODE_ENV === 'development') {
+    howOftenToUpdate = 1000 /*sec*/ * 10; // 10 seconds
+  } else {
+    if (viewsTimeInterval === 'daily_views') {
+      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/; // one hour
+    } else if (viewsTimeInterval === 'weekly_views') {
+      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // seven hours
+    } else if (viewsTimeInterval === 'monthly_views') {
+      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
+    } else if (viewsTimeInterval === 'yearly_views') {
+      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
+    }
   }
 
-  //const threshold = new Date();
   const threshold = new Date(Date.now() - howOftenToUpdate);
   const howLongToLock = 1000 /*sec*/ * 30; // 30 seconds
-  //const howLongToLock = 1000 /*sec*/; // 1 seconds
-
 
   db.collection('article', (err, articleColl) => {
     if (err !== null) {
@@ -146,12 +147,6 @@ function monitorHealth(db) {
     return;
   }
 
-  const intervalNames = [
-    'daily_views',
-    'weekly_views',
-    'monthly_views',
-    'yearly_views',
-  ]
   const acceptableAmountOfTimeSinceLastUpdate = {
     'daily': howOftenToUpdateDaily + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/),
     'weekly': howOftenToUpdateWeekly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 2 /*2 hours*/),

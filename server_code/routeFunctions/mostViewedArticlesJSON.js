@@ -2,8 +2,6 @@ const logError = require('../utils').logError;
 const getMostViewedArticlesJSON = require('../updateSummaries').getMostViewedArticlesJSON;
 
 function getRouteFunction(db) {
-
-
   const routeFunction = function (req, res, next) {
     const dontInclude = req.body.dont_include;
     const howMany = req.body.how_many;

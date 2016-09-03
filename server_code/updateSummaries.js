@@ -55,43 +55,21 @@ function updateTimeBuckets(db, articleId, summaryName) {
   });
 }
 
-function incrementAlltimeVews(db, articleId, approval) {
-  db.collection('summary_of_all_time', (err, summaryCol) => {
+function incrementAlltimeViews(db, articleId) {
+  db.collection('article', (err, articleColl) => {
     if (err !== null) {
       handleError(err);
     } else {
-
-      function incrementView() {
-        summaryCol.updateOne(
-          {
-            _id: articleId,
-          },
-          {
-            $inc: {views: 1},
-          }
-        ).then(function (result) {
-        }, function (err) {
-          handleError(err);
-        });
-      }
-
-      summaryCol.insertOne(
+      articleColl.updateOne(
         {
           _id: articleId,
-          approval: approval,
-          views: 0
+        },
+        {
+          $inc: {all_time_views: 1},
         }
-      ).then(function(result) {
-          incrementView();
-        }, function(err) {
-          if (err.code === duplicateKeyErrorCode) {
-            incrementView();
-          } else {
-            handleError(err);
-          }
-        }
-      ).then(function(){}, function(err){handleError(err)});
-
+      ).then(function (result) {}, function (err) {
+        handleError(err);
+      });
     }
   });
 }
@@ -160,12 +138,16 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
         if (err !== null) {
           reject(err);
         } else {
+          let views = timeInterval + '_views';
+          if (timeInterval !== 'all_time') {
+            views += '.views';
+          }
           articleColl.find({
             _id: {
               $nin: dontInclude
             },
             approval: 'approved'
-          }).sort([[timeInterval + '_views.views', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
+          }).sort([[views, -1]]).skip(skipAheadAmount).limit(howMany).toArray(
             function (err, articles) {
               if (err !== null) {
                 reject(err);
@@ -179,7 +161,6 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
     }
   });
   return prom;
-
 }
 
 // Basically, when an article is viewed, this method will be called so that
@@ -193,7 +174,7 @@ function incrementViews(db, articleId) {
   updateTimeBuckets(db, articleId, 'weekly');
   updateTimeBuckets(db, articleId, 'monthly');
   updateTimeBuckets(db, articleId, 'yearly');
-  incrementAlltimeVews(db, articleId);
+  incrementAlltimeViews(db, articleId);
 }
 
 module.exports = {
