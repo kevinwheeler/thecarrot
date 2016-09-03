@@ -55,33 +55,6 @@ function updateTimeBuckets(db, articleId, summaryName) {
   });
 }
 
-/*
- *  If this article isn't already in the summary collection, insert it.
- */
-function insertIntoSummary(db, articleId, approval, summaryName) {
-  const collectionName = 'summary_of_' + summaryName;
-  db.collection(collectionName, (err, summaryCol) => {
-    if (err !== null) {
-      handleError(err);
-    } else {
-      summaryCol.insertOne(
-        {
-          _id: articleId,
-          approval: approval,
-          lastUpdated: new Date(),
-          lockedUntil: new Date(),
-          views: 1
-        }
-      ).then(function(result){}, function(err) {
-        if (err.code === duplicateKeyErrorCode) {
-          return;
-        }
-        handleError(err);
-      });
-    }
-  });
-}
-
 function incrementAlltimeVews(db, articleId, approval) {
   db.collection('summary_of_all_time', (err, summaryCol) => {
     if (err !== null) {
@@ -123,66 +96,90 @@ function incrementAlltimeVews(db, articleId, approval) {
   });
 }
 
-function getApprovalStatus(db, articleId) {
-  const prom = new Promise(function(resolve, reject) {
-    db.collection('article', (err, collection) => {
-      if (err !== null) {
-        reject(err);
-      } else {
-        collection.find({
-          _id: articleId
-        }).next().then(
-          function(article) {
-            resolve(article.approval);
-          },
-          function(err) {
-            reject(err);
-          }
-        );
-      }
-    });
-  });
-  return prom;
+function getInitialSummaryAttributes() {
+  const retVal = {};
+  const intervals = ['daily', 'weekly', 'monthly', 'yearly'];
+
+  for (let i=0; i < intervals.length; i++) {
+    const keyName = intervals[i] + '_views';
+    retVal[keyName] = {
+      lastUpdated: new Date(),
+      lockedUntil: new Date(),
+      views: 1
+    }
+  }
+
+  retVal.all_time_views = 1;
+  return retVal
 }
 
-// Returns a promise that resolves if the approval status was set in all of the summary collections.
-// Rejects if the approval status failed to set in any summary collection. (If it rejects, it can leave
-// the approval status set in some summary collection and unset in others), in which case you should retry.
-function setApprovalStatus(db, articleId, approval) {
-  const collectionNames = [
-    'summary_of_daily',
-    'summary_of_weekly',
-    'summary_of_monthly',
-    'summary_of_yearly',
-    'summary_of_all_time',
-  ];
 
-  const promises = [];
-  for(let i=0; i < collectionNames.length; i++) {
-    const prom = new Promise(function(resolve, reject) {
-      db.collection(collectionNames[i], (err, summaryColl) => {
+function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount) {
+  const MAX_ARTICLES_PER_REQUEST = 50;
+  const MAX_SKIP_AHEAD_AMOUNT = 1000;
+
+  let validationErrors = [];
+
+  if (typeof(dontInclude) !== "object") {
+    validationErrors.push("dontInclude invalid");
+  }
+
+  if (typeof(howMany) !== "number" || howMany < 1 || howMany > MAX_ARTICLES_PER_REQUEST) {
+    validationErrors.push("howMany invalid");
+  }
+
+  if (timeInterval !== 'daily' && timeInterval !== 'weekly' && timeInterval !== 'monthly'
+    && timeInterval !== 'yearly' && timeInterval !== 'all_time') {
+    validationErrors.push("invalid time interval");
+  }
+
+  if (typeof(skipAheadAmount) !== "number" || Number.isNaN(skipAheadAmount) || skipAheadAmount < 0 || skipAheadAmount > MAX_SKIP_AHEAD_AMOUNT) {
+    validationErrors.push("skipAheadAmount invalid");
+  }
+
+  if (validationErrors.length) {
+    validationErrors = new Error(JSON.stringify(validationErrors));
+    validationErrors.clientError = true;
+  } else {
+    validationErrors = null;
+  }
+
+  return validationErrors;
+}
+
+//TODO project
+// Returns an error object or null. If a parameter didn't pass validation, the error object
+// will have the property clientError set to true so that the caller can send an http 4xx response instead of a 5xx response.
+function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount) {
+  let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount);
+  let prom = new Promise(function(resolve, reject) {
+    if (validationErrors !== null) {
+      reject(validationErrors)
+    } else {
+      db.collection('article', (err, articleColl) => {
         if (err !== null) {
           reject(err);
         } else {
-          summaryColl.updateOne(
-            {
-              _id: articleId,
+          articleColl.find({
+            _id: {
+              $nin: dontInclude
             },
-            {
-              $set: {approval: approval}
-            }
-          ).then(function(result) {
-            resolve(result);
-            }, function(err) {
-              reject(err);
+            approval: 'approved'
+          }).sort([[timeInterval + '_views.views', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
+            function (err, articles) {
+              if (err !== null) {
+                reject(err);
+              } else {
+                resolve(articles);
+              }
             }
           );
         }
       });
-    });
-    promises.push(prom);
-  }
-  return Promise.all(promises);
+    }
+  });
+  return prom;
+
 }
 
 // Basically, when an article is viewed, this method will be called so that
@@ -196,21 +193,11 @@ function incrementViews(db, articleId) {
   updateTimeBuckets(db, articleId, 'weekly');
   updateTimeBuckets(db, articleId, 'monthly');
   updateTimeBuckets(db, articleId, 'yearly');
-  getApprovalStatus(db, articleId).then(
-    function(approval) {
-      insertIntoSummary(db, articleId, approval, 'daily');
-      insertIntoSummary(db, articleId, approval, 'weekly');
-      insertIntoSummary(db, articleId, approval, 'monthly');
-      insertIntoSummary(db, articleId, approval, 'yearly');
-      incrementAlltimeVews(db, articleId, approval);
-    },
-    function(err) {
-      handleError(err);
-    }
-  ).then(function(){}, function(err){handleError(err)});
+  incrementAlltimeVews(db, articleId);
 }
 
 module.exports = {
   incrementViews: incrementViews,
-  setApprovalStatus: setApprovalStatus
+  getInitialSummaryAttributes: getInitialSummaryAttributes,
+  getMostViewedArticlesJSON: getMostViewedArticlesJSON,
 };

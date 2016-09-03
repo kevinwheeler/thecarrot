@@ -29,7 +29,8 @@ const logError = function(err) {
   // From function L we will call logError and logError will call console.trace(). That way the line number
   // of this L will be captured/traced, and we can figure out where the error originated from.
   // Note: We also use this in other cases besides just when passing in a lambda/inline function as an argument/callback
-  // to another function.
+  // to another function. Use it any time you have an error object in your hand that came from a different line of code,
+  // and you want the current line of code to be noted/traced.
   console.trace("Caught from:");
 }
 

@@ -22,7 +22,11 @@ const distDir = __dirname + '/modern-backbone-starterkit/dist/';
 
 const MONGO_URI = process.env.MONGODB_URI;
 
-MongoClient.connect(MONGO_URI, (err, db) => {
+MongoClient.connect(MONGO_URI,
+  {
+    wtimeout: 1000*15
+  },
+  (err, db) => {
   if (err !== null) {
     logError(err);
     throw err;

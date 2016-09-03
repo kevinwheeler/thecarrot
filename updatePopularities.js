@@ -2,7 +2,8 @@ const MONGO_URI = process.env.MONGODB_URI;
 const MongoClient = require('mongodb').MongoClient;
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 
-//TODO create an index on any field that needs one. IE all the date fields.
+// TODO create an index on any field that needs one. IE all the date fields.
+// TODO make sure things can't timeout or whatever. mongo concerns.
 
 function handleError(err) {
   if (err !== null) {
@@ -12,19 +13,19 @@ function handleError(err) {
   }
 }
 
-function updateCollEntry(db, summaryCollName, articleId) {
+function updateCollEntry(db, viewsTimeInterval, articleId) {
   let timeBucketCollName;
   let sumFromDate;
-  if (summaryCollName === 'summary_of_daily') {
+  if (viewsTimeInterval === 'daily_views') {
     timeBucketCollName = 'time_buckets_for_daily';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/));
-  } else if (summaryCollName === 'summary_of_weekly') {
+  } else if (viewsTimeInterval === 'weekly_views') {
     timeBucketCollName = 'time_buckets_for_weekly';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/));
-  } else if (summaryCollName === 'summary_of_monthly') {
+  } else if (viewsTimeInterval === 'monthly_views') {
     timeBucketCollName = 'time_buckets_for_monthly';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 30 /*month*/));
-  } else if (summaryCollName === 'summary_of_yearly') {
+  } else if (viewsTimeInterval === 'yearly_views') {
     timeBucketCollName = 'time_buckets_for_yearly';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 365 /*year*/));
   }
@@ -46,32 +47,31 @@ function updateCollEntry(db, summaryCollName, articleId) {
         ],
         function(err, result) {
           if (err !== null) {
-            throw err;
+            handleError(err);
           }
-          db.collection(summaryCollName, (err, summaryColl) => {
+          db.collection('article', (err, articleColl) => {
             if (err !== null) {
-              throw err;
+              handleError(err);
             } else {
               const hasViews = result.length !== 0;
+              let views;
               if (hasViews) {
-                summaryColl.updateOne(
-                  {
-                   _id: articleId,
-                  },
-                  {
-                    $set: {
-                      lastUpdated: new Date(),
-                      views: result[0].totalViews
-                    }
-                  }
-                );
+                views = result[0].totalViews;
               } else {
-                summaryColl.deleteOne(
-                  {
-                   _id: articleId
-                  }
-                );
+                views = 0;
               }
+              const setVal = {};
+              setVal[viewsTimeInterval + '.lastUpdated'] = new Date();
+              setVal[viewsTimeInterval + '.views'] = views;
+
+              articleColl.updateOne(
+                {
+                 _id: articleId,
+                },
+                {
+                  $set: setVal
+                }
+              );
             }
           });
         }
@@ -85,41 +85,49 @@ const howOftenToUpdateWeekly = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // s
 const howOftenToUpdateMonthly = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
 const howOftenToUpdateYearly = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
 
-function processOneColl(db, collName) {
+function processOneInterval(db, viewsTimeInterval) {
   // NOTE: if you change these values, you may also need to change the acceptable amount of time
   // that an entry can go without being updated (look in monitorSummariesHealth() )
   let howOftenToUpdate;
-  if (collName === 'summary_of_daily') {
+  if (viewsTimeInterval === 'daily_views') {
     howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/; // one hour
-  } else if (collName === 'summary_of_weekly') {
+  } else if (viewsTimeInterval === 'weekly_views') {
     howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // seven hours
-  } else if (collName === 'summary_of_monthly') {
+  } else if (viewsTimeInterval === 'monthly_views') {
     howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
-  } else if (collName === 'summary_of_yearly') {
+  } else if (viewsTimeInterval === 'yearly_views') {
     howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
   }
 
-  const threshold = new Date();
-  //const threshold = new Date(Date.now() - howOftenToUpdate);
-  //const howLongToLock = 1000 /*sec*/ * 30; // 30 seconds
-  const howLongToLock = 1000 /*sec*/; // 1 seconds
+  //const threshold = new Date();
+  const threshold = new Date(Date.now() - howOftenToUpdate);
+  const howLongToLock = 1000 /*sec*/ * 30; // 30 seconds
+  //const howLongToLock = 1000 /*sec*/; // 1 seconds
 
 
-  db.collection(collName, (err, summaryCol) => {
+  db.collection('article', (err, articleColl) => {
     if (err !== null) {
-      throw err;
+      handleError(err);
     } else {
-      summaryCol.findOneAndUpdate(
+      const filter = {};
+      filter[viewsTimeInterval + '.lastUpdated'] = {$lt: threshold};
+      filter[viewsTimeInterval + '.lockedUntil'] = {$lt: new Date()}; // lock so that multiple workers will divide up work
+      // filter will look something like this
+      //{
+      //  daily_views.lastUpdated': {$lt: threshold},
+      //  daily_views.lockedUntil': {$lt: new Date()}
+      //}
+      const setVal = {};
+      setVal[viewsTimeInterval + '.lockedUntil'] = new Date(Date.now() + howLongToLock);
+
+      articleColl.findOneAndUpdate(
+        filter,
         {
-         'lastUpdated': {$lt: threshold},
-         'lockedUntil': {$lt: new Date()} // so multiple workers will divide up work
-        },
-        {
-          $set: {'lockedUntil': new Date(Date.now() + howLongToLock)},
+          $set: setVal
         }
       ).then(function(result) {
           if (result.value !== null) {
-            updateCollEntry(db, collName, result.value._id)
+            updateCollEntry(db, viewsTimeInterval, result.value._id)
           }
         }, function(err){
           handleError(err);
@@ -127,22 +135,28 @@ function processOneColl(db, collName) {
       ).then(function(r){}, function(err){handleError(err)});
     }
   });
-  
-  
 }
 
-function monitorSumarriesHealth(db) {
-  const collectionNames = [
-    'summary_of_daily',
-    'summary_of_weekly',
-    'summary_of_monthly',
-    'summary_of_yearly',
+/*
+ TODO when we insert an article, do we need to initialize these values?
+ */
+
+function monitorHealth(db) {
+  if (process.env.NODE_ENV === 'development') {
+    return;
+  }
+
+  const intervalNames = [
+    'daily_views',
+    'weekly_views',
+    'monthly_views',
+    'yearly_views',
   ]
   const acceptableAmountOfTimeSinceLastUpdate = {
-    'summary_of_daily': howOftenToUpdateDaily + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/),
-    'summary_of_weekly': howOftenToUpdateWeekly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 2 /*2 hours*/),
-    'summary_of_monthly': howOftenToUpdateMonthly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7 /*7 hours*/),
-    'summary_of_yearly': howOftenToUpdateYearly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*1 day*/)
+    'daily': howOftenToUpdateDaily + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/),
+    'weekly': howOftenToUpdateWeekly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 2 /*2 hours*/),
+    'monthly': howOftenToUpdateMonthly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7 /*7 hours*/),
+    'yearly': howOftenToUpdateYearly + (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*1 day*/)
   }
 
   db.collection('random_stuff', (err, randColl) => {
@@ -159,51 +173,61 @@ function monitorSumarriesHealth(db) {
       ).then(function(result) {
           const howOftenToMonitor = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; /*7 hours*/
           if (result == null || result.lastMonitoredAt < new Date(Date.now() - howOftenToMonitor)) {
-            for (let i = 0; i < collectionNames.length; i++) {
-              const collectionName = collectionNames[i];
-              db.collection(collectionName, (err, summaryCol) => {
-                if (err !== null) {
-                  throw err;
-                } else {
-                  const threshold = new Date(Date.now() - acceptableAmountOfTimeSinceLastUpdate[collectionNames[i]]);
-                  summaryCol.find(
-                    {
-                     'lastUpdated': {$lt: threshold},
-                    }
-                  ).count().then(function(count){
+            db.collection('article', (err, articleCol) => {
+              if (err !== null) {
+                throw err;
+              } else {
+                articleCol.find(
+                  {
+                    $or: [
+                      {'daily_views.lastUpdated':{$lt: acceptableAmountOfTimeSinceLastUpdate.daily}},
+                      {'weekly_views.lastUpdated':{$lt: acceptableAmountOfTimeSinceLastUpdate.weekly}},
+                      {'monthly_views.lastUpdated':{$lt: acceptableAmountOfTimeSinceLastUpdate.monthly}},
+                      {'yearly_views.lastUpdated':{$lt: acceptableAmountOfTimeSinceLastUpdate.yearly}},
+                    ]
+                  }
+                ).count().then(function(count) {
+                    const prom = new Promise(function(resolve, reject) {
                       if (count) {
-                        if (process.env.NODE_ENV !== 'development') {
-                          sendgrid.send({
-                              to: process.env.ALERT_EMAIL_ADDRESS,
-                              from: 'noreply@' + process.env.DOMAIN_NAME,
-                              subject: process.env.DOMAIN_NAME + ' ALERT - most viewed sumarry out of date',
-                              text: 'collectionName = ' + collectionName
-                            }, function (err, json) {
-                              if (err) {
-                                handleError(err);
-                              }
+                        sendgrid.send({
+                            to: process.env.ALERT_EMAIL_ADDRESS,
+                            from: 'noreply@' + process.env.DOMAIN_NAME,
+                            subject: process.env.DOMAIN_NAME + ' ALERT - most viewed summary out of date',
+                            text: 'Health check failed.'
+                          }, function (err, json) {
+                            if (err) {
+                              reject(err);
+                            } else {
+                              resolve("Health check failed. Alerted via email.");
                             }
-                          );
-                        }
+                          }
+                        );
+                      } else {
+                        resolve("Everything looks good.")
                       }
-                      randColl.updateOne(
-                        {
-                         _id: 'summariesLastMonitored',
-                        },
-                        {
-                          $set: {'lastMonitoredAt': new Date()}
-                        },
-                        {
-                          upsert: true
-                        }
-                      )
-                    }, function(err) {
-                      handleError(err);
-                    }
-                  ).then(function(r){}, function(err){handleError(err)});
-                }
-              });
-            }
+                    });
+                    return prom;
+                  }, function(err) {
+                    handleError(err);
+                  }
+                ).then(function() {
+                    randColl.updateOne(
+                      {
+                        _id: 'summariesLastMonitored',
+                      },
+                      {
+                        $set: {'lastMonitoredAt': new Date()}
+                      },
+                      {
+                        upsert: true
+                      }
+                    )
+                  }, function(err) {
+                    handleError(err);
+                  }
+                ).then(function(r){}, function(err){handleError(err)});
+              }
+            });
           }
         }, function(err){
           handleError(err);
@@ -254,33 +278,37 @@ function processAll(db) {
 
 
   for (let i = 0; i < numProcessesForDaily; i++) {
-    processOneColl(db, 'summary_of_daily');
+    processOneInterval(db, 'daily_views');
   }
   for (let i = 0; i < numProcessesForWeekly; i++) {
-    processOneColl(db, 'summary_of_weekly');
+    processOneInterval(db, 'weekly_views');
   }
   for (let i = 0; i < numProcessesForMonthly; i++) {
-    processOneColl(db, 'summary_of_monthly');
+    processOneInterval(db, 'monthly_views');
   }
   for (let i = 0; i < numProcessesForYearly; i++) {
-    processOneColl(db, 'summary_of_yearly');
+    processOneInterval(db, 'yearly_views');
   }
   
-  monitorSumarriesHealth(db);
+  monitorHealth(db);
   deleteOldTimeBucketEntries(db);
 }
 
 
 
-MongoClient.connect(MONGO_URI, (err, db) => {
-  if (err !== null) {
-    handleError(err);
-  } else {
-    setInterval(function(){
-        for (let i = 0; i < 10; i++) {
-          processAll(db);
-        }
-      }, 1000
-    );
-  }
+MongoClient.connect(MONGO_URI,
+  {
+    wtimeout: 1000*15
+  },
+  (err, db) => {
+    if (err !== null) {
+      handleError(err);
+    } else {
+      setInterval(function(){
+          for (let i = 0; i < 10; i++) {
+            processAll(db);
+          }
+        }, 1000
+      );
+    }
 });

@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const getURLSlug = require('../slugutil').getURLSlug;
 const logError = require('../utils').logError;
 const mongoConcerns = require('../mongoConcerns');
@@ -66,21 +67,19 @@ function getRouteFunction(db) {
             staffPick: false,
             subline: subline
           };
+          const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
+          _.merge(doc, initialSummaryAttributes);
+
           if (req.user) { // TODO make sure not posting anonymously
             doc.authorId = req.user.fbId;
           }
           collection.insert(doc, {
               w: "majority",
-              wtimeout: mongoConcerns.WTIMEOUT
             },
             (error, result) => {
               if (error !== null) {
                 next(error);
               } else {
-                // Pretend the article has been viewed once, so that it will be inserted into the most popular
-                // by day/week/month/year lists. Since views don't get counted until the article has been approved,
-                // the redirect won't add a view, so we add one manually here.
-                updateSummaries.incrementViews(db, articleId);
                 notifyAdminViaEmail(articleURLSlug);
                 res.redirect('/article/' + articleURLSlug);
               }

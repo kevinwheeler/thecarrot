@@ -1,7 +1,8 @@
+// TODO removed the  updateSummarries, need to double check that everything is right.
+// Might as well clean up promise code while we are at it.
 const getNextId = require('../utils').getNextId;
 const logError = require('../utils').logError;
 const mongoConcerns = require('../mongoConcerns');
-const updateSummaries = require('../updateSummaries');
 
 function getRouteFunction(db) {
   function setApproval (approvalVerdict, articleId, approverFbId) {
@@ -33,8 +34,6 @@ function getRouteFunction(db) {
               w: 'majority'
             }
           ).then(function (result) {
-              updateSummaries.setApprovalStatus(db, articleId, approvalVerdict).then(
-                function (result) {
                   db.collection('approvalLog', (err, approvalLogColl) => {
                     if (err !== null) {
                       reject(err);
@@ -78,8 +77,6 @@ function getRouteFunction(db) {
                       );
                     }
                   });
-                },rejectOnError
-              ).then(function(){}, rejectOnError);
             }, rejectOnError
           ).then(function(){}, rejectOnError);
         }

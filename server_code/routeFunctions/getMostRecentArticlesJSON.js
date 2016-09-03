@@ -7,7 +7,7 @@ function getRouteFunction(db) {
 
   // Returns an error object or null. If error object isn't null, will have the property
   // clientError set to true so that we can send a 4xx response instead of a 5xx response.
-  function validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount) {
+  function validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount, category, staffPicksOnly) {
     let validationErrors = [];
     if (typeof(maxId) !== "number" || Number.isNaN(maxId) || maxId < 0) {
       validationErrors.push("maxId invalid");
@@ -31,7 +31,7 @@ function getRouteFunction(db) {
   }
 
 
-  function getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount) {
+  function getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount, category, staffPicksOnly) {
     let validationErrors = validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount);
 
     let prom = new Promise(function(resolve, reject) {
@@ -67,6 +67,8 @@ function getRouteFunction(db) {
     const maxId = parseInt(req.query.max_id, 10);
     const howMany = parseInt(req.query.how_many, 10);
     const skipAheadAmount = parseInt(req.query.skip_ahead_amount, 10);
+    const category = req.query.category;
+    const staffPicksOnly = req.query.skip_ahead_amount;
     getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount).then(
       function(articlesJSON) {
         res.send(articlesJSON);
