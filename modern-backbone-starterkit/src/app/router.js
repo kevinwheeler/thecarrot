@@ -6,16 +6,16 @@ import serviceProvider from './utils/serviceProvider.js';
 export default Backbone.Router.extend({
 
   // IMPORTANT: Routes need to be duplicated on server code and in navbar code.
+  // also categories duplicated here in router.getCategory()
   routes: {
     'business'      : 'categoryRoute',
-    'education'     : 'categoryRoute',
     'other'         : 'categoryRoute',
     'politics'      : 'categoryRoute',
     'spirituality'  : 'categoryRoute',
     'sports'        : 'categoryRoute',
-    'technology'    : 'categoryRoute',
+    'science-and-technology'    : 'categoryRoute',
 
-    '': 'homeRoute',
+    '': 'categoryRoute',
     'admin'       : 'adminRoute',
     'admin/my-approval-histor:y'       : 'adminRoute',
     'article/:articleSlug'       : 'articleRoute',
@@ -56,7 +56,7 @@ export default Backbone.Router.extend({
   //  var self = this;
 
   //  //TODO for peformance reasons, it would be better to not use event delegation on document.
-  //  $(document).on('click', 'a.rwc-dont-pageload', function(evt) {
+  //  $(document).on('click', 'a.kmw-dont-pageload', function(evt) {
   //    let href = $(this).attr('href');
   //    let isRootRelativeUrl = (href.charAt(0) === '/') && (href.charAt(1) !== '/');
   //    if (isRootRelativeUrl) {
@@ -97,6 +97,26 @@ export default Backbone.Router.extend({
     let articleSlug = url.substring(url.lastIndexOf('/') + 1);
     const id = parseInt(articleSlug, 10);
     return id;
+  },
+
+  // returns the category of the current route. Returns 'home' if we are on the homepage, and returns 'N/A' if we
+  // aren't on a category route.
+  getCategory() {
+    const pathnameToCategoryMap = {
+      '/'                          : 'home',
+      '/business'                  : 'business',
+      '/entertainment'             : 'entertainment',
+      '/other'                     : 'other',
+      '/politics'                  : 'politics',
+      '/spirituality'              : 'spirituality',
+      '/sports'                    : 'sports',
+      '/science-and-technology'    : 'science-and-technology',
+    }
+    let category = pathnameToCategoryMap[window.location.pathname];
+    if (category === undefined) {
+      category = 'N/A'
+    }
+    return category;
   },
 
   articleRoute() {

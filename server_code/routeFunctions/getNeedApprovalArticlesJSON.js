@@ -39,7 +39,7 @@ function getRouteFunction(db) {
             //TODO consider a compound index on approval, id.
             articleColl.find({
               _id: {$gte: minId},
-              approval: {$in: ['pending', 'inTransaction']}
+              approval: 'pending'
             }).sort([['_id', 1]]).limit(howMany).toArray(
               function (err, articles) {
                 if (err !== null) {

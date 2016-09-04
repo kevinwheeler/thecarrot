@@ -4,8 +4,11 @@ import ArticleModel from 'MODELSDIR/articleModel';
 export default Backbone.Collection.extend({
   //These first few attributes are standard backbone attrbibutes that can be read about in the docs.
   initialize: function(options) {
-    this.minId = Number.MAX_SAFE_INTEGER;
+    this.category= options.category;
     this.skipAheadAmount = options.skipAheadAmount;
+    this.staffPicksOnly = options.staffPicksOnly;
+
+    this.minId = Number.MAX_SAFE_INTEGER;
     this.currentlyFetching = false;
     this.noMoreResults = false;
   },
@@ -36,9 +39,11 @@ export default Backbone.Collection.extend({
       this.currentlyFetching = true;
       this.fetch({
         data: $.param({
+          category: this.category,
           how_many: 10,
           max_id: this.minId - 1,
           skip_ahead_amount: this.skipAheadAmount,
+          staff_picks_only: this.staffPicksOnly
         }),
         remove: false
       });

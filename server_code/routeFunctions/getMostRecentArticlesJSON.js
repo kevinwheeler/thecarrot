@@ -21,6 +21,21 @@ function getRouteFunction(db) {
       validationErrors.push("skipAheadAmount invalid");
     }
 
+    if (category !== "politics" && category !== "spirituality" && category !== "all") {
+      validationErrors.push("category invalid");
+    }
+
+    if (typeof(staffPicksOnly) !== "boolean") {
+      validationErrors.push("staffPicksOnly invalid");
+    }
+
+    if (staffPicksOnly && category !== "all") {
+      // we might change this later, but for now we aren't implementing the ability to request staff picks from a
+      // particular category.
+      validationErrors.push("Invalid combo of staff_picks_only and category");
+    }
+
+
     if (validationErrors.length) {
       validationErrors = new Error(JSON.stringify(validationErrors));
       validationErrors.clientError = true;
@@ -32,7 +47,7 @@ function getRouteFunction(db) {
 
 
   function getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount, category, staffPicksOnly) {
-    let validationErrors = validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount);
+    let validationErrors = validateMostRecentArticlesParams(maxId, howMany, skipAheadAmount, category, staffPicksOnly);
 
     let prom = new Promise(function(resolve, reject) {
       if (validationErrors !== null) {
@@ -43,10 +58,18 @@ function getRouteFunction(db) {
             reject(err);
           } else {
             //TODO consider a compound index on approval, id.
-            collection.find({
+            const filter = {
               _id: {$lte: maxId},
               approval: 'approved'
-            }).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
+            };
+            if (category !== 'all') {
+              filter.category = category;
+            }
+            if (staffPicksOnly === true) {
+              filter.staffPick = true;
+            }
+
+            collection.find(filter).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
               function (err, articles) {
                 if (err !== null) {
                   reject(err);
@@ -68,8 +91,14 @@ function getRouteFunction(db) {
     const howMany = parseInt(req.query.how_many, 10);
     const skipAheadAmount = parseInt(req.query.skip_ahead_amount, 10);
     const category = req.query.category;
-    const staffPicksOnly = req.query.skip_ahead_amount;
-    getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount).then(
+    let staffPicksOnly = req.query.staff_picks_only;
+    if (staffPicksOnly === 'false') {
+      staffPicksOnly = false;
+    } else if (staffPicksOnly === 'true') {
+      staffPicksOnly = true;
+    }
+
+    getMostRecentArticlesJSON(maxId, howMany, skipAheadAmount, category, staffPicksOnly).then(
       function(articlesJSON) {
         res.send(articlesJSON);
       },

@@ -1,3 +1,8 @@
+/*
+ * We use an absolutely positioned navbar with a regularly positioned element of equal height underneath it. We wanted
+ * the navbar to be absolutely positioned so that we could make it sticky. So then we stuck a regularly positioned element
+ * of equal height underneat it so that the actual content of the page won't accidentally go underneath it.
+ */
 import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
@@ -9,9 +14,8 @@ import bootstrap from 'bootstrap';
 import template from 'TEMPLATESDIR/navTemplate.hbs';
 import viewport from 'bootstrapToolkit';
 
-//export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-  //Thesee first few properties are standard Backbone properties. Look them up in Backbone's documentation.
+  //These first few properties are standard Backbone properties. Look them up in Backbone's documentation.
   className: 'kmw-nav navbar',
 
   initialize: function(options = {}) {
@@ -24,11 +28,6 @@ export default Backbone.View.extend({
     this.updateWhenBreakpointReached();
     this.toggleStickyOnScroll();
     this.setActiveElement();
-
-    let self = this;
-    //setInterval(function(){self.disableSticky()},750);
-
-    _.bindAll(this, 'collapse');
   },
 
   tagName: 'nav',
@@ -36,11 +35,6 @@ export default Backbone.View.extend({
   template: template,
 
   render: _.throttle(function() {
-      //this.isLoggedIn = window.kmw.user !== undefined;
-      //let fbId;
-      //if (this.isLoggedIn) {
-      //  fbId = window.kmw.user.fbId;
-      //}
       this.$el.html(this.template({
         doneFetching: this.currentUser.get('doneFetching'),
         loggedIn: this.currentUser.get('loggedIn'),
@@ -51,10 +45,6 @@ export default Backbone.View.extend({
   ),
 
   // All of the following properties are not standard backbone properties.
-  collapse: function() {
-    this.$('#rwc-nav-collapse').collapse('hide');
-  },
-
   disableSticky: function() {
     this.$('.kmw-navbar-header').removeClass('kmw-navbar-header-sticky');
     this.$('.kmw-navbar').removeClass('kmw-navbar-sticky');

@@ -13,7 +13,7 @@ function getRouteFunction(db) {
       },
       function(err) {
         if (err.clientError === true){
-          res.status(400).send("Something went wrong.");;
+          res.status(400).send("Something went wrong.");
         } else {
           logError(err);
           next(err);

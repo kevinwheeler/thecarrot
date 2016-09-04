@@ -85,7 +85,8 @@ var serviceProvider = {
     const articleGridViewInst = new ArticleGridView();
 
     const mostRecentPopularToggleViewInst = new MostRecentPopularToggleView({
-      articleGridView: articleGridViewInst
+      articleGridView: articleGridViewInst,
+      router: this.getRouter()
     });
 
     const homeViewInst = new HomeView({

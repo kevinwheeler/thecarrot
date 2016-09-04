@@ -7,7 +7,7 @@ import template from 'TEMPLATESDIR/homeTemplate.hbs';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
-  className: 'rwc-home-view',
+  className: 'kmw-home-view',
 
   initialize: function(options = {}) {
     this.navView = options.navView;

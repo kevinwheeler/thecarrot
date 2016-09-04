@@ -2,7 +2,9 @@ const MONGO_URI = process.env.MONGODB_URI;
 const MongoClient = require('mongodb').MongoClient;
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 
-// TODO create an index on any field that needs one. IE all the date fields.
+// TODO indexes
+// TODO move most of the code out of this file into one combined/encapsulated file with the rest of the
+// related logic that is currently found in updateSummaries.js
 
 function handleError(err) {
   if (err !== null) {
