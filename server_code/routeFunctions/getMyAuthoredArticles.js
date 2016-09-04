@@ -1,4 +1,5 @@
 const logError = require('../utils').logError;
+const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 
 function getRouteFunction(db) {
 
@@ -45,7 +46,7 @@ function getRouteFunction(db) {
             collection.find({
               _id: {$lte: maxId},
               authorId: fbId
-            }).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
+            }).project(publicArticleFieldsProjection).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
               function (err, articles) {
                 if (err !== null) {
                   reject(err);

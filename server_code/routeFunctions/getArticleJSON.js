@@ -1,6 +1,7 @@
+const _ = require('lodash');
 const logError = require('../utils').logError;
 const send404 = require('../utils').send404;
-
+const privateArticleFields = require('../utils').privateArticleFields;
 
 function getRouteFunction(db) {
    return function (req, res, next) {
@@ -25,7 +26,8 @@ function getRouteFunction(db) {
                } else {
                  article.viewerIsAuthor = false;
                }
-               res.json(article)
+               const args = [article].concat(privateArticleFields);
+               res.json(_.omit.apply(null, args));
              }
            }
          });

@@ -2,6 +2,7 @@
  * Related files: migrations/2createSummaryIndexes.js, updatePopularities.js
  *
  */
+const publicArticleFieldsProjection = require('./utils').publicArticleFieldsProjection;
 const timebucket = require('timebucket');
 
 const duplicateKeyErrorCode = 11000;
@@ -92,7 +93,7 @@ function getInitialSummaryAttributes() {
 }
 
 
-function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount) {
+function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly) {
   const MAX_ARTICLES_PER_REQUEST = 50;
   const MAX_SKIP_AHEAD_AMOUNT = 1000;
 
@@ -115,6 +116,20 @@ function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, sk
     validationErrors.push("skipAheadAmount invalid");
   }
 
+  if (category !== "politics" && category !== "spirituality" && category !== "all") {
+    validationErrors.push("category invalid");
+  }
+
+  if (typeof(staffPicksOnly) !== "boolean") {
+    validationErrors.push("staffPicksOnly invalid");
+  }
+
+  if (staffPicksOnly && category !== "all") {
+    // we might change this later, but for now we aren't implementing the ability to request staff picks from a
+    // particular category.
+    validationErrors.push("Invalid combo of staff_picks_only and category");
+  }
+
   if (validationErrors.length) {
     validationErrors = new Error(JSON.stringify(validationErrors));
     validationErrors.clientError = true;
@@ -125,11 +140,10 @@ function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, sk
   return validationErrors;
 }
 
-//TODO project
 // Returns an error object or null. If a parameter didn't pass validation, the error object
 // will have the property clientError set to true so that the caller can send an http 4xx response instead of a 5xx response.
-function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount) {
-  let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount);
+function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly) {
+  let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly);
   let prom = new Promise(function(resolve, reject) {
     if (validationErrors !== null) {
       reject(validationErrors)
@@ -142,12 +156,19 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
           if (timeInterval !== 'all_time') {
             views += '.views';
           }
-          articleColl.find({
+          const filter = {
             _id: {
               $nin: dontInclude
             },
             approval: 'approved'
-          }).sort([[views, -1]]).skip(skipAheadAmount).limit(howMany).toArray(
+          };
+          if (category !== 'all') {
+            filter.category = category;
+          }
+          if (staffPicksOnly === true) {
+            filter.staffPick = true;
+          }
+          articleColl.find(filter).project(publicArticleFieldsProjection).sort([[views, -1]]).skip(skipAheadAmount).limit(howMany).toArray(
             function (err, articles) {
               if (err !== null) {
                 reject(err);

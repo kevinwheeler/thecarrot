@@ -7,7 +7,15 @@ function getRouteFunction(db) {
     const howMany = req.body.how_many;
     const timeInterval = req.body.time_interval;
     const skipAheadAmount = parseInt(req.body.skip_ahead_amount, 10);
-    getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount).then(
+    const category = req.body.category;
+    let staffPicksOnly = req.body.staff_picks_only;
+    //if (staffPicksOnly === 'false') {
+    //  staffPicksOnly = false;
+    //} else if (staffPicksOnly === 'true') {
+    //  staffPicksOnly = true;
+    //}
+
+    getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly).then(
       function(articlesJSON) {
         res.send(articlesJSON);
       },

@@ -1,4 +1,5 @@
 const logError = require('../utils').logError;
+const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 
 function getRouteFunction(db) {
 
@@ -69,7 +70,7 @@ function getRouteFunction(db) {
               filter.staffPick = true;
             }
 
-            collection.find(filter).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
+            collection.find(filter).project(publicArticleFieldsProjection).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
               function (err, articles) {
                 if (err !== null) {
                   reject(err);

@@ -72,8 +72,6 @@ export default Backbone.Router.extend({
   currentRouteIsAdminArticleRoute() {
     let url = window.location.pathname;
 
-    console.log("in is admin route?");
-    console.log(url.indexOf('/admin/article'));
     if (url.indexOf('/admin/article') === 0) {
       return true;
     } else {

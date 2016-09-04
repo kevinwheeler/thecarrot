@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 function getNextId(db, counterName) {
   var nextIdPromise = new Promise(function(resolve, reject) {
     db.collection('counters').findOneAndUpdate(
@@ -34,6 +36,28 @@ const logError = function(err) {
   console.trace("Caught from:");
 }
 
+// Dont send articles to client without projecting first. We don't want people to know the SID of the author, for example.
+const publicArticleFieldsProjection = {
+  _id: true,
+  approval: true,
+  articleURLSlug: true,
+  category: true,
+  dateCreated: true,
+  headline: true,
+  imageURL: true,
+  staffPick: true,
+  subline: true,
+  daily_views: true,
+  weekly_views: true,
+  monthly_views: true,
+  yearly_views: true,
+  all_time_views: true,
+};
+
+const publicArticleFields = _.keys(publicArticleFieldsProjection);
+
+const privateArticleFields = ["sidOfAuthor"];
+
 const send404 = function(res) {
   res.status(404).send('Error 404. Page not found.');
 }
@@ -41,5 +65,8 @@ const send404 = function(res) {
 module.exports = {
   getNextId: getNextId,
   logError: logError,
+  publicArticleFields: publicArticleFields,
+  publicArticleFieldsProjection: publicArticleFieldsProjection,
+  privateArticleFields: privateArticleFields,
   send404: send404
 };

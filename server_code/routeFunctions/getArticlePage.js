@@ -1,7 +1,7 @@
 const logError = require('../utils').logError;
 const send404 = require('../utils').send404;
 const updateSummaries = require('../updateSummaries');
-
+const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 
 function getRouteFunction(db) {
    return function (req, res, next) {
@@ -13,7 +13,7 @@ function getRouteFunction(db) {
         logError(err);
         next(err);
       } else {
-        collection.find({'_id': articleId}).next(function (err, article) {
+        collection.find({'_id': articleId}).project(publicArticleFieldsProjection).next(function (err, article) {
           if (err !== null) {
             logError(err);
             next(err);

@@ -4,9 +4,12 @@ import ArticleModel from 'MODELSDIR/articleModel';
 export default Backbone.Collection.extend({
   //These first few attributes are standard backbone attrbibutes that can be read about in the docs.
   initialize: function(options) {
-    this.articleIDs = [];
+    this.category= options.category;
     this.skipAheadAmount = options.skipAheadAmount;
+    this.staffPicksOnly = options.staffPicksOnly;
     this.timeInterval = options.timeInterval;
+
+    this.articleIDs = [];
     this.currentlyFetching = false;
     this.noMoreResults = false;
   },
@@ -33,10 +36,12 @@ export default Backbone.Collection.extend({
       this.fetch({
         contentType: "application/json",
         data: JSON.stringify({
+          category: this.category,
           dont_include: this.articleIDs,
           how_many: 10,
           skip_ahead_amount: this.skipAheadAmount,
-          time_interval: this.timeInterval
+          time_interval: this.timeInterval,
+          staff_picks_only: this.staffPicksOnly
         }),
         remove: false,
         type: 'POST'

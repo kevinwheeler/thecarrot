@@ -59,7 +59,7 @@ export default Backbone.View.extend({
     //  staffPicksOnly = false;
     //}
 
-    if (category !== "N/A") {
+    if (category !== "N/A") { // if we are on a page that is actually supposed to display a list of popular/most recent articles
       const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
       const $skipAhead = this.$(".kmw-skip-ahead");
       let skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
@@ -80,64 +80,84 @@ export default Backbone.View.extend({
       }
 
       if (recentOrPopular === 'most-recent') {
-        //if (this.mostRecentArticlesCollection === undefined) {
-        this.mostRecentArticlesCollection = new MostRecentArticlesCollection({
+          this.articleCollection = new MostRecentArticlesCollection({
+            category: category,
+            skipAheadAmount: skipAheadAmount,
+            staffPicksOnly: staffPicksOnly,
+          });
+          this.$('.kmw-time-interval-select').addClass('kmw-hidden');
+      } else if (recentOrPopular === 'most-popular') {
+        const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
+        this.articleCollection = new MostViewedArticlesCollection({
           category: category,
           skipAheadAmount: skipAheadAmount,
           staffPicksOnly: staffPicksOnly,
+          timeInterval: timeInterval,
         });
-        this.mostRecentArticlesCollection.fetchNextArticles();
-        //}
-        this.articleGridView.setArticleCollection(this.mostRecentArticlesCollection);
-        this.$('.kmw-time-interval-select').addClass('kmw-hidden');
-
-
-      } else if (recentOrPopular === 'most-popular') {
-        const timeInterval = this.$('.kmw-time-interval-select').get(0).value
-
-        if (timeInterval === 'daily') {
-          //if (this.mostViewedArticlesDailyCollection === undefined) {
-          this.mostViewedArticlesDailyCollection = new MostViewedArticlesCollection({
-            timeInterval: 'daily',
-            skipAheadAmount: skipAheadAmount
-          });
-          this.mostViewedArticlesDailyCollection.fetchNextArticles();
-          //}
-          this.articleGridView.setArticleCollection(this.mostViewedArticlesDailyCollection);
-
-        } else if (timeInterval === 'weekly') {
-          //if (this.mostViewedArticlesWeeklyCollection === undefined) {
-          this.mostViewedArticlesWeeklyCollection = new MostViewedArticlesCollection({
-            timeInterval: 'weekly',
-            skipAheadAmount: skipAheadAmount
-          });
-          this.mostViewedArticlesWeeklyCollection.fetchNextArticles();
-          //}
-          this.articleGridView.setArticleCollection(this.mostViewedArticlesWeeklyCollection);
-
-        } else if (timeInterval === 'monthly') {
-          //if (this.mostViewedArticlesMonthlyCollection === undefined) {
-          this.mostViewedArticlesMonthlyCollection = new MostViewedArticlesCollection({
-            timeInterval: 'monthly',
-            skipAheadAmount: skipAheadAmount
-          });
-          this.mostViewedArticlesMonthlyCollection.fetchNextArticles();
-          //}
-          this.articleGridView.setArticleCollection(this.mostViewedArticlesMonthlyCollection);
-
-        } else if (timeInterval === 'all_time') {
-          //if (this.mostViewedArticlesAllTimeCollection === undefined) {
-          this.mostViewedArticlesAllTimeCollection = new MostViewedArticlesCollection({
-            timeInterval: 'all_time',
-            skipAheadAmount: skipAheadAmount
-          });
-          this.mostViewedArticlesAllTimeCollection.fetchNextArticles();
-          //}
-          this.articleGridView.setArticleCollection(this.mostViewedArticlesAllTimeCollection);
-        }
-
         this.$('.kmw-time-interval-select').removeClass('kmw-hidden');
       }
+        this.articleCollection.fetchNextArticles();
+        this.articleGridView.setArticleCollection(this.articleCollection);
+
+      //if (recentOrPopular === 'most-recent') {
+      //  //if (this.mostRecentArticlesCollection === undefined) {
+      //  this.mostRecentArticlesCollection = new MostRecentArticlesCollection({
+      //    category: category,
+      //    skipAheadAmount: skipAheadAmount,
+      //    staffPicksOnly: staffPicksOnly,
+      //  });
+      //  this.mostRecentArticlesCollection.fetchNextArticles();
+      //  //}
+      //  this.articleGridView.setArticleCollection(this.mostRecentArticlesCollection);
+      //  this.$('.kmw-time-interval-select').addClass('kmw-hidden');
+      //
+      //
+      //} else if (recentOrPopular === 'most-popular') {
+      //  const timeInterval = this.$('.kmw-time-interval-select').get(0).value
+      //
+      //  if (timeInterval === 'daily') {
+      //    //if (this.mostViewedArticlesDailyCollection === undefined) {
+      //    this.mostViewedArticlesDailyCollection = new MostViewedArticlesCollection({
+      //      timeInterval: 'daily',
+      //      skipAheadAmount: skipAheadAmount
+      //    });
+      //    this.mostViewedArticlesDailyCollection.fetchNextArticles();
+      //    //}
+      //    this.articleGridView.setArticleCollection(this.mostViewedArticlesDailyCollection);
+      //
+      //  } else if (timeInterval === 'weekly') {
+      //    //if (this.mostViewedArticlesWeeklyCollection === undefined) {
+      //    this.mostViewedArticlesWeeklyCollection = new MostViewedArticlesCollection({
+      //      timeInterval: 'weekly',
+      //      skipAheadAmount: skipAheadAmount
+      //    });
+      //    this.mostViewedArticlesWeeklyCollection.fetchNextArticles();
+      //    //}
+      //    this.articleGridView.setArticleCollection(this.mostViewedArticlesWeeklyCollection);
+      //
+      //  } else if (timeInterval === 'monthly') {
+      //    //if (this.mostViewedArticlesMonthlyCollection === undefined) {
+      //    this.mostViewedArticlesMonthlyCollection = new MostViewedArticlesCollection({
+      //      timeInterval: 'monthly',
+      //      skipAheadAmount: skipAheadAmount
+      //    });
+      //    this.mostViewedArticlesMonthlyCollection.fetchNextArticles();
+      //    //}
+      //    this.articleGridView.setArticleCollection(this.mostViewedArticlesMonthlyCollection);
+      //
+      //  } else if (timeInterval === 'all_time') {
+      //    //if (this.mostViewedArticlesAllTimeCollection === undefined) {
+      //    this.mostViewedArticlesAllTimeCollection = new MostViewedArticlesCollection({
+      //      timeInterval: 'all_time',
+      //      skipAheadAmount: skipAheadAmount
+      //    });
+      //    this.mostViewedArticlesAllTimeCollection.fetchNextArticles();
+      //    //}
+      //    this.articleGridView.setArticleCollection(this.mostViewedArticlesAllTimeCollection);
+      //  }
+      //
+      //  this.$('.kmw-time-interval-select').removeClass('kmw-hidden');
+      //}
     }
   }
 });
