@@ -31,7 +31,6 @@ export default Backbone.View.extend({
   },
 
   beforeRoute: function() {
-    console.log("in before route");
     if (serviceProvider.getRouter().getCategory() !== 'N/A') {
       this.saveScrollPosition();
     }
@@ -58,6 +57,35 @@ export default Backbone.View.extend({
     $(window).scrollTop(this.scrollPosition);
   },
 
+  // returns true if we aren't supposed to load in a brand new article collection
+  // restore one the one we were last using.
+  shouldRestorePreviousSession: function () {
+    const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
+    const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
+    const $skipAhead = this.$(".kmw-skip-ahead");
+    const skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
+    const category = this.router.getCategory();
+
+    if (
+      timeInterval !== this.lastTimeInterval ||
+      recentOrPopular !== this.lastRecentOrPopular ||
+      skipAheadAmount !== this.lastSkipAheadAmount ||
+      category !== this.lastCategory
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+
+  saveSessionInfo: function() {
+    this.lastTimeInterval = this.$('.kmw-time-interval-select').get(0).value;
+    this.lastRecentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
+    const $skipAhead = this.$(".kmw-skip-ahead");
+    this.lastSkipAheadAmount = parseInt($skipAhead.get(0).value, 10);
+    this.lastCategory = this.router.getCategory();
+  },
+
   saveScrollPosition: function () {
     this.scrollPosition = $(window).scrollTop();
   },
@@ -76,13 +104,12 @@ export default Backbone.View.extend({
     //}
 
     if (category !== "N/A") { // if we are on a page that is actually supposed to display a list of popular/most recent articles
-      if (category === this.lastCategory) {
+      if (this.shouldRestorePreviousSession()) {
         this.restoreScrollPosition();
       } else {
         // TODO if we ever change it such that clicking on a different category doesn't cause a new page load,
         // we will want to make it such that we reset the controls/inputs when we click on a new category.
 
-        this.lastCategory = category; // This way if we click on an article and then press the back button, we don't lose the state of where we were.
         const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
         const $skipAhead = this.$(".kmw-skip-ahead");
         let skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
@@ -101,6 +128,8 @@ export default Backbone.View.extend({
           $skipAhead.val(0);
           skipAheadAmount = 0;
         }
+
+        this.saveSessionInfo();
 
         if (recentOrPopular === 'most-recent') {
           this.articleCollection = new MostRecentArticlesCollection({
