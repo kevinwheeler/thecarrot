@@ -29,6 +29,7 @@ export default Backbone.Model.extend({
 
   parse: function(articleJSON, options) {
     articleJSON.articleURL = '/' + serviceProvider.getRouter().exports.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
+    articleJSON.doneFetching = true;
     return articleJSON;
   }
 });

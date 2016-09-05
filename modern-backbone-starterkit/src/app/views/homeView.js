@@ -13,9 +13,16 @@ export default Backbone.View.extend({
     this.navView = options.navView;
     this.mostRecentPopularToggleView = options.mostRecentPopularToggleView;
     this.articleGridView = options.articleGridView;
+  },
 
+  render: function() {
+    this.$el.children().detach();
     this.$el.html(template());
     this.attachSubViews();
+  },
+
+  beforeRoute: function() {
+    this.mostRecentPopularToggleView.beforeRoute();
   },
 
   attachSubViews: function() {

@@ -21,14 +21,8 @@ import UserModel from 'MODELSDIR/UserModel';
 import UserView from 'VIEWSDIR/userView';
 
 var serviceProvider = {
-  _createRouter(routerEvents) {
-    this.router = new Router({'routerEvents': routerEvents});
-  },
-
-  _createRouterEvents() {
-    let routerEvents = {};
-    _.extend(routerEvents, Backbone.Events);
-    this.routerEvents = routerEvents;
+  _createRouter() {
+    this.router = new Router();
   },
 
   _createNavView() {
@@ -36,7 +30,6 @@ var serviceProvider = {
     currentUser.fetchCurrentUser();
     this.navView = new NavView({
       currentUser: currentUser,
-      routerEvents: this.routerEvents
     });
   },
 
@@ -137,8 +130,7 @@ var serviceProvider = {
   },
 
   initialize() {
-    this._createRouterEvents();
-    this._createRouter(this.routerEvents);
+    this._createRouter();
     this._createNavView();
   },
 

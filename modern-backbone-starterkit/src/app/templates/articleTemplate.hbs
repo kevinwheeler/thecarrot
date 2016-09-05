@@ -1,6 +1,10 @@
 <nav class='NAV-STUB'></nav>
 <div class="container">
 
+  {{#unless articleDoneFetching}}
+    Loading...
+  {{/unless}}
+
   {{#if isAdminRouteAndNotDoneFetching}}
     Verifying that you are an admin. Please wait..
   {{/if}}

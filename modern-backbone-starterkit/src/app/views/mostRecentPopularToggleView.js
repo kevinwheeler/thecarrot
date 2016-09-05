@@ -5,6 +5,7 @@ import Backbone from 'backbone';
 
 import MostRecentArticlesCollection from 'COLLECTIONSDIR/mostRecentArticlesCollection';
 import MostViewedArticlesCollection from 'COLLECTIONSDIR/mostViewedArticlesCollection';
+import serviceProvider from 'UTILSDIR/serviceProvider';
 import template from 'TEMPLATESDIR/mostRecentPopularToggleTemplate.hbs';
 import 'STYLESDIR/stylus/mostRecentPopularToggle.css';
 
@@ -29,6 +30,13 @@ export default Backbone.View.extend({
     this.infiniteScroll();
   },
 
+  beforeRoute: function() {
+    console.log("in before route");
+    if (serviceProvider.getRouter().getCategory() !== 'N/A') {
+      this.saveScrollPosition();
+    }
+  },
+
   infiniteScroll: function() {
     const self = this;
     const onScrollFunction = function() {
@@ -46,6 +54,14 @@ export default Backbone.View.extend({
     }, 500
   ),
 
+  restoreScrollPosition: function () {
+    $(window).scrollTop(this.scrollPosition);
+  },
+
+  saveScrollPosition: function () {
+    this.scrollPosition = $(window).scrollTop();
+  },
+
    //TODO debounce? I think we update on initialize and on route causing this to run twice in a row.
   update: function() {
     let category = this.router.getCategory();
@@ -60,44 +76,52 @@ export default Backbone.View.extend({
     //}
 
     if (category !== "N/A") { // if we are on a page that is actually supposed to display a list of popular/most recent articles
-      const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
-      const $skipAhead = this.$(".kmw-skip-ahead");
-      let skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
-      if (_.isNaN(skipAheadAmount)) {
-        skipAheadAmount = 0;
-      }
+      if (category === this.lastCategory) {
+        this.restoreScrollPosition();
+      } else {
+        // TODO if we ever change it such that clicking on a different category doesn't cause a new page load,
+        // we will want to make it such that we reset the controls/inputs when we click on a new category.
 
-      if(skipAheadAmount > 1000) {
-        alert("skip ahead amount cannot exceed 1000");
-        $skipAhead.val(1000);
-        skipAheadAmount = 1000;
-      }
+        this.lastCategory = category; // This way if we click on an article and then press the back button, we don't lose the state of where we were.
+        const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
+        const $skipAhead = this.$(".kmw-skip-ahead");
+        let skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
+        if (_.isNaN(skipAheadAmount)) {
+          skipAheadAmount = 0;
+        }
 
-      if(skipAheadAmount < 0) {
-        alert("skip ahead amount must be a non-negative number.");
-        $skipAhead.val(0);
-        skipAheadAmount = 0;
-      }
+        if(skipAheadAmount > 1000) {
+          alert("skip ahead amount cannot exceed 1000");
+          $skipAhead.val(1000);
+          skipAheadAmount = 1000;
+        }
 
-      if (recentOrPopular === 'most-recent') {
+        if(skipAheadAmount < 0) {
+          alert("skip ahead amount must be a non-negative number.");
+          $skipAhead.val(0);
+          skipAheadAmount = 0;
+        }
+
+        if (recentOrPopular === 'most-recent') {
           this.articleCollection = new MostRecentArticlesCollection({
             category: category,
             skipAheadAmount: skipAheadAmount,
             staffPicksOnly: staffPicksOnly,
           });
           this.$('.kmw-time-interval-select').addClass('kmw-hidden');
-      } else if (recentOrPopular === 'most-popular') {
-        const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
-        this.articleCollection = new MostViewedArticlesCollection({
-          category: category,
-          skipAheadAmount: skipAheadAmount,
-          staffPicksOnly: staffPicksOnly,
-          timeInterval: timeInterval,
-        });
-        this.$('.kmw-time-interval-select').removeClass('kmw-hidden');
-      }
+        } else if (recentOrPopular === 'most-popular') {
+          const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
+          this.articleCollection = new MostViewedArticlesCollection({
+            category: category,
+            skipAheadAmount: skipAheadAmount,
+            staffPicksOnly: staffPicksOnly,
+            timeInterval: timeInterval,
+          });
+          this.$('.kmw-time-interval-select').removeClass('kmw-hidden');
+        }
         this.articleCollection.fetchNextArticles();
         this.articleGridView.setArticleCollection(this.articleCollection);
+      }
 
       //if (recentOrPopular === 'most-recent') {
       //  //if (this.mostRecentArticlesCollection === undefined) {
