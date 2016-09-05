@@ -1,6 +1,7 @@
 const MONGO_URI = process.env.MONGODB_URI;
 const MongoClient = require('mongodb').MongoClient;
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
+const wtimeout = require('./server_code/utils').wtimeout;
 
 // TODO indexes
 // TODO move most of the code out of this file into one combined/encapsulated file with the rest of the
@@ -294,7 +295,9 @@ function processAll(db) {
 
 MongoClient.connect(MONGO_URI,
   {
-    wtimeout: 1000*15
+    db: {
+      wtimeout: wtimeout
+    }
   },
   (err, db) => {
     if (err !== null) {

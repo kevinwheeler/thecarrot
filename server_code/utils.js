@@ -62,11 +62,14 @@ const send404 = function(res) {
   res.status(404).send('Error 404. Page not found.');
 }
 
+const wtimeout = 15 * 1000;
+
 module.exports = {
   getNextId: getNextId,
   logError: logError,
   publicArticleFields: publicArticleFields,
   publicArticleFieldsProjection: publicArticleFieldsProjection,
   privateArticleFields: privateArticleFields,
-  send404: send404
+  send404: send404,
+  wtimeout: wtimeout
 };

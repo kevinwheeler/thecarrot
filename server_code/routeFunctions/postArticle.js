@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const getURLSlug = require('../slugutil').getURLSlug;
 const logError = require('../utils').logError;
-const mongoConcerns = require('../mongoConcerns');
 const requester = require('request');
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 const updateSummaries = require('../updateSummaries');
