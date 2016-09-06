@@ -11,7 +11,7 @@ import 'STYLESDIR/stylus/upload.css';
 
 window.onRecaptchaLoaded = function() {
   window.grecaptcha.render(window.kmwrecaptcha, {
-    'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh'
+    'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh'//TODO move this to an environment variable.
   });
 };
 
@@ -35,6 +35,19 @@ export default Backbone.View.extend({
     // run recaptcha script
     $script(recaptchaURL);
     this.bindToModel();
+    this.checkIfCookiesAreEnabled();
+  },
+
+  // http://stackoverflow.com/a/8112653
+  areCookiesEnabled: function(){
+    var cookieEnabled = (navigator.cookieEnabled) ? true : false;
+
+    if (typeof navigator.cookieEnabled == "undefined" && !cookieEnabled)
+    {
+      document.cookie="testcookie";
+      cookieEnabled = (document.cookie.indexOf("testcookie") != -1) ? true : false;
+    }
+    return (cookieEnabled);
   },
 
   // Attributes below aren't standard backbone attributes. They are custom.
@@ -60,6 +73,12 @@ export default Backbone.View.extend({
     });
   },
 
+  checkIfCookiesAreEnabled: function() {
+    if (!this.areCookiesEnabled()) {
+      alert("Cookies must be enabled in order for this site to work properly.");
+    }
+  },
+
   displayValidationErrors: function(validationErrors) {
     let $validationErrorsContainer = this.$("#kmw-validation-errors");
     $validationErrorsContainer.empty();
@@ -75,7 +94,6 @@ export default Backbone.View.extend({
       $validationErrorsContainer.append(errorMessage);
     }
 
-    console.dir(validationErrors);
   },
 
   doneUploading: function() {
@@ -89,13 +107,11 @@ export default Backbone.View.extend({
     const files = e.target.files;
     const file = files[0];
     const fileSize = file.size;
-    const fiftyMegabytes = 50 * 1000 * 1000;
-    console.log(fiftyMegabytes);
+    const eightMegabytes = 8 * 1000 * 1000;
     if (file == null) {
       return alert('No file selected.');
-    } else if (fileSize > fiftyMegabytes) { // NOTE: if you change this value,
-      // you will also need to change it server-side.
-      alert("File too big. Files must be smaller than 50 MB.");
+    } else if (fileSize > eightMegabytes) {
+      alert("File too big. Files must be smaller than 8 MB.");
     } else {
       this.model.getSignedRequest(file);
     }

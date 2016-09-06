@@ -7,15 +7,20 @@ import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import 'STYLESDIR/stylus/article.css';
 import 'UTILSDIR/facebooksdk';
 
+
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
   className: 'kmw-article-view',
 
-  initialize: function(options = {}) {
+  events: {
+    'click .kmw-js-spam-flag': 'spamFlagClicked'
+  },
 
+  initialize: function(options = {}) {
     this.navView = options.navView;
     this.articleModel = options.articleModel;
     this.currentUserModel = options.currentUserModel;
+    this.flagArticleModalView = options.flagArticleModalView;
     this.listenTo(this.articleModel, 'change', this.render);
     this.listenTo(this.currentUserModel, 'change', this.render);
 
@@ -68,6 +73,13 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
+
+    let $flagArticleModal = this.$('.FLAG-ARTICLE-MODAL-STUB');
+    $flagArticleModal.replaceWith(this.flagArticleModalView.$el);
   },
+
+  spamFlagClicked: function() {
+    this.flagArticleModalView.open();
+  }
 
 });

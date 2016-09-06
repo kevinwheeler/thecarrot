@@ -7,6 +7,7 @@ import ArticleView from 'VIEWSDIR/articleView';
 import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
+import FlagArticleModalView from 'VIEWSDIR/flagArticleModalView';
 import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
@@ -61,9 +62,11 @@ var serviceProvider = {
     currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
     articleModelInst.fetch();
+    const flagArticleModalView = new FlagArticleModalView();
     const articleViewInst = new ArticleView({
       articleModel: articleModelInst,
       currentUserModel: currentUserModel,
+      flagArticleModalView: flagArticleModalView,
       navView: this.getNavView()
     });
     return articleViewInst;

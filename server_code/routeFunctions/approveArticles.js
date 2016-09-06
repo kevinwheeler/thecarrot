@@ -70,7 +70,7 @@ function getRouteFunction(db) {
             w: 'majority',
           }
         );
-      }).then(function success(){
+      }).then(function success() {
         resolve();
       }).catch(function(err) {
         reject(err);

@@ -99,6 +99,7 @@ MongoClient.connect(MONGO_URI,
 
 
       app.use(express.static(distDir));
+      app.use(express.static('public'));
 
     app.use(function(req, res, next) {
       send404(res);

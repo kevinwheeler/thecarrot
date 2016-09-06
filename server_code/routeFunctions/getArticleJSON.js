@@ -26,6 +26,7 @@ function getRouteFunction(db) {
                } else {
                  article.viewerIsAuthor = false;
                }
+               // return article except with private fields omitted.
                const args = [article].concat(privateArticleFields);
                res.json(_.omit.apply(null, args));
              }
