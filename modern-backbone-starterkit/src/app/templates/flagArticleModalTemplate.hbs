@@ -1,7 +1,16 @@
 <div data-remodal-id="flag-article-modal">
   <button data-remodal-action="close" class="remodal-close"></button>
-  <h1>Remodal</h1>
-  <p>
-    Responsive, lightweight, fast, synchronized with CSS animations, fully customizable modal window plugin with declarative configuration and hash tracking.
-  </p>
+  <h1>Flag as inappropriate/spam.</h1>
+  <form style="width: 100%" class="kmw-flag-article-form">
+    <label style="width: 100%" for="kmw-picture-input">
+      Please provide details as to why you are flagging this article. <br/>
+      <textarea style="width: 80%;" name="why-flagging"></textarea>
+    </label>
+    <button class="kmw-js-flag-article-done" type="button">Done</button>
+    <div class="kmw-captcha-and-submit">
+      <div class="kmw-recaptcha"></div>
+      <button class="kmw-js-flag-article-done" type="button">Submit</button>
+    </div>
+    <br>
+  </form>
 </div>

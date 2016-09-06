@@ -3,17 +3,12 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import $script from 'scriptjs';
 import Spinner from 'UTILSDIR/spin';
 import template from 'TEMPLATESDIR/uploadTemplate.hbs';
+import {grecaptchaLoaded, renderElementOnLoad} from 'UTILSDIR/recaptcha'
 
 import 'STYLESDIR/stylus/upload.css';
 
-window.onRecaptchaLoaded = function() {
-  window.grecaptcha.render(window.kmwrecaptcha, {
-    'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh'//TODO move this to an environment variable.
-  });
-};
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -30,10 +25,14 @@ export default Backbone.View.extend({
     this.navView = options.navView;
     this.$el.html(template());
     this.attachSubViews();
-    window.kmwrecaptcha = this.$('.kmw-recaptcha').get(0);
-    let recaptchaURL = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit';
-    // run recaptcha script
-    $script(recaptchaURL);
+    const recaptchaEl = this.$('.kmw-recaptcha').get(0);
+    if (grecaptchaLoaded) {
+      window.grecaptcha.render(recaptchaEl, {
+        'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh'//TODO move this to an environment variable.
+      });
+    } else {
+      renderElementOnLoad(recaptchaEl);
+    }
     this.bindToModel();
     this.checkIfCookiesAreEnabled();
   },
