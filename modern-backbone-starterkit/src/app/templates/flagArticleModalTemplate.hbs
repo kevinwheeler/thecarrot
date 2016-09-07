@@ -1,16 +1,21 @@
-<div data-remodal-id="flag-article-modal">
-  <button data-remodal-action="close" class="remodal-close"></button>
+<button data-remodal-action="close" class="remodal-close"></button>
+<div class="kmw-js-not-finished kmw-not-finished">
   <h1>Flag as inappropriate/spam.</h1>
-  <form style="width: 100%" class="kmw-flag-article-form">
-    <label style="width: 100%" for="kmw-picture-input">
+  <form style="width: 100%" class="kmw-js-flag-article-form">
+    <input type="hidden" name="article-id" value="{{articleId}}">
+    <input class="kmw-js-captcha-auth" type="hidden" name="captcha-authenticated" value="false">
+    <label style="width: 100%">
       Please provide details as to why you are flagging this article. <br/>
-      <textarea style="width: 80%;" name="why-flagging"></textarea>
+      <textarea style="width: 80%;" name="reason-for-flagging"></textarea>
     </label>
-    <button class="kmw-js-flag-article-done" type="button">Done</button>
-    <div class="kmw-captcha-and-submit">
+    <button class="kmw-js-flag-article-done kmw-flag-article-done" type="button">Done</button>
+    <div class="kmw-captcha-and-submit kmw-hidden">
       <div class="kmw-recaptcha"></div>
-      <button class="kmw-js-flag-article-done" type="button">Submit</button>
+      <button class="kmw-js-flag-article-submit" type="button">Submit</button>
     </div>
     <br>
   </form>
+</div>
+<div class="kmw-js-finished kmw-finished kmw-hidden">
+  Thanks for your feedback!
 </div>

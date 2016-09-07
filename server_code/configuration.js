@@ -27,6 +27,8 @@ function exportVal(app) {
     domain: process.env.DOMAIN_NAME,
     httpOnly: true,
     name: 'kmwSid',
+    resave: false,
+    saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
     store: new MongoStore({
       url: process.env.MONGODB_URI

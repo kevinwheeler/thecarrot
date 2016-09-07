@@ -76,6 +76,7 @@ MongoClient.connect(MONGO_URI,
       const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
+      const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const signS3 = require('./server_code/routeFunctions/signS3')(db);
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
@@ -88,7 +89,8 @@ MongoClient.connect(MONGO_URI,
       app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
-      app.post('/article', bodyParser.urlencoded(), postArticle);
+      app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);
+      app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
       let s3Limiter = new RateLimit({
         delayAfter: 3, // begin slowing down responses after the third request
         delayMs: 1000, // slow down subsequent responses by 1 second per request

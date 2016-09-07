@@ -73,13 +73,9 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
-
-    let $flagArticleModal = this.$('.FLAG-ARTICLE-MODAL-STUB');
-    $flagArticleModal.replaceWith(this.flagArticleModalView.$el);
   },
 
   spamFlagClicked: function() {
     this.flagArticleModalView.open();
   }
-
 });

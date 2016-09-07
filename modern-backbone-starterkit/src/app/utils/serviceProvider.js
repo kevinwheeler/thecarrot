@@ -62,7 +62,9 @@ var serviceProvider = {
     currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
     articleModelInst.fetch();
-    const flagArticleModalView = new FlagArticleModalView();
+    const flagArticleModalView = new FlagArticleModalView({
+      articleId: this.getRouter().getArticleIdOfCurrentRoute()
+    });
     const articleViewInst = new ArticleView({
       articleModel: articleModelInst,
       currentUserModel: currentUserModel,
