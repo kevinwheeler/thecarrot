@@ -16,8 +16,7 @@ export default Backbone.Router.extend({
     'science-and-technology'    : 'categoryRoute',
 
     '': 'categoryRoute',
-    'admin'       : 'adminRoute',
-    'admin/my-approval-histor:y'       : 'adminRoute',
+    'admin/:subroute'       : 'adminRoute',
     'article/:articleSlug'       : 'articleRoute',
     'admin/article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
@@ -113,8 +112,13 @@ export default Backbone.Router.extend({
       let isRootRelativeUrl = (href.charAt(0) === '/') && (href.charAt(1) !== '/');
       if (isRootRelativeUrl) {
         let urlWithoutLeadingSlash = href.slice(1, href.length);
-        evt.preventDefault();
-        self.navigate(urlWithoutLeadingSlash, true);
+        //http://stackoverflow.com/questions/24715689/detect-if-the-user-wanted-to-open-link-in-new-window-or-tab-mac-and-windows
+        if (event.ctrlKey || event.shiftKey || event.metaKey || event.which == 2) {
+          return true;
+        } else {
+          evt.preventDefault();
+          self.navigate(urlWithoutLeadingSlash, true);
+        }
       } else {
         throw "'dont-pageload' links that aren't root relative aren't implemented right now.";
       }
@@ -130,10 +134,15 @@ export default Backbone.Router.extend({
 
   adminRoute(param) {
     let adminViewInst;
-    if (param === "y") {
+    console.log("in admin route. param = " + param)
+    if (param === 'need-approval-articles') {
+      adminViewInst = serviceProvider.getAdminView("needApproval");
+    } else if (param === "my-approval-history") {
        adminViewInst = serviceProvider.getAdminView("approvalHistory");
+    } else if (param === 'flagged-articles') {
+      adminViewInst = serviceProvider.getAdminView("flaggedArticles");
     } else {
-       adminViewInst = serviceProvider.getAdminView("needApproval");
+      throw "invalid admin route";
     }
     const app = $('#js-app');
     app.children().detach();
