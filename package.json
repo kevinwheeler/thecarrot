@@ -24,7 +24,8 @@
     "request": "2.x.x",
     "sendgrid": "2.0.0",
     "speakingurl": "9.0.0",
-    "timebucket": "0.3.4"
+    "timebucket": "0.3.4",
+    "wilson-score": "^1.0.0"
   },
   "engines": {
     "node": "6.2.1"

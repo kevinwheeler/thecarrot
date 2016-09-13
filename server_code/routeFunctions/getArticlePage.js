@@ -27,7 +27,7 @@ function getRouteFunction(db) {
               send404(res);
             } else {
               if (adminPage || article.approval === 'approved') {
-                updateSummaries.incrementViews(db, articleId);
+                //updateSummaries.incrementViews(db, articleId); // already happens in api call that gets the article data.
                 let title = article.headline;
                 let description;
                 if (article.subline.length) {

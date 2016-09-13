@@ -48,9 +48,9 @@ MongoClient.connect(MONGO_URI,
       // IMPORTANT: Routes are duplicated in client side code.
       // Namely the router and the nav template.
       app.get('/', sendIndex);
-      app.get('/admin', sendIndex);
-      app.get('/admin/yo', sendIndex);
+      app.get('/admin/flagged-articles', sendIndex);
       app.get('/admin/my-approval-history', sendIndex);
+      app.get('/admin/need-approval-articles', sendIndex);
       app.get('/user/:userid', sendIndex);
       app.get('/business', sendIndex);
       app.get('/education', sendIndex);
@@ -77,10 +77,11 @@ MongoClient.connect(MONGO_URI,
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
+      const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
       const signS3 = require('./server_code/routeFunctions/signS3')(db);
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
-      app.get('/api/article/:articleId', getArticleJSON);
+      app.get('/api/article', getArticleJSON);
       app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
       app.get('/most-recent-articles', getMostRecentArticlesJSON);
       app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
@@ -91,6 +92,7 @@ MongoClient.connect(MONGO_URI,
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
       app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);
       app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
+      app.post('/flagged-articles', bodyParser.json(), postFlaggedArticles);
       let s3Limiter = new RateLimit({
         delayAfter: 3, // begin slowing down responses after the third request
         delayMs: 1000, // slow down subsequent responses by 1 second per request

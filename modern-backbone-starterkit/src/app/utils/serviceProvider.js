@@ -8,6 +8,7 @@ import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
 import FlagArticleModalView from 'VIEWSDIR/flagArticleModalView';
+import FlaggedArticlesCollection from 'COLLECTIONSDIR/flaggedArticlesCollection';
 import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
@@ -39,21 +40,26 @@ var serviceProvider = {
     return aboutViewInst;
   },
 
-  getAdminView(collectionToUse) {
+  getAdminView(subroute) {
 
     let articlesCollection;
     let articleGridView;
-    if (collectionToUse === "approvalHistory") {
+    if (subroute === "approvalHistory") {
       articlesCollection = new MyApprovalHistoryCollection();
       articleGridView = new ApprovalHistoryArticleGridView();
-    } else if (collectionToUse === "needApproval") {
+    } else if (subroute === "needApproval") {
       articlesCollection = new ArticlesThatNeedApprovalCollection();
       articleGridView = new NeedApprovalArticleGridView();
+    } else if (subroute === "flaggedArticles") {
+      articlesCollection = new FlaggedArticlesCollection();
+      articleGridView = new NeedApprovalArticleGridView();
+    } else {
+      throw "invalid collectionToUse";
     }
     articlesCollection.fetchNextArticles();
     articleGridView.setArticleCollection(articlesCollection);
 
-    let adminViewInst = new AdminView({selectableArticleGridView: articleGridView});
+    let adminViewInst = new AdminView({articleGridView: articleGridView});
     return adminViewInst;
   },
 
@@ -61,7 +67,7 @@ var serviceProvider = {
     const currentUserModel = new CurrentUserModel();
     currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
-    articleModelInst.fetch();
+    articleModelInst.fetchArticle();
     const flagArticleModalView = new FlagArticleModalView({
       articleId: this.getRouter().getArticleIdOfCurrentRoute()
     });

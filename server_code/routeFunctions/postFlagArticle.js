@@ -1,7 +1,10 @@
+const getNextId = require('../utils').getNextId;
 const logError = require('../utils').logError;
 const requester = require('request');
+const wilson = require('wilson-score')
 
 function getRouteFunction(db) {
+  let articleColl;
 
   // Returns an error object or null. If error object isn't null, will have the property
   // clientError set to true so that we can send a 4xx response instead of a 5xx response.
@@ -40,49 +43,97 @@ function getRouteFunction(db) {
       if (err !== null) {
         return Promise.reject(err);
       } else {
-        return flagsColl.insertOne({
-          articleId: articleId,
-          reason: reason
-        });
-      }
-    });
-  }
-
-  function incrementFlagCount(articleId, captchaAuthenticated) {
-    db.collection('article', (err, articleColl) => {
-      if (err !== null) {
-        return Promise.reject(err);
-      } else {
-        let incDoc;
-        if (captchaAuthenticated) {
-          incDoc = {authenticatedFlags : 1}
-        } else {
-          incDoc = {unauthenticatedFlags : 1}
-        }
-        return articleColl.updateOne(
-          {
-            _id: articleId,
-          },
-          {
-            $inc: incDoc
+        getNextId(db, flagsCollName).then(
+          function(id) {
+            return flagsColl.insertOne({
+              _id: id,
+              articleId: articleId,
+              reason: reason
+            });
+          }, function(err) {
+            return Promise.reject(err);
           }
         );
       }
     });
   }
 
+
+  function getArticleColl() {
+    const prom = new Promise(function(resolve,reject) {
+      db.collection('article', (err, coll) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          articleColl = coll;
+          resolve();
+        }
+      });
+    })
+    return prom;
+  }
+
+  function incrementFlagCount(articleId, captchaAuthenticated) {
+    let incDoc;
+    if (captchaAuthenticated) {
+      incDoc = {numAuthenticatedFlags : 1}
+    } else {
+      incDoc = {numUnauthenticatedFlags : 1}
+    }
+    return articleColl.updateOne(
+      {
+        _id: articleId,
+      },
+      {
+        $inc: incDoc
+      }
+    );
+  }
+
+  function updateFlaginess(articleId) {
+    articleColl.findOne({
+      _id: articleId
+    }).then(function(article) {
+
+      // Inspired by http://ux.stackexchange.com/questions/34840/highly-rated-content-how-do-users-expect-this-to-be-sorted
+      // Basically, we are simulating voting with up votes and down votes. A view counts as an up vote, a
+      // flag counts as a down vote.
+      const flaginess = wilson(article.numAuthenticatedFlags, article.all_time_views, 1.644853);
+      articleColl.updateOne({
+          _id: articleId
+        },
+        {
+          $set: {flaginess: flaginess}
+        }
+      ).catch(function(err){
+        logError(err);
+      })
+    }).catch(function(err){
+      logError(err);
+    });
+  }
+
   function doEverything(res, articleId, captchaAuthenticated, reason) {
-    const prom1 = insertFlagEntry(articleId, captchaAuthenticated, reason);
-    const prom2 = incrementFlagCount(articleId, captchaAuthenticated);
-    Promise.all([prom1, prom2]).then(
+    getArticleColl(
+    ).then(
+      Promise.all([
+        insertFlagEntry(articleId, captchaAuthenticated, reason),
+        incrementFlagCount(articleId, captchaAuthenticated),
+      ])
+    ).then(
       function() {
         res.status(200).send('OK');
       },
       function() {
         res.status(500).send('Something went wrong.');
       }
-    )
-
+    ).then(function() {
+      if (captchaAuthenticated) {
+        updateFlaginess(articleId);
+      }
+    }).catch(function(err) {
+      logError(err);
+    })
   }
 
   const routeFunction = function (req, res, next) {

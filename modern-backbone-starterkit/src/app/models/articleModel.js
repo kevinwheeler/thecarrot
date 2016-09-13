@@ -24,12 +24,21 @@ export default Backbone.Model.extend({
   },
 
   url: function() {
-    return "/api/article/" + this._id;
+    return "/api/article";
   },
 
   parse: function(articleJSON, options) {
     articleJSON.articleURL = '/' + serviceProvider.getRouter().exports.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
     articleJSON.doneFetching = true;
     return articleJSON;
-  }
+  },
+
+  fetchArticle: function() {
+      this.fetch({
+        data: $.param({
+          articleId: this._id,
+          incrementViews: true
+        }),
+      });
+  },
 });

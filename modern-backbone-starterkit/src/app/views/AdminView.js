@@ -15,7 +15,7 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    this.selectableArticleGridView = options.selectableArticleGridView;
+    this.articleGridView = options.articleGridView;
     this.$el.html(template());
     this.attachSubViews();
   },
@@ -23,6 +23,6 @@ export default Backbone.View.extend({
   // Attributes below aren't standard backbone attributes. They are custom.
   attachSubViews: function() {
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');
-    $articleGrid.replaceWith(this.selectableArticleGridView.$el);
+    $articleGrid.replaceWith(this.articleGridView.$el);
   }
 });

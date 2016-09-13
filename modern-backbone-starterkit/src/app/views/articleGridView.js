@@ -17,6 +17,8 @@ export default Backbone.View.extend({
   },
 
   render: _.throttle(function() {
+    console.log("articles json = ")
+    console.log(this.articleCollection.toJSON());
       const newHTMLString = template({
         articles: this.articleCollection.toJSON(),
         fetchingMoreResults: this.articleCollection.getCurrentlyFetching(),

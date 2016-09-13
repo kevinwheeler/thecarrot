@@ -60,11 +60,14 @@ function getRouteFunction(db) {
             articleURLSlug: articleURLSlug,
             category: category,
             dateCreated: new Date(),
+            flaginess: 0,
             headline: headline,
             imageURL: imageURL,
+            numAuthenticatedFlags: 0,
+            numUnauthenticatedFlags: 0,
             sidOfAuthor: req.sessionID,
             staffPick: false,
-            subline: subline
+            subline: subline,
           };
           const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
           _.merge(doc, initialSummaryAttributes);
