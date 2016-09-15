@@ -16,29 +16,29 @@ dummyimage.com won't end up changing this.
 const http = require('http');
 const fs = require('fs');
 
-const download = function(url, dest, cb) {
-  const file = fs.createWriteStream(dest);
-  const request = http.get(url, function(response) {
-    response.pipe(file);
-    file.on('finish', function() {
-      file.close(cb);  // close() is async, call cb after close completes.
-    });
-  }).on('error', function(err) { // Handle errors
-    fs.unlink(dest); // Delete the file async. (But we don't check the result)
-    if (cb) cb(err.message);
-  });
-};
+//const download = function(url, dest, cb) {
+//  const file = fs.createWriteStream(dest);
+//  const request = http.get(url, function(response) {
+//    response.pipe(file);
+//    file.on('finish', function() {
+//      file.close(cb);  // close() is async, call cb after close completes.
+//    });
+//  }).on('error', function(err) { // Handle errors
+//    fs.unlink(dest); // Delete the file async. (But we don't check the result)
+//    if (cb) cb(err.message);
+//  });
+//};
 
-const NUM_ARTICLES_TO_CREATE = 50;
+const NUM_ARTICLES_TO_CREATE = 22;
 const IMAGE_DIR = __dirname + '/images/';
 
-for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
-  download(`http://dummyimage.com/1200x630/000/fff&text=${i}`, __dirname + '/images/' + i + '.png', function(err) {
-    if (err !== undefined) {
-      throw `error downloading image ${i}`;
-    }
-  });
-}
+//for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
+//  download(`http://dummyimage.com/1200x630/000/fff&text=${i}`, __dirname + '/images/' + i + '.png', function(err) {
+//    if (err !== undefined) {
+//      throw `error downloading image ${i}`;
+//    }
+//  });
+//}
 
 
 
