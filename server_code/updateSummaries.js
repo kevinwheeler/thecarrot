@@ -2,6 +2,7 @@
  * Related files: migrations/2createSummaryIndexes.js, updatePopularities.js
  *
  */
+const categories = require('../modern-backbone-starterkit/src/isomorphic/categories');
 const publicArticleFieldsProjection = require('./utils').publicArticleFieldsProjection;
 const timebucket = require('timebucket');
 
@@ -118,7 +119,17 @@ function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, sk
     validationErrors.push("skipAheadAmount invalid");
   }
 
-  if (category !== "politics" && category !== "spirituality" && category !== "all") {
+  let categoryFound = false;
+  for (let i=0; i < categories.length; i++) {
+    if (category === categories[i].otherSlug) {
+      categoryFound = true;
+      break;
+    }
+  }
+  if (category === "all") {
+    categoryFound = true;
+  }
+  if (!categoryFound) {
     validationErrors.push("category invalid");
   }
 

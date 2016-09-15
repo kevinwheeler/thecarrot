@@ -7,53 +7,37 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a href="/" class="navbar-brand kmw-navbar-brand">Createaheadline.com</a>
+      <a href="/" class="navbar-brand kmw-navbar-brand">Nothing But Headlines</a>
     </div>
     <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
       <br>
       <ul class="nav navbar-nav">
         {{!-- Routes are duplicated in server code and in router file. --}}
         <li>
-          <a href="/">Home</a>
+          <a href="/">All</a>
         </li>
+        {{#each categories}}
+          <li>
+            <a href="/{{this.urlSlug}}">{{this.prettyName}}</a>
+          </li>
+        {{/each}}
         <li>
-          <a href="/politics">Politics</a>
-        </li>
-        <li>
-          <a href="/sports">Sports</a>
-        </li>
-        <li>
-          <a href="/spirituality">Spirituality</a>
-        </li>
-        <li>
-          <a href="/business">Business</a>
-        </li>
-        <li>
-          <a href="/education">Education</a>
-        </li>
-        <li>
-          <a href="/technology">Science & Technology</a>
-        </li>
-        <li>
-          <a href="/other">Other</a>
-        </li>
-        <li>
-          <a href="/upload">Create your own article</a>
+          <a href="/upload">Create your own headline</a>
         </li>
 
-        {{#unless doneFetching}}
-             <li>
-               <a href="#">Loading...</a>
-             </li>
-        {{else if loggedIn}}
-          <li>
-            <a href="/user/{{userId}}">Account</a>
-          </li>
-        {{else}}
-          <li>
-            <a href="/auth/facebook">Log in</a>
-          </li>
-        {{/unless}}
+        <!--{{#unless doneFetching}}-->
+             <!--<li>-->
+               <!--<a href="#">Loading...</a>-->
+             <!--</li>-->
+        <!--{{else if loggedIn}}-->
+          <!--<li>-->
+            <!--<a href="/user/{{userId}}">Account</a>-->
+          <!--</li>-->
+        <!--{{else}}-->
+          <!--<li>-->
+            <!--<a href="/auth/facebook">Log in</a>-->
+          <!--</li>-->
+        <!--{{/unless}}-->
       </ul>
     </nav>
     <hr class="kmw-nav-hr"/>

@@ -1,5 +1,6 @@
 const logError = require('../utils').logError;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
+const categories = require('../../modern-backbone-starterkit/src/isomorphic/categories');
 
 function getRouteFunction(db) {
 
@@ -22,7 +23,18 @@ function getRouteFunction(db) {
       validationErrors.push("skipAheadAmount invalid");
     }
 
-    if (category !== "politics" && category !== "spirituality" && category !== "all") {
+
+    let categoryFound = false;
+    for (let i=0; i < categories.length; i++) {
+      if (category === categories[i].otherSlug) {
+        categoryFound = true;
+        break;
+      }
+    }
+    if (category === "all") {
+      categoryFound = true;
+    }
+    if (!categoryFound) {
       validationErrors.push("category invalid");
     }
 

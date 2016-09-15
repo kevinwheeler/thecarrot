@@ -1,20 +1,16 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
 
+import categories from 'ISOMORPHICDIR/categories';
 import serviceProvider from './utils/serviceProvider.js';
 
 export default Backbone.Router.extend({
 
   // IMPORTANT: Routes need to be duplicated on server code and in navbar code.
   // also categories duplicated here in router.getCategory()
+  // Also, this hash doesn't include every route. There are more routes that are created dynamically in
+  // initialize.
   routes: {
-    'business'      : 'categoryRoute',
-    'other'         : 'categoryRoute',
-    'politics'      : 'categoryRoute',
-    'spirituality'  : 'categoryRoute',
-    'sports'        : 'categoryRoute',
-    'science-and-technology'    : 'categoryRoute',
-
     '': 'categoryRoute',
     'admin/:subroute'       : 'adminRoute',
     'article/:articleSlug'       : 'articleRoute',
@@ -40,6 +36,10 @@ export default Backbone.Router.extend({
 
   initialize(options) {
     $('body').append('<div id="js-app"></div>');
+
+    for (let i=0; i < categories.length; i++) {
+      this.route(categories[i].urlSlug, "categoryRoute");
+    }
 
     // http://stackoverflow.com/questions/7131909/facebook-callback-appends-to-return-url
     // Facebook adds #_=_ to the end of the redirect url after someone logs in or authenticates using facebook.
@@ -84,17 +84,16 @@ export default Backbone.Router.extend({
   // returns the category of the current route. Returns 'home' if we are on the homepage, and returns 'N/A' if we
   // aren't on a category route.
   getCategory() {
-    const pathnameToCategoryMap = {
-      '/'                          : 'home',
-      '/business'                  : 'business',
-      '/entertainment'             : 'entertainment',
-      '/other'                     : 'other',
-      '/politics'                  : 'politics',
-      '/spirituality'              : 'spirituality',
-      '/sports'                    : 'sports',
-      '/science-and-technology'    : 'science-and-technology',
+    let categoryURLSlug = window.location.pathname.substring(1); // remove leading slash
+    let category;
+    for (let i=0; i < categories.length; i++) {
+      if (categoryURLSlug === categories[i].urlSlug) {
+        category = categories[i].otherSlug;
+      }
     }
-    let category = pathnameToCategoryMap[window.location.pathname];
+    if (categoryURLSlug === '') {
+      category = 'home'
+    }
     if (category === undefined) {
       category = 'N/A'
     }

@@ -17,11 +17,14 @@
   <input type="text" id="kmw-subline-input" name="subline">
   <br>
 
-  <label for="kmw-subline-input">Category</label>
+  <label for="kmw-category-select">Category</label>
   <select id="kmw-category-select" name="category">
     <option value="" disabled selected>Select a category</option>
-    <option value="politics">Politics</option>
-    <option value="spirituality">Spirituality</option>
+    {{#each categories}}
+      <li>
+        <option value="{{this.otherSlug}}">{{this.prettyName}}</option>
+      </li>
+    {{/each}}
   </select>
   <br>
 

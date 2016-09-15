@@ -11,6 +11,7 @@ import Backbone from 'backbone';
 import 'STYLESDIR/css/nav.css';
 import 'STYLESDIR/stylus/nav.css';
 import bootstrap from 'bootstrap';
+import categories from 'ISOMORPHICDIR/categories';
 import template from 'TEMPLATESDIR/navTemplate.hbs';
 import viewport from 'bootstrapToolkit';
 
@@ -36,6 +37,7 @@ export default Backbone.View.extend({
 
   render: _.throttle(function() {
       this.$el.html(this.template({
+        categories: categories,
         doneFetching: this.currentUser.get('doneFetching'),
         loggedIn: this.currentUser.get('loggedIn'),
         userId: this.currentUser.get('fbId')

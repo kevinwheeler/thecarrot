@@ -1,5 +1,6 @@
 const aws = require('aws-sdk');
 const bodyParser = require('body-parser');
+const categories = require('./modern-backbone-starterkit/src/isomorphic/categories');
 const express = require('express');
 const logError = require('./server_code/utils').logError;
 const MongoClient = require('mongodb').MongoClient;
@@ -52,14 +53,19 @@ MongoClient.connect(MONGO_URI,
       app.get('/admin/my-approval-history', sendIndex);
       app.get('/admin/need-approval-articles', sendIndex);
       app.get('/user/:userid', sendIndex);
-      app.get('/business', sendIndex);
-      app.get('/education', sendIndex);
-      app.get('/other', sendIndex);
-      app.get('/politics', sendIndex);
-      app.get('/sports', sendIndex);
-      app.get('/spirituality', sendIndex);
-      app.get('/technology', sendIndex);
       app.get('/upload', sendIndex);
+
+      for (let i=0; i < categories.length; i++) {
+        app.get('/' + categories[i].urlSlug, sendIndex);
+      }
+
+      //app.get('/business', sendIndex);
+      //app.get('/education', sendIndex);
+      //app.get('/other', sendIndex);
+      //app.get('/politics', sendIndex);
+      //app.get('/sports', sendIndex);
+      //app.get('/spirituality', sendIndex);
+      //app.get('/technology', sendIndex);
 
       app.get('/logout', function(req, res) {
         req.logout();

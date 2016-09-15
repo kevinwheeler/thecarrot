@@ -20,7 +20,7 @@ function getRouteFunction(db) {
         res.send(articlesJSON);
       },
       function(err) {
-        if (err.clientError === true){
+        if (err.clientError === true) {
           res.status(400).send("Something went wrong.");
         } else {
           logError(err);

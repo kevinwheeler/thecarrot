@@ -69,6 +69,7 @@ function exportVal(app, db) {
 
 // we will call this to start the GitHub Login process
   app.get('/auth/facebook', passport.authenticate('facebook'));
+  app.get('/login', passport.authenticate('facebook'));
 
 // GitHub will call this URL
   app.get('/auth/facebook/callback', passport.authenticate('facebook', {failureRedirect: '/why'}),//TODO /why

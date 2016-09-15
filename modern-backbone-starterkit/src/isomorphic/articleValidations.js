@@ -1,13 +1,21 @@
+const categories = require('./categories');
+
 let exportVal = {
   validateCategory: function(category) {
     if (typeof(category) !== "string") {
       return "Category isn't a string.";
     }
-    if (
-      category !== "politics" &&
-      category !== "spirituality"
-    ) {
-      return "Category invalid.";
+
+    let categoryFound = false;
+    for (let i=0; i < categories.length; i++) {
+      if (category === categories[i].otherSlug) {
+        categoryFound = true;
+        break;
+      }
+    }
+
+    if (!categoryFound) {
+      return "Category invalid."
     }
   },
 

@@ -64,6 +64,7 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
       // skip the first option because it isn't selectable.
       // select between other options in round robin fashion.
       const index = (i % (options.length - 1)) + 1;
+      console.log("index = " + index);
       const elToSelect = options[index];
       elToSelect.click();
     }, function(err) {
