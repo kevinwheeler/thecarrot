@@ -24,7 +24,7 @@ let exportVal = {
       return "Headline isn't a string."; 
     }
     if (headline.length >= 300) {
-      return "Headline too long. Should be less than 100 characters.";
+      return "Headline too long. Should be less than 300 characters.";
     }
     if (headline.length == 0) {
       return "Headline is empty.";
@@ -36,7 +36,7 @@ let exportVal = {
       return "Subline isn't a string."; 
     }
     if (subline.length >= 500) {
-      return "Subline too long. Should be less than 300 characters.";
+      return "Subline too long. Should be less than 500 characters.";
     }
   },
 
