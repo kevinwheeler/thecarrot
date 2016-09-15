@@ -19,7 +19,8 @@ export default Backbone.View.extend({
 
   events: {
     'change #kmw-picture-input': 'fileSelected',
-    'submit #kmw-article-upload-form': 'onFormSubmitted'
+    'submit #kmw-article-upload-form': 'onFormSubmitted',
+    "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged'
   },
 
   initialize: function(options = {}) {
@@ -29,12 +30,14 @@ export default Backbone.View.extend({
     }));
     this.attachSubViews();
     const recaptchaEl = this.$('.kmw-recaptcha').get(0);
+    _.bindAll(this, 'grecaptchaSuccessful');
     if (grecaptchaLoaded) {
       window.grecaptcha.render(recaptchaEl, {
+        'callback': this.grecaptchaSuccessful,
         'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh'//TODO move this to an environment variable.
       });
     } else {
-      renderElementOnLoad(recaptchaEl);
+      renderElementOnLoad(recaptchaEl, this.grecaptchaSuccessful);
     }
     this.bindToModel();
     this.checkIfCookiesAreEnabled();
@@ -61,9 +64,9 @@ export default Backbone.View.extend({
   bindToModel: function() {
     let self = this;
 
-    this.listenTo(this.model, "change:imageId ", function() {
-      self.$("#kmw-image-id").get(0).value = this.model.get('imageId');
-    });
+    //this.listenTo(this.model, "change:imageId ", function() {
+    //  self.$("#kmw-image-id").get(0).value = this.model.get('imageId');
+    //});
 
     this.listenTo(this.model, "change:uploading", function() {
       let uploading = self.model.get('uploading');
@@ -108,15 +111,23 @@ export default Backbone.View.extend({
   fileSelected: function(e) {
     const files = e.target.files;
     const file = files[0];
-    const fileSize = file.size;
     const eightMegabytes = 8 * 1000 * 1000;
     if (file == null) {
-      return alert('No file selected.');
-    } else if (fileSize > eightMegabytes) {
-      alert("File too big. Files must be smaller than 8 MB.");
+      alert('No file selected.');
+      this.model.set("uploaded")
     } else {
-      this.model.getSignedRequest(file);
+      const fileSize = file.size;
+      if (fileSize > eightMegabytes) {
+        alert("File too big. Files must be smaller than 8 MB.");
+      } else {
+        this.model.getSignedRequest(file);
+      }
     }
+  },
+
+  grecaptchaSuccessful: function() {
+    console.log("in grecaptcha successful");
+    this.model.set('captchaCompleted', true);
   },
 
   onFormSubmitted: function(e) {

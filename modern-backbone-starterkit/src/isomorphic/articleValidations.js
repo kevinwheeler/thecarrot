@@ -3,7 +3,7 @@ const categories = require('./categories');
 let exportVal = {
   validateCategory: function(category) {
     if (typeof(category) !== "string") {
-      return "Category isn't a string.";
+      return "Category invalid.";
     }
 
     let categoryFound = false;
@@ -23,7 +23,7 @@ let exportVal = {
     if (typeof(headline) !== "string") {
       return "Headline isn't a string."; 
     }
-    if (headline.length >= 100) {
+    if (headline.length >= 300) {
       return "Headline too long. Should be less than 100 characters.";
     }
     if (headline.length == 0) {
@@ -35,7 +35,7 @@ let exportVal = {
     if (typeof(subline) !== "string") {
       return "Subline isn't a string."; 
     }
-    if (subline.length >= 300) {
+    if (subline.length >= 500) {
       return "Subline too long. Should be less than 300 characters.";
     }
   },
