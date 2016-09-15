@@ -13,7 +13,9 @@ export default Backbone.View.extend({
   className: 'kmw-article-view',
 
   events: {
-    'click .kmw-js-spam-flag': 'spamFlagClicked'
+    'click .kmw-js-spam-flag': 'spamFlagClicked',
+    'click .kmw-js-upvote': 'upvoteClicked',
+    'click .kmw-js-downvote': 'downvoteClicked',
   },
 
   initialize: function(options = {}) {
@@ -39,6 +41,7 @@ export default Backbone.View.extend({
       const articleDoneFetching = this.articleModel.get('doneFetching') === true;
       const isAdminRoute = serviceProvider.getRouter().currentRouteIsAdminArticleRoute();
       const isAdmin = this.currentUserModel.get('userType') === 'admin';
+      const isAdminAndIsAdminRoute = isAdmin && isAdminRoute;
 
       const authorOrApprovedOrAdmin = viewerIsAuthor || approved || isAdmin;
       const isAdminRouteAndNotDoneFetching = isAdminRoute && !currentUserDoneFetching;
@@ -61,6 +64,7 @@ export default Backbone.View.extend({
         currentUserDoneFetching: currentUserDoneFetching,
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,
+        isAdminAndIsAdminRoute: isAdminAndIsAdminRoute,
         isAdminRoute: isAdminRoute,
         isAdminRouteAndNotAdmin: isAdminRouteAndNotAdmin,
         isAdminRouteAndNotDoneFetching: isAdminRouteAndNotDoneFetching,
@@ -75,7 +79,23 @@ export default Backbone.View.extend({
     $nav.replaceWith(this.navView.$el);
   },
 
+  downvoteClicked: function() {
+    if (this.currentUserModel.get('loggedIn') === true) {
+
+    } else {
+      alert("You must be logged in to downvote.")
+    }
+  },
+
   spamFlagClicked: function() {
     this.flagArticleModalView.open();
+  },
+
+  upvoteClicked: function() {
+    if (this.currentUserModel.get('loggedIn') === true) {
+      console.log("logged in");
+    } else {
+      alert("You must be logged in to upvote.");
+    }
   }
 });

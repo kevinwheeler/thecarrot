@@ -16,33 +16,33 @@ function handleError(err) {
   }
 }
 
-function updateTimeBuckets(db, articleId, summaryName) {
-  let timeIntervalSize;
-  if (summaryName === 'daily') {
-    timeIntervalSize = '10m';
-  } else if (summaryName === 'weekly') {
-    timeIntervalSize = 'h';
-  } else if (summaryName === 'monthly') {
-    timeIntervalSize = '5h';
-  } else if (summaryName === 'yearly') {
-    timeIntervalSize = '2d';
+function updateTimeBuckets(db, articleId, attributeName, timeInterval) {
+  let timeBucketSize;
+  if (timeInterval === 'daily') {
+    timeBucketSize = '10m';
+  } else if (timeInterval === 'weekly') {
+    timeBucketSize = 'h';
+  } else if (timeInterval === 'monthly') {
+    timeBucketSize = '5h';
+  } else if (timeInterval === 'yearly') {
+    timeBucketSize = '2d';
   }
 
-  const collectionName = 'time_buckets_for_' + summaryName;
+  const timeBucketCollectionName = `time_buckets_for_${timeInterval}_${attributeName}`;
   
-  db.collection(collectionName, (err, tbCol) => {
+  db.collection(timeBucketCollectionName, (err, tbColl) => {
     if (err !== null) {
       handleError(err);
     } else {
       const curDate = new Date();
-      const tBucket = timebucket(curDate).resize(timeIntervalSize).toDate();
-      tbCol.updateOne(
+      const tBucket = timebucket(curDate).resize(timeBucketSize).toDate();
+      tbColl.updateOne(
         {
           articleId: articleId,
           timeBucket: tBucket
         },
         {
-          $inc: {views: 1}
+          $inc: {count: 1}
         },
         {
           upsert: true
@@ -56,17 +56,19 @@ function updateTimeBuckets(db, articleId, summaryName) {
   });
 }
 
-function incrementAlltimeViews(db, articleId) {
+function incrementAlltimeCount(db, attributeName, articleId) {
   db.collection('article', (err, articleColl) => {
     if (err !== null) {
       handleError(err);
     } else {
+      const incDoc = {};
+      incDoc[`all_time_${attributeName}`] = 1;
       articleColl.updateOne(
         {
           _id: articleId,
         },
         {
-          $inc: {all_time_views: 1},
+          $inc: incDoc,
         }
       ).then(function (result) {}, function (err) {
         handleError(err);
@@ -190,16 +192,16 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
 // This just increments views and whatnot, the process of actually adding up all the
 // time buckets to know how many views an article got over the last day/week/month/year happens
 // in updatePopularities.js.
-function incrementViews(db, articleId) {
-  updateTimeBuckets(db, articleId, 'daily');
-  updateTimeBuckets(db, articleId, 'weekly');
-  updateTimeBuckets(db, articleId, 'monthly');
-  updateTimeBuckets(db, articleId, 'yearly');
-  incrementAlltimeViews(db, articleId);
+function incrementCounts(db, attributeName, articleId) {
+  updateTimeBuckets(db, articleId, attributeName, 'daily');
+  updateTimeBuckets(db, articleId, attributeName, 'weekly');
+  updateTimeBuckets(db, articleId, attributeName, 'monthly');
+  updateTimeBuckets(db, articleId, attributeName, 'yearly');
+  incrementAlltimeCount(db, attributeName, articleId);
 }
 
 module.exports = {
-  incrementViews: incrementViews,
+  incrementCounts: incrementCounts,
   getInitialSummaryAttributes: getInitialSummaryAttributes,
   getMostViewedArticlesJSON: getMostViewedArticlesJSON,
 };

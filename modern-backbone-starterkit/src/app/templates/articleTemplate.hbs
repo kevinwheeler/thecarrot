@@ -36,7 +36,7 @@
     Sorry, this article was NOT approved. Please make sure that any headlines you create comply with Facebook's guidelines.<br>
   {{/if}}
 
-  {{#if isAdmin}}
+  {{#if isAdminAndIsAdminRoute}}
     Approval Status: {{approvalStatus}} <br>
 
     {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}
@@ -56,8 +56,13 @@
   {{/if}}
 
   {{#if approved}}
-    <img class="kmw-js-spam-flag" src="/images/flag-1095056.svg" style="height: 35px; width: 35px;">
+    <img class="kmw-js-spam-flag kmw-spam-flag" src="/images/flag.svg">
+    {{#if currentUserDoneFetching}}
+      <!--<img class="kmw-js-upvote kmw-upvote" src="/images/thumbs-up.svg">-->
+      <!--<img class="kmw-js-downvote kmw-downvote" src="/images/thumbs-down.svg">-->
+    {{/if}}
     <div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+    <br/>
     <div class="fb-comments" data-href="{{articleURL}}" data-width="500" data-numposts="5"></div>
     <div class="row">
       <div class="col-xs-12 kmw-landing-copywriting">

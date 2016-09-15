@@ -63,7 +63,7 @@ function getRouteFunction(db) {
                    article.viewerIsAuthor = false;
                  }
                  if (incrementViews) {
-                   updateSummaries.incrementViews(db, articleId);
+                   updateSummaries.incrementCounts(db, 'views', articleId);
                  }
                  // return article except with private fields omitted.
                  const args = [article].concat(privateArticleFields);

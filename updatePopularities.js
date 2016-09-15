@@ -15,20 +15,20 @@ function handleError(err) {
   }
 }
 
-function updateCollEntry(db, viewsTimeInterval, articleId) {
+function updateViews(db, viewsTimeInterval, articleId) {
   let timeBucketCollName;
   let sumFromDate;
   if (viewsTimeInterval === 'daily_views') {
-    timeBucketCollName = 'time_buckets_for_daily';
+    timeBucketCollName = 'time_buckets_for_daily_views';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/));
   } else if (viewsTimeInterval === 'weekly_views') {
-    timeBucketCollName = 'time_buckets_for_weekly';
+    timeBucketCollName = 'time_buckets_for_weekly_views';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/));
   } else if (viewsTimeInterval === 'monthly_views') {
-    timeBucketCollName = 'time_buckets_for_monthly';
+    timeBucketCollName = 'time_buckets_for_monthly_views';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 30 /*month*/));
   } else if (viewsTimeInterval === 'yearly_views') {
-    timeBucketCollName = 'time_buckets_for_yearly';
+    timeBucketCollName = 'time_buckets_for_yearly_views';
     sumFromDate = new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 365 /*year*/));
   }
 
@@ -44,7 +44,7 @@ function updateCollEntry(db, viewsTimeInterval, articleId) {
           },
           { $group: {
             _id: null,
-            totalViews: { $sum: '$views' } }
+            totalViews: { $sum: '$count' } }
           }
         ],
         function(err, result) {
@@ -73,7 +73,9 @@ function updateCollEntry(db, viewsTimeInterval, articleId) {
                 {
                   $set: setVal
                 }
-              );
+              ).catch(function(err) {
+                handleError(err);
+              });
             }
           });
         }
@@ -87,57 +89,69 @@ const howOftenToUpdateWeekly = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // s
 const howOftenToUpdateMonthly = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
 const howOftenToUpdateYearly = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
 
-function processOneInterval(db, viewsTimeInterval) {
-  // NOTE: if you change these values, you may also need to change the acceptable amount of time
-  // that an entry can go without being updated (look in monitorSummariesHealth() )
-  let howOftenToUpdate;
-  if (process.env.NODE_ENV === 'development') {
-    howOftenToUpdate = 1000 /*sec*/ * 10; // 10 seconds
-  } else {
-    if (viewsTimeInterval === 'daily_views') {
-      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/; // one hour
-    } else if (viewsTimeInterval === 'weekly_views') {
-      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // seven hours
-    } else if (viewsTimeInterval === 'monthly_views') {
-      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
-    } else if (viewsTimeInterval === 'yearly_views') {
-      howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
-    }
-  }
-
-  const threshold = new Date(Date.now() - howOftenToUpdate);
-  const howLongToLock = 1000 /*sec*/ * 30; // 30 seconds
-
-  db.collection('article', (err, articleColl) => {
-    if (err !== null) {
-      handleError(err);
+/*
+ * Finds an article whose viewsTimeInterval (of the form 'daily_views', 'weekly_views', ...) hasn't been updated
+ * in a while. Then it locks this article for a period of time by setting a timestamp so that any other processes
+ * won't process this same article.
+ *
+ * Resolves with article id if there is an article that is ready to be updated, else resolves with null.
+ */
+function processOneInterval(db, timeInterval, attributeName) {
+  const prom = new Promise(function(resolve, reject) {
+    // NOTE: if you change these values, you may also need to change the acceptable amount of time
+    // that an entry can go without being updated (look in monitorSummariesHealth() )
+    let howOftenToUpdate;
+    if (process.env.NODE_ENV === 'development') {
+      howOftenToUpdate = 1000 /*sec*/ * 10; // 10 seconds
     } else {
-      const filter = {};
-      filter[viewsTimeInterval + '.lastUpdated'] = {$lt: threshold};
-      filter[viewsTimeInterval + '.lockedUntil'] = {$lt: new Date()}; // lock so that multiple workers will divide up work
-      // filter will look something like this
-      //{
-      //  daily_views.lastUpdated': {$lt: threshold},
-      //  daily_views.lockedUntil': {$lt: new Date()}
-      //}
-      const setVal = {};
-      setVal[viewsTimeInterval + '.lockedUntil'] = new Date(Date.now() + howLongToLock);
-
-      articleColl.findOneAndUpdate(
-        filter,
-        {
-          $set: setVal
-        }
-      ).then(function(result) {
-          if (result.value !== null) {
-            updateCollEntry(db, viewsTimeInterval, result.value._id)
-          }
-        }, function(err){
-          handleError(err);
-        }
-      ).then(function(r){}, function(err){handleError(err)});
+      if (timeInterval === 'daily') {
+        howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/; // one hour
+      } else if (timeInterval === 'weekly') {
+        howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; // seven hours
+      } else if (timeInterval === 'monthly') {
+        howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/; // one day
+      } else if (timeInterval === 'yearly') {
+        howOftenToUpdate = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 7 /*week*/; // one week
+      }
     }
+
+    const threshold = new Date(Date.now() - howOftenToUpdate);
+    const howLongToLock = 1000 /*sec*/ * 30; // 30 seconds
+
+    db.collection('article', (err, articleColl) => {
+      if (err !== null) {
+        handleError(err);
+
+      } else {
+        const filter = {};
+        filter[attributeName + '.lastUpdated'] = {$lt: threshold};
+        filter[attributeName + '.lockedUntil'] = {$lt: new Date()}; // lock so that multiple workers can divide up work
+        // filter will look something like this
+        //{
+        //  daily_views.lastUpdated': {$lt: threshold},
+        //  daily_views.lockedUntil': {$lt: new Date()}
+        //}
+        const setVal = {};
+        setVal[attributeName + '.lockedUntil'] = new Date(Date.now() + howLongToLock);
+
+        articleColl.findOneAndUpdate(
+          filter,
+          {
+            $set: setVal
+          }
+        ).then(function(result) {
+            if (result.value !== null) {
+
+              resolve(result.value._id);
+            } else {
+              resolve(null);
+            }
+          }
+        ).catch(function(err){handleError(err)});
+      }
+    });
   });
+  return prom;
 }
 
 /*
@@ -226,7 +240,7 @@ function monitorHealth(db) {
               }
             });
           }
-        }, function(err){
+        }, function(err) {
           handleError(err);
         }
       );
@@ -240,13 +254,13 @@ function deleteOldTimeBucketEntries(db) {
     'time_buckets_for_weekly',
     'time_buckets_for_monthly',
     'time_buckets_for_yearly'
-  ]
+  ];
   const whenToDelete = {
     'time_buckets_for_daily': new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 40)),
     'time_buckets_for_weekly': new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 10)),
     'time_buckets_for_monthly': new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 40)),
     'time_buckets_for_yearly': new Date(Date.now() - (1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 400))
-  }
+  };
 
   for (let i = 0; i < tbCollectionNames.length; i++) {
     const collectionName = tbCollectionNames[i]
@@ -256,14 +270,12 @@ function deleteOldTimeBucketEntries(db) {
       } else {
         tbColl.deleteMany({
           timeBucket: {$lt: whenToDelete[collectionName]}
-        }).then(function(r){}, function(err){
+        }).then(function(r){}, function(err) {
           handleError(err);
         });
       }
     });
   }
-  
-
 }
 
 function processAll(db) {
@@ -273,22 +285,46 @@ function processAll(db) {
   const numProcessesForMonthly = 1;
   const numProcessesForYearly = 1;
 
+  monitorHealth(db); //TODO monitor health should happen outside of this function so that it runs for sure.
 
   for (let i = 0; i < numProcessesForDaily; i++) {
-    processOneInterval(db, 'daily_views');
+    processOneInterval(db, 'daily', 'daily_views').then(function(articleId) {
+      if (articleId !== null) {
+        updateViews(db, 'daily_views', articleId);
+      }
+    }).catch(function(err) {
+      handleError(err);
+    });
   }
   for (let i = 0; i < numProcessesForWeekly; i++) {
-    processOneInterval(db, 'weekly_views');
+    processOneInterval(db, 'weekly', 'weekly_views').then(function(articleId) {
+      if (articleId !== null) {
+        updateViews(db, 'weekly_views', articleId);
+      }
+    }).catch(function(err) {
+      handleError(err);
+    });
   }
   for (let i = 0; i < numProcessesForMonthly; i++) {
-    processOneInterval(db, 'monthly_views');
+    processOneInterval(db, 'monthly', 'monthly_views').then(function(articleId) {
+      if (articleId !== null) {
+        updateViews(db, 'monthly_views', articleId);
+      }
+    }).catch(function(err) {
+      handleError(err);
+    });
   }
   for (let i = 0; i < numProcessesForYearly; i++) {
-    processOneInterval(db, 'yearly_views');
+    processOneInterval(db, 'yearly', 'yearly_views').then(function(articleId) {
+      if (articleId !== null) {
+        updateViews(db, 'yearly_views', articleId);
+      }
+    }).catch(function(err) {
+      handleError(err);
+    });
   }
   
-  monitorHealth(db);
-  deleteOldTimeBucketEntries(db);
+  //deleteOldTimeBucketEntries(db);
 }
 
 
@@ -303,7 +339,7 @@ MongoClient.connect(MONGO_URI,
     if (err !== null) {
       handleError(err);
     } else {
-      setInterval(function(){
+      setInterval(function() {
           for (let i = 0; i < 10; i++) {
             processAll(db);
           }
