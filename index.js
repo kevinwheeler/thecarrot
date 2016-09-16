@@ -1,6 +1,6 @@
 const aws = require('aws-sdk');
 const bodyParser = require('body-parser');
-const categories = require('./modern-backbone-starterkit/src/isomorphic/categories');
+const categories = require('./modern-backbone-starterkit/src/isomorphic/categories').categories;
 const express = require('express');
 const logError = require('./server_code/utils').logError;
 const MongoClient = require('mongodb').MongoClient;

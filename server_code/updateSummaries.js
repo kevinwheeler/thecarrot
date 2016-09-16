@@ -2,7 +2,7 @@
  * Related files: migrations/2createSummaryIndexes.js, updatePopularities.js
  *
  */
-const categories = require('../modern-backbone-starterkit/src/isomorphic/categories');
+const categories = require('../modern-backbone-starterkit/src/isomorphic/categories').categories;
 const publicArticleFieldsProjection = require('./utils').publicArticleFieldsProjection;
 const timebucket = require('timebucket');
 

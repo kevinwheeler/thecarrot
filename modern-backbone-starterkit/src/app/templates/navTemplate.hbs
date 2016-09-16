@@ -14,28 +14,28 @@
       <ul class="nav navbar-nav">
         {{!-- Routes are duplicated in server code and in router file. --}}
         <li>
-          <a href="/">All</a>
+          <a class="kmw-nav-item-anchor" href="/">All</a>
         </li>
         {{#each categories}}
           <li>
-            <a href="/{{this.urlSlug}}">{{this.prettyName}}</a>
+            <a class="kmw-nav-item-anchor" href="/{{this.urlSlug}}">{{this.prettyName}}</a>
           </li>
         {{/each}}
         <li>
-          <a href="/upload">Create your own headline</a>
+          <a class="kmw-nav-item-anchor" href="/upload">Create your own headline</a>
         </li>
 
         <!--{{#unless doneFetching}}-->
              <!--<li>-->
-               <!--<a href="#">Loading...</a>-->
+               <!--<a class="kmw-nav-item-anchor" href="#">Loading...</a>-->
              <!--</li>-->
         <!--{{else if loggedIn}}-->
           <!--<li>-->
-            <!--<a href="/user/{{userId}}">Account</a>-->
+            <!--<a class="kmw-nav-item-anchor" href="/user/{{userId}}">Account</a>-->
           <!--</li>-->
         <!--{{else}}-->
           <!--<li>-->
-            <!--<a href="/auth/facebook">Log in</a>-->
+            <!--<a class="kmw-nav-item-anchor" href="/auth/facebook">Log in</a>-->
           <!--</li>-->
         <!--{{/unless}}-->
       </ul>

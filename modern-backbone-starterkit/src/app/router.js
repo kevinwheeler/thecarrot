@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
 
-import categories from 'ISOMORPHICDIR/categories';
+import {categories} from 'ISOMORPHICDIR/categories';
 import serviceProvider from './utils/serviceProvider.js';
 
 export default Backbone.Router.extend({
@@ -98,6 +98,10 @@ export default Backbone.Router.extend({
       category = 'N/A'
     }
     return category;
+  },
+
+  getCategoryRoutePrefix() {
+    return '/';
   },
 
   // Make sure when a user click's a link to somewhere else in our page it doesn't

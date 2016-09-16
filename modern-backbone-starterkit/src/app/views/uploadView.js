@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
-import categories from 'ISOMORPHICDIR/categories';
+import {categories} from 'ISOMORPHICDIR/categories';
 import Spinner from 'UTILSDIR/spin';
 import template from 'TEMPLATESDIR/uploadTemplate.hbs';
 import {grecaptchaLoaded, renderElementOnLoad} from 'UTILSDIR/recaptcha'
@@ -25,6 +25,7 @@ export default Backbone.View.extend({
 
   initialize: function(options = {}) {
     this.navView = options.navView;
+    this.$el.children().detach();
     this.$el.html(template({
       categories: categories
     }));

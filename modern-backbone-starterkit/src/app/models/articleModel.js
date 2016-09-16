@@ -2,6 +2,7 @@
 // initialize instances of the subclasses instead.
 import Backbone from 'backbone';
 import serviceProvider from 'UTILSDIR/serviceProvider';
+import cat from 'ISOMORPHICDIR/categories';
 
 export default Backbone.Model.extend({
   defaults: {
@@ -17,7 +18,6 @@ export default Backbone.Model.extend({
   idAttribute: "_id",
 
   initialize: function(options) {
-    window.kmwmod = this;
     if (options.setIdToCurrentArticle === true) {
       this._id = serviceProvider.getRouter().getArticleIdOfCurrentRoute();
     }
@@ -29,6 +29,8 @@ export default Backbone.Model.extend({
 
   parse: function(articleJSON, options) {
     articleJSON.articleURL = '/' + serviceProvider.getRouter().exports.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
+    articleJSON.categoryPrettyName = cat.otherSlugToPrettyName[articleJSON.category];
+    articleJSON.categoryURL = serviceProvider.getRouter().getCategoryRoutePrefix + cat.otherSlugToURLSlug[articleJSON.category];
     articleJSON.doneFetching = true;
     return articleJSON;
   },

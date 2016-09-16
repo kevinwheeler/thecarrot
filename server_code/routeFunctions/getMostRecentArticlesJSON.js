@@ -1,6 +1,6 @@
 const logError = require('../utils').logError;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
-const categories = require('../../modern-backbone-starterkit/src/isomorphic/categories');
+const categories = require('../../modern-backbone-starterkit/src/isomorphic/categories').categories;
 
 function getRouteFunction(db) {
 

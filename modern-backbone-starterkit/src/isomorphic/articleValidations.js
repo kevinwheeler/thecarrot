@@ -1,4 +1,4 @@
-const categories = require('./categories');
+const categories = require('./categories').categories;
 
 let exportVal = {
   validateCategory: function(category) {

@@ -36,10 +36,10 @@ var serviceProvider = {
     });
   },
 
-  getAboutView() {
-    let aboutViewInst = new AboutView({navView: this.getNavView()});
-    return aboutViewInst;
-  },
+  //getAboutView() {
+  //  let aboutViewInst = new AboutView({navView: this.getNavView()});
+  //  return aboutViewInst;
+  //},
 
   getAdminView(subroute) {
 
@@ -87,7 +87,9 @@ var serviceProvider = {
   },
 
   getHomeView() {
-    const articleGridViewInst = new ArticleColumnsView();
+    const articleGridViewInst = new ArticleColumnsView({
+      router: this.getRouter()
+    });
 
     const mostRecentPopularToggleViewInst = new MostRecentPopularToggleView({
       articleGridView: articleGridViewInst,

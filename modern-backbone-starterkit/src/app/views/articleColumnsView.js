@@ -16,7 +16,8 @@ export default Backbone.View.extend({
   events: {
   },
 
-  initialize: function(options = {}) {
+  initialize: function(options) {
+    this.router = options.router;
   },
 
   render: _.throttle(function() {
@@ -38,17 +39,22 @@ export default Backbone.View.extend({
       const $newEl = $(newEl);
       const $columns = $newEl.find('.article-column');
       const articles = this.articleCollection.toJSON();
+      const displayCategory = this.router.getCategory() === 'home';
       for (let i=0; i < articles.length; i++) {
         console.log("i = " + i);
         console.log("article = ");
         console.log(articles[i]);
         $columns.get(i % numColumns).appendChild(
           $.parseHTML(
-            articleCardTemplate(articles[i])
+            articleCardTemplate({
+              article: articles[i],
+              displayCategory: displayCategory
+            })
           )[0]
         );
       }
-      // update using diffDom
+
+      // apply update using diffDom
       const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);
       if (diffDomWrapper !== undefined) {
         const diff = dd.diff(diffDomWrapper, newEl);
