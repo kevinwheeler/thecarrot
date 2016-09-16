@@ -4,7 +4,7 @@ import serviceProvider from 'UTILSDIR/serviceProvider';
 
 export default Backbone.Collection.extend({
   //These first few attributes are standard backbone attrbibutes that can be read about in the docs.
-  initialize: function(options) {
+  initialize: function(models, options) {
     this.minId = Number.MAX_SAFE_INTEGER;
     this.currentlyFetching = false;
     this.noMoreResults = false;

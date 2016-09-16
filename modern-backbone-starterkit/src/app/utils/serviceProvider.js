@@ -4,6 +4,7 @@ import AdminView from 'VIEWSDIR/adminView';
 import ApprovalHistoryArticleGridView from 'VIEWSDIR/approvalHistoryArticleGridView';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
+import ArticleColumnsView from 'VIEWSDIR/articleColumnsView';
 import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
@@ -45,13 +46,13 @@ var serviceProvider = {
     let articlesCollection;
     let articleGridView;
     if (subroute === "approvalHistory") {
-      articlesCollection = new MyApprovalHistoryCollection();
+      articlesCollection = new MyApprovalHistoryCollection([]);
       articleGridView = new ApprovalHistoryArticleGridView();
     } else if (subroute === "needApproval") {
-      articlesCollection = new ArticlesThatNeedApprovalCollection();
+      articlesCollection = new ArticlesThatNeedApprovalCollection([]);
       articleGridView = new NeedApprovalArticleGridView();
     } else if (subroute === "flaggedArticles") {
-      articlesCollection = new FlaggedArticlesCollection();
+      articlesCollection = new FlaggedArticlesCollection([]);
       articleGridView = new NeedApprovalArticleGridView();
     } else {
       throw "invalid collectionToUse";
@@ -86,7 +87,7 @@ var serviceProvider = {
   },
 
   getHomeView() {
-    const articleGridViewInst = new ArticleGridView();
+    const articleGridViewInst = new ArticleColumnsView();
 
     const mostRecentPopularToggleViewInst = new MostRecentPopularToggleView({
       articleGridView: articleGridViewInst,

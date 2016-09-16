@@ -132,7 +132,7 @@ export default Backbone.View.extend({
         this.saveSessionInfo();
 
         if (recentOrPopular === 'most-recent') {
-          this.articleCollection = new MostRecentArticlesCollection({
+          this.articleCollection = new MostRecentArticlesCollection([], {
             category: category,
             skipAheadAmount: skipAheadAmount,
             staffPicksOnly: staffPicksOnly,
@@ -140,7 +140,7 @@ export default Backbone.View.extend({
           this.$('.kmw-time-interval-select').addClass('kmw-hidden');
         } else if (recentOrPopular === 'most-popular') {
           const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
-          this.articleCollection = new MostViewedArticlesCollection({
+          this.articleCollection = new MostViewedArticlesCollection([], {
             category: category,
             skipAheadAmount: skipAheadAmount,
             staffPicksOnly: staffPicksOnly,
@@ -154,7 +154,7 @@ export default Backbone.View.extend({
 
       //if (recentOrPopular === 'most-recent') {
       //  //if (this.mostRecentArticlesCollection === undefined) {
-      //  this.mostRecentArticlesCollection = new MostRecentArticlesCollection({
+      //  this.mostRecentArticlesCollection = new MostRecentArticlesCollection([], {
       //    category: category,
       //    skipAheadAmount: skipAheadAmount,
       //    staffPicksOnly: staffPicksOnly,
@@ -170,7 +170,7 @@ export default Backbone.View.extend({
       //
       //  if (timeInterval === 'daily') {
       //    //if (this.mostViewedArticlesDailyCollection === undefined) {
-      //    this.mostViewedArticlesDailyCollection = new MostViewedArticlesCollection({
+      //    this.mostViewedArticlesDailyCollection = new MostViewedArticlesCollection([], {
       //      timeInterval: 'daily',
       //      skipAheadAmount: skipAheadAmount
       //    });
@@ -180,7 +180,7 @@ export default Backbone.View.extend({
       //
       //  } else if (timeInterval === 'weekly') {
       //    //if (this.mostViewedArticlesWeeklyCollection === undefined) {
-      //    this.mostViewedArticlesWeeklyCollection = new MostViewedArticlesCollection({
+      //    this.mostViewedArticlesWeeklyCollection = new MostViewedArticlesCollection([], {
       //      timeInterval: 'weekly',
       //      skipAheadAmount: skipAheadAmount
       //    });
@@ -190,7 +190,7 @@ export default Backbone.View.extend({
       //
       //  } else if (timeInterval === 'monthly') {
       //    //if (this.mostViewedArticlesMonthlyCollection === undefined) {
-      //    this.mostViewedArticlesMonthlyCollection = new MostViewedArticlesCollection({
+      //    this.mostViewedArticlesMonthlyCollection = new MostViewedArticlesCollection([], {
       //      timeInterval: 'monthly',
       //      skipAheadAmount: skipAheadAmount
       //    });
@@ -200,7 +200,7 @@ export default Backbone.View.extend({
       //
       //  } else if (timeInterval === 'all_time') {
       //    //if (this.mostViewedArticlesAllTimeCollection === undefined) {
-      //    this.mostViewedArticlesAllTimeCollection = new MostViewedArticlesCollection({
+      //    this.mostViewedArticlesAllTimeCollection = new MostViewedArticlesCollection([], {
       //      timeInterval: 'all_time',
       //      skipAheadAmount: skipAheadAmount
       //    });

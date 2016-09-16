@@ -1,0 +1,18 @@
+<div class="diff-dom-wrapper">
+  <div class="columns-container num-columns-{{numColumns}}">
+    {{#each numColumnsArray}}
+      <div class="article-column article-column-1-of-{{../numColumns}}">
+      </div>
+    {{/each}}
+  </div>
+  {{#if fetchingMoreResults}}
+    <div style="text-align: center;">
+      Loading more results...
+    </div>
+  {{/if}}
+  {{#if noMoreResults}}
+    <div style="text-align: center;">
+      No More results.
+    </div>
+  {{/if}}
+</div>

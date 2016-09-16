@@ -3,7 +3,7 @@ import ArticleModel from 'MODELSDIR/articleModel';
 
 export default Backbone.Collection.extend({
   //These first few attributes are standard backbone attrbibutes that can be read about in the docs.
-  initialize: function(options) {
+  initialize: function(models, options) {
     //this.skipAheadAmount = options.skipAheadAmount;
 
     this.articleIDs = [];
