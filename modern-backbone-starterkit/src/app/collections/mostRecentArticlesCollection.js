@@ -17,6 +17,7 @@ export default Backbone.Collection.extend({
 
   parse: function(response, options) {
     this.currentlyFetching = false;
+    this.trigger('doneFetching');
     if (!response.length) {
       this.noMoreResults = true;
       this.trigger('noMoreResults');
@@ -36,6 +37,7 @@ export default Backbone.Collection.extend({
   // Attributes below this line are not standard Backbone attributes, they are custom.
   fetchNextArticles: function() {
     if (!this.currentlyFetching && !this.noMoreResults) {
+      this.trigger('fetching');
       this.currentlyFetching = true;
       this.fetch({
         data: $.param({

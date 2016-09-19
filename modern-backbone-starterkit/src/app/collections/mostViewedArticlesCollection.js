@@ -16,6 +16,7 @@ export default Backbone.Collection.extend({
   model: ArticleModel,
   parse: function(response, options) {
     this.currentlyFetching = false;
+    this.trigger('doneFetching');
     if (!response.length) {
       this.noMoreResults = true;
       this.trigger('noMoreResults');
@@ -33,6 +34,7 @@ export default Backbone.Collection.extend({
   fetchNextArticles: function() {
     if (!this.currentlyFetching && !this.noMoreResults) {
       this.currentlyFetching = true;
+      this.trigger('fetching');
       this.fetch({
         contentType: "application/json",
         data: JSON.stringify({

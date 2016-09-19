@@ -32,7 +32,6 @@ function getRouteFunction(db) {
     // TODO does this assume people only upload one picture, etc?
     // probably not, we probably re-set this session variable every time they upload a picture / hit signS3 route
     const articleId = sess.articleId;
-    const imageSlug = sess.imageSlug;
     const headline = req.body.headline;
     const subline = req.body.subline;
     const category = req.body.category;
@@ -47,12 +46,12 @@ function getRouteFunction(db) {
         if (err !== null) {
           next(err);
         } else {
-          let imageURL;
-          if (process.env.NODE_ENV === 'production') {
-            imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
-          } else {
-            imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
-          }
+          //let imageURL;
+          //if (process.env.NODE_ENV === 'production') {
+          //  imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
+          //} else {
+          //  imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
+          //}
           const articleURLSlug = getURLSlug(articleId, headline);
           const doc = {
             _id: articleId,
@@ -62,7 +61,9 @@ function getRouteFunction(db) {
             dateCreated: new Date(),
             flaginess: 0,
             headline: headline,
-            imageURL: imageURL,
+            imageHeight: sess.imageHeight,
+            imageWidth: sess.imageWidth,
+            imageSlug: sess.imageSlug,
             numAuthenticatedFlags: 0,
             numUnauthenticatedFlags: 0,
             sidOfAuthor: req.sessionID,

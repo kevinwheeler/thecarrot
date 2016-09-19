@@ -3,7 +3,8 @@ import Backbone from 'backbone';
 import 'bootstrap';
 import 'bootstrapCSS';
 import 'bootstrapTheme';
-//import '../../dist/css/main.css';
+
+import 'STYLESDIR/stylus/main.css';
 
 import serviceProvider from './utils/serviceProvider.js';
 

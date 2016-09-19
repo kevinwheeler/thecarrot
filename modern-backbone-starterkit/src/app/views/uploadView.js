@@ -111,17 +111,17 @@ export default Backbone.View.extend({
 
   fileSelected: function(e) {
     const files = e.target.files;
-    const file = files[0];
-    const eightMegabytes = 8 * 1000 * 1000;
-    if (file == null) {
-      alert('No file selected.');
-      this.model.set("uploaded")
+    if (files.length === 0) {
+      this.model.clearFileSelection();
     } else {
+      const file = files[0];
+      const eightMegabytes = 8 * 1000 * 1000;
       const fileSize = file.size;
-      if (fileSize > eightMegabytes) {
+      if (fileSize >= eightMegabytes) {
         alert("File too big. Files must be smaller than 8 MB.");
       } else {
-        this.model.getSignedRequest(file);
+        //this.model.getSignedRequest(file);
+        this.model.uploadFile(file);
       }
     }
   },

@@ -24,6 +24,7 @@ export default Backbone.Collection.extend({
       let articleJSON = response[i];
 
       articleJSON.adminArticleURL = '/' + serviceProvider.getRouter().exports.adminArticleRoutePrefix + '/' + articleJSON.articleURLSlug;
+      articleJSON.imageURL = window.kmw.imageBaseUrl + articleJSON.imageSlug;
 
       // convert to a more human readable representation.
       const timestamp = new Date(Date.parse(articleJSON.historicalApprovalTimestamp)).toString();

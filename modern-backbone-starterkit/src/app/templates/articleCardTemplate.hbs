@@ -7,9 +7,16 @@
     </div>
   {{/if}}
   <div class="article-card-main">
-    <img src="{{article.imageURL}}" class="article-card-image">
+    <div class="article-card-image" style="background-image: url('{{article.imageURL}}');">
+      <img src="{{article.imageURL}}" class="article-card-image-ghost">
+    </div>
     <h2 class="article-card-headline">{{article.headline}}</h2>
     <h3 class="article-card-subline">{{article.subline}}</h3>
+    <div class="fb-like article-card-share" data-href="{{shareHref}}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+    <!--<div class="fb-share-button article-card-share"-->
+         <!--data-href="{{shareHref}}"-->
+         <!--data-layout="button_count">-->
+    <!--</div>-->
     {{! Makes sure other text doesn't overlap with absolutely positioned article-card-more-container}}
     <span class="article-card-more-spacer">          </span>
     <div class="article-card-more-container">

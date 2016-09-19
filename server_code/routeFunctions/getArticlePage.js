@@ -39,6 +39,7 @@ function getRouteFunction(db) {
                   article: article,
                   description: description,
                   fbAppId: process.env.FACEBOOK_APP_ID,
+                  imageBaseUrl: process.env.IMAGE_BASE_URL,
                   title: title,
                   url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
                   articleApproval: article.approval
@@ -47,6 +48,7 @@ function getRouteFunction(db) {
                 res.render('pages/article', {
                   articleApproval: article.approval,
                   fbAppId: process.env.FACEBOOK_APP_ID,
+                  imageBaseUrl: process.env.IMAGE_BASE_URL
                 });
               }
             }

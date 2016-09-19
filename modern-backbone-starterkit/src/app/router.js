@@ -35,7 +35,7 @@ export default Backbone.Router.extend({
   },
 
   initialize(options) {
-    $('body').append('<div id="js-app"></div>');
+    $('body').append('<div id="js-app" class="kmw-app"></div>');
 
     for (let i=0; i < categories.length; i++) {
       this.route(categories[i].urlSlug, "categoryRoute");

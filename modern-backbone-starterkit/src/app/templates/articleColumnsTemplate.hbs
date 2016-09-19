@@ -5,14 +5,10 @@
       </div>
     {{/each}}
   </div>
-  {{#if fetchingMoreResults}}
-    <div style="text-align: center;">
+    <div class="js-article-columns-loading article-columns-loading{{#unless fetchingMoreResults}} kmw-hidden{{/unless}}">
       Loading more results...
     </div>
-  {{/if}}
-  {{#if noMoreResults}}
-    <div style="text-align: center;">
+    <div class="js-article-columns-no-more-results article-columns-no-more-results{{#unless noMoreResults}} kmw-hidden{{/unless}}">
       No More results.
     </div>
-  {{/if}}
 </div>

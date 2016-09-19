@@ -48,7 +48,7 @@ const webdriver = require('selenium-webdriver');
 require('dotenv').config({path: __dirname + '/../.env'});
 
 By = webdriver.By;
-let driver = new webdriver.Builder()
+const driver = new webdriver.Builder()
   .forBrowser('chrome')
   .build();
 

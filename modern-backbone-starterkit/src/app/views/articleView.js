@@ -70,6 +70,10 @@ export default Backbone.View.extend({
         isAdminRouteAndNotDoneFetching: isAdminRouteAndNotDoneFetching,
       }));
       this.attachSubViews();
+
+      if (window.FB !== undefined) {
+        window.FB.XFBML.parse(this.el);
+      }
       return this;
     }, 16
   ),

@@ -39,7 +39,8 @@ MongoClient.connect(MONGO_URI,
 
       const sendIndex = function(req, res) {
         res.render('pages/index', {
-          fbAppId: process.env.FACEBOOK_APP_ID
+          fbAppId: process.env.FACEBOOK_APP_ID,
+          imageBaseUrl: process.env.IMAGE_BASE_URL
         });
       }
 
@@ -84,6 +85,7 @@ MongoClient.connect(MONGO_URI,
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
+      const postImage = require('./server_code/routeFunctions/postImage')(db);
       const signS3 = require('./server_code/routeFunctions/signS3')(db);
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
@@ -99,6 +101,7 @@ MongoClient.connect(MONGO_URI,
       app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);
       app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
       app.post('/flagged-articles', bodyParser.json(), postFlaggedArticles);
+      app.post('/image', upload.single('image'), postImage);
       let s3Limiter = new RateLimit({
         delayAfter: 3, // begin slowing down responses after the third request
         delayMs: 1000, // slow down subsequent responses by 1 second per request

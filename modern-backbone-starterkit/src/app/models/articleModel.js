@@ -29,8 +29,9 @@ export default Backbone.Model.extend({
 
   parse: function(articleJSON, options) {
     articleJSON.articleURL = '/' + serviceProvider.getRouter().exports.articleRoutePrefix + '/' + articleJSON.articleURLSlug;
+    articleJSON.imageURL = window.kmw.imageBaseUrl + articleJSON.imageSlug;
     articleJSON.categoryPrettyName = cat.otherSlugToPrettyName[articleJSON.category];
-    articleJSON.categoryURL = serviceProvider.getRouter().getCategoryRoutePrefix + cat.otherSlugToURLSlug[articleJSON.category];
+    articleJSON.categoryURL = serviceProvider.getRouter().getCategoryRoutePrefix() + cat.otherSlugToURLSlug[articleJSON.category];
     articleJSON.doneFetching = true;
     return articleJSON;
   },
