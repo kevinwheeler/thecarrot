@@ -6,7 +6,55 @@ const updateSummaries = require('../updateSummaries');
 function getRouteFunction(db) {
 
 
+  // If one person views the same article 1000 times, we don't want to increment the number of views that this article
+  // has each time. So this function determines whether or not we actually want to increment the number of views.
+  // For now, we just check if the user's IP address and we will only let him increment the view count once
+  // every 24 hours.
+  function getShouldIncrementViews(articleId, ipAddress) {
+    const prom = new Promise(function(resolve, reject) {
+      db.collection('views', (err, viewsColl) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          const threshold = new Date(Date.now() - 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/);
+          viewsColl.find({
+            articleId: articleId,
+            ipAddress: ipAddress,
+            timestamp: {$gt: threshold}
+          }).limit(1).next().then(function(result) {
+            if (result) {
+              resolve(false);
+            } else {
+              resolve(true);
+            }
+          }).catch(function(err) {
+            reject(err);
+          });
+        }
+      });
+    });
+    return prom;
+  }
 
+  /*
+   *  Log that the article was viewed by this ip address so that we don't
+   *  count any more views from this ip address for a while.
+   */
+  function updateShouldIncrementViews(articleId, ipAddress) {
+    db.collection('views', (err, viewsColl) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        viewsColl.insertOne({
+          articleId: articleId,
+          ipAddress: ipAddress,
+          timestamp: new Date()
+        }).catch(function(err) {
+          logError(err);
+        });
+      }
+    });
+  }
 
   function validateParams(articleId, incrementViews) {
     let validationErrors = [];
@@ -35,7 +83,7 @@ function getRouteFunction(db) {
      //let articleSlug = req.params.articleSlug;
      let articleId = parseInt(req.query.articleId, 10);
      let incrementViews = req.query.incrementViews;
-     if (incrementViews === 'true'){
+     if (incrementViews === 'true') {
        incrementViews = true;
      } else if (incrementViews === 'false') {
        incrementViews = false;
@@ -63,7 +111,14 @@ function getRouteFunction(db) {
                    article.viewerIsAuthor = false;
                  }
                  if (incrementViews) {
-                   updateSummaries.incrementCounts(db, 'views', articleId);
+                   getShouldIncrementViews(articleId, req.ip).then(function(shouldIncrement) {
+                     if (shouldIncrement) {
+                       updateSummaries.incrementCounts(db, 'views', articleId);
+                       updateShouldIncrementViews(articleId, req.ip);
+                     }
+                   }).catch(function(err) {
+                     logError(err);
+                   });
                  }
                  // return article except with private fields omitted.
                  const args = [article].concat(privateArticleFields);
