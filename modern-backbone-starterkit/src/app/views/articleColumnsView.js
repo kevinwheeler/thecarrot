@@ -27,9 +27,8 @@ export default Backbone.View.extend({
   },
 
   render: _.throttle(function() {
-      this.colCounter = 0; //TODO
+      this.numColumns = this.getNumColumns();
       const self = this;
-      this.numColumns = 3;
       // num columns array is a hack so that we can loop a dynamic number of times in handlebars.
       // The only way I saw to do this was to loop over each element in a dynamically sized array.
       const numColumnsArray = [];
@@ -52,15 +51,6 @@ export default Backbone.View.extend({
       this.articleCollection.each(function(model) {
         self.addArticle(model);
       });
-
-      // apply update using diffDom
-      //const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);
-      //if (diffDomWrapper !== undefined) {
-      //  const diff = dd.diff(diffDomWrapper, newEl);
-      //  dd.apply(diffDomWrapper, diff);
-      //} else {
-      //  this.$el.html(newEl);
-      //}
 
       if (window.FB !== undefined) {
         window.FB.XFBML.parse(this.el);
@@ -110,6 +100,19 @@ export default Backbone.View.extend({
     return Math.min((intrinsicHeight/intrinsicWidth)*actualWidth, 500);
   },
 
+  getNumColumns: function() {
+    const windowWidth = $(window).width();
+
+    if (windowWidth < 800) {
+      return 1
+    }
+    else if (windowWidth < 1200) {
+      return 2
+    } else {
+      return 3;
+    }
+  },
+
   onDoneFetching: function() {
     this.$(".js-article-columns-loading").addClass("kmw-hidden");
   },
@@ -126,7 +129,9 @@ export default Backbone.View.extend({
     if (articleCollection === this.articleCollection) {
       return;
     }
-    if (this.articleCollection !== undefined) {
+    if (this.articleCollection === undefined) {
+
+    } else {
       this.stopListening(this.articleCollection);
     }
     this.articleCollection = articleCollection;
@@ -135,5 +140,17 @@ export default Backbone.View.extend({
     this.listenTo(this.articleCollection, 'doneFetching', this.onDoneFetching);
     this.listenTo(this.articleCollection, 'noMoreResults', this.onNoMoreResults);
     this.render();
+    this.reRenderWhenNumberOfColumnsShouldChange();
+  },
+
+  reRenderWhenNumberOfColumnsShouldChange: function(){
+    const self = this;
+    $(window).resize(function() {
+      if (self.numColumns !== self.getNumColumns()) {
+        self.numColumns = self.getNumColumns();
+        self.render();
+      }
+    });
   }
+
 });

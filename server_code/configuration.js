@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const compression = require('compression');
+const forceDomain = require('forcedomain');
 const helmet = require('helmet');
 const passport = require('passport');
 const session = require('express-session');
@@ -11,16 +12,11 @@ function exportVal(app) {
     throw "NODE_ENV environment variable not set.";
   }
 
-  // from http://stackoverflow.com/questions/7185074/heroku-nodejs-http-to-https-ssl-forced-redirect
-  var forceSsl = function (req, res, next) {
-    if (req.headers['x-forwarded-proto'] !== 'https') {
-      return res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
-    }
-    return next();
-  };
-
   if (NODE_ENV === 'production') {
-    app.use(forceSsl);
+    app.use(forceDomain({
+      hostname: 'www.nothingbutheadlines.lol',
+      protocol: 'https'
+    }));
   }
 
   const sessionOptions = {
