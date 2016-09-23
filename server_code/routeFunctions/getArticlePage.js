@@ -40,6 +40,7 @@ function getRouteFunction(db) {
                   description: description,
                   fbAppId: process.env.FACEBOOK_APP_ID,
                   imageBaseUrl: process.env.IMAGE_BASE_URL,
+                  imageURL: process.env.IMAGE_BASE_URL + article.imageSlug,
                   title: title,
                   url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
                   articleApproval: article.approval
