@@ -65,7 +65,6 @@ export default Backbone.View.extend({
       articleCardTemplate({
         article: article,
         displayCategory: this.displayCategory,
-        shareHref: location.protocol + "//" + location.host + "/" + article.articleURLSlug
       })
     )[0];
     const $newArticleCard = $(newArticleCard);

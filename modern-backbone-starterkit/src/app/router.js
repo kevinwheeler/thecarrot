@@ -3,6 +3,7 @@ import Backbone from 'backbone';
 
 import {categories} from 'ISOMORPHICDIR/categories';
 import serviceProvider from './utils/serviceProvider.js';
+const articleRoute = require('ISOMORPHICDIR/routes').articleRoute;
 
 export default Backbone.Router.extend({
 
@@ -13,8 +14,8 @@ export default Backbone.Router.extend({
   routes: {
     '': 'categoryRoute',
     'admin/:subroute'       : 'adminRoute',
-    'article/:articleSlug'       : 'articleRoute',
-    'admin/article/:articleSlug'       : 'articleRoute',
+    //'article/:articleSlug'       : 'articleRoute',
+    //'admin/article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
     'user/:userId'       : 'userRoute',
     'upload': 'uploadRoute'
@@ -30,8 +31,8 @@ export default Backbone.Router.extend({
   },
 
   exports: {
-    articleRoutePrefix: 'article',
-    adminArticleRoutePrefix: 'admin/article'
+    articleRoutePrefix: articleRoute.routePrefix,
+    adminArticleRoutePrefix: articleRoute.adminRoutePrefix
   },
 
   initialize(options) {
@@ -40,6 +41,9 @@ export default Backbone.Router.extend({
     for (let i=0; i < categories.length; i++) {
       this.route(categories[i].urlSlug, "categoryRoute");
     }
+
+    this.route(articleRoute.backboneRouteString1, "articleRoute");
+    this.route(articleRoute.backboneRouteString2, "articleRoute");
 
     // http://stackoverflow.com/questions/7131909/facebook-callback-appends-to-return-url
     // Facebook adds #_=_ to the end of the redirect url after someone logs in or authenticates using facebook.
@@ -56,10 +60,10 @@ export default Backbone.Router.extend({
   currentRouteIsAdminArticleRoute() {
     let url = window.location.pathname;
 
-    if (url.indexOf('/admin/article') === 0) {
+    if (url.indexOf('/' + articleRoute.adminRoutePrefix) === 0) {
       return true;
     } else {
-      if ((url.indexOf('/article') !== 0) && (url.indexOf('/admin/article') !== 0)) {
+      if ((url.indexOf('/' + articleRoute.routePrefix) !== 0) && (url.indexOf('/' + articleRoute.adminRoutePrefix) !== 0)) {
         throw "Called currentRouteIsAdminArticleRoute when not in an article route"
       }
       return false;
@@ -68,7 +72,7 @@ export default Backbone.Router.extend({
 
   getArticleIdOfCurrentRoute() {
     let url = window.location.pathname;
-    if ((url.indexOf('/article') !== 0) && (url.indexOf('/admin/article') !== 0)) {
+    if ((url.indexOf('/' + articleRoute.routePrefix) !== 0) && (url.indexOf('/' + articleRoute.adminRoutePrefix) !== 0)) {
       throw "Called getArticleIdOfCurrentRoute() when not in an article route";
     }
 

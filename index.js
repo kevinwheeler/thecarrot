@@ -2,6 +2,7 @@ const aws = require('aws-sdk');
 const bodyParser = require('body-parser');
 const categories = require('./modern-backbone-starterkit/src/isomorphic/categories').categories;
 const express = require('express');
+const articleRoute = require('./modern-backbone-starterkit/src/isomorphic/routes').articleRoute;
 const logError = require('./server_code/utils').logError;
 const MongoClient = require('mongodb').MongoClient;
 const multer = require('multer');
@@ -92,7 +93,7 @@ MongoClient.connect(MONGO_URI,
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
       app.post('/best-articles', bodyParser.json(), bestArticlesJSON);
       app.get('/api/article', getArticleJSON);
-      app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
+      app.get(articleRoute.nodeRouteString, getArticlePage);
       app.get('/most-recent-articles', getMostRecentArticlesJSON);
       app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
       app.get('/my-authored-articles', getMyAuthoredArticles);
