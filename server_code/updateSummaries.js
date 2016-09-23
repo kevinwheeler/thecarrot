@@ -71,7 +71,7 @@ function incrementAlltimeCount(db, attributeName, articleId) {
         {
           $inc: incDoc,
         }
-      ).then(function (result) {}, function (err) {
+      ).catch(function (err) {
         handleError(err);
       });
     }
@@ -156,8 +156,8 @@ function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, sk
 // Returns an error object or null. If a parameter didn't pass validation, the error object
 // will have the property clientError set to true so that the caller can send an http 4xx response instead of a 5xx response.
 function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly) {
-  let validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly);
-  let prom = new Promise(function(resolve, reject) {
+  const validationErrors = validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly);
+  const prom = new Promise(function(resolve, reject) {
     if (validationErrors !== null) {
       reject(validationErrors)
     } else {

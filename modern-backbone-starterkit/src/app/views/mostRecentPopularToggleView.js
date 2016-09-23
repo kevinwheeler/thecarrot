@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
+import BestArticlesCollection from 'COLLECTIONSDIR/bestArticlesCollection';
 import MostRecentArticlesCollection from 'COLLECTIONSDIR/mostRecentArticlesCollection';
 import MostViewedArticlesCollection from 'COLLECTIONSDIR/mostViewedArticlesCollection';
 import serviceProvider from 'UTILSDIR/serviceProvider';
@@ -14,7 +15,7 @@ export default Backbone.View.extend({
   className: 'kmw-most-recent-popular-toggle',
 
   events: {
-    'change .kmw-most-recent-popular-select': 'update',
+    'change .kmw-collection-type-select': 'update',
     'change .kmw-time-interval-select': 'update',
     'input .kmw-skip-ahead': 'debouncedUpdate'
   },
@@ -40,7 +41,7 @@ export default Backbone.View.extend({
     const self = this;
     const onScrollFunction = function() {
       const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
-      if(distanceFromBottom < 500)  {
+      if (distanceFromBottom < 500)  {
         self.articleGridView.fetchMoreResults();
       }
     };
@@ -61,14 +62,14 @@ export default Backbone.View.extend({
   // restore one the one we were last using.
   shouldRestorePreviousSession: function () {
     const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
-    const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
+    const collectionType = this.$('.kmw-collection-type-select').get(0).value;
     const $skipAhead = this.$(".kmw-skip-ahead");
     const skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
     const category = this.router.getCategory();
 
     if (
       timeInterval !== this.lastTimeInterval ||
-      recentOrPopular !== this.lastRecentOrPopular ||
+      collectionType !== this.lastCollectionType ||
       skipAheadAmount !== this.lastSkipAheadAmount ||
       category !== this.lastCategory
     ) {
@@ -80,7 +81,7 @@ export default Backbone.View.extend({
 
   saveSessionInfo: function() {
     this.lastTimeInterval = this.$('.kmw-time-interval-select').get(0).value;
-    this.lastRecentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
+    this.lastCollectionType = this.$('.kmw-collection-type-select').get(0).value;
     const $skipAhead = this.$(".kmw-skip-ahead");
     this.lastSkipAheadAmount = parseInt($skipAhead.get(0).value, 10);
     this.lastCategory = this.router.getCategory();
@@ -110,7 +111,7 @@ export default Backbone.View.extend({
         // TODO if we ever change it such that clicking on a different category doesn't cause a new page load,
         // we will want to make it such that we reset the controls/inputs when we click on a new category.
 
-        const recentOrPopular = this.$('.kmw-most-recent-popular-select').get(0).value;
+        const collectionType = this.$('.kmw-collection-type-select').get(0).value;
         const $skipAhead = this.$(".kmw-skip-ahead");
         let skipAheadAmount = parseInt($skipAhead.get(0).value, 10);
         if (_.isNaN(skipAheadAmount)) {
@@ -131,16 +132,25 @@ export default Backbone.View.extend({
 
         this.saveSessionInfo();
 
-        if (recentOrPopular === 'most-recent') {
+        if (collectionType === 'most-recent') {
           this.articleCollection = new MostRecentArticlesCollection([], {
             category: category,
             skipAheadAmount: skipAheadAmount,
             staffPicksOnly: staffPicksOnly,
           });
           this.$('.kmw-time-interval-select').addClass('kmw-hidden');
-        } else if (recentOrPopular === 'most-popular') {
+        } else if (collectionType === 'most-popular') {
           const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
           this.articleCollection = new MostViewedArticlesCollection([], {
+            category: category,
+            skipAheadAmount: skipAheadAmount,
+            staffPicksOnly: staffPicksOnly,
+            timeInterval: timeInterval,
+          });
+          this.$('.kmw-time-interval-select').removeClass('kmw-hidden');
+        } else if (collectionType === 'best') {
+          const timeInterval = this.$('.kmw-time-interval-select').get(0).value;
+          this.articleCollection = new BestArticlesCollection([], {
             category: category,
             skipAheadAmount: skipAheadAmount,
             staffPicksOnly: staffPicksOnly,
@@ -152,7 +162,7 @@ export default Backbone.View.extend({
         this.articleGridView.setArticleCollection(this.articleCollection);
       }
 
-      //if (recentOrPopular === 'most-recent') {
+      //if (collectionType === 'most-recent') {
       //  //if (this.mostRecentArticlesCollection === undefined) {
       //  this.mostRecentArticlesCollection = new MostRecentArticlesCollection([], {
       //    category: category,
@@ -165,7 +175,7 @@ export default Backbone.View.extend({
       //  this.$('.kmw-time-interval-select').addClass('kmw-hidden');
       //
       //
-      //} else if (recentOrPopular === 'most-popular') {
+      //} else if (collectionType === 'most-popular') {
       //  const timeInterval = this.$('.kmw-time-interval-select').get(0).value
       //
       //  if (timeInterval === 'daily') {

@@ -1,7 +1,7 @@
 const getNextId = require('../utils').getNextId;
 const logError = require('../utils').logError;
 const requester = require('request');
-const wilson = require('wilson-score')
+const wilson = require('wilson-score');
 
 function getRouteFunction(db) {
   let articleColl;

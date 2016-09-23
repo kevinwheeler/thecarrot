@@ -23,8 +23,10 @@ export default Backbone.View.extend({
     this.articleModel = options.articleModel;
     this.currentUserModel = options.currentUserModel;
     this.flagArticleModalView = options.flagArticleModalView;
+    this.voteModel = options.voteModel;
     this.listenTo(this.articleModel, 'change', this.render);
     this.listenTo(this.currentUserModel, 'change', this.render);
+    this.listenTo(this.voteModel, 'change', this.render);
 
     this.render();
   },
@@ -68,6 +70,8 @@ export default Backbone.View.extend({
         isAdminRoute: isAdminRoute,
         isAdminRouteAndNotAdmin: isAdminRouteAndNotAdmin,
         isAdminRouteAndNotDoneFetching: isAdminRouteAndNotDoneFetching,
+        isDownVoted: this.voteModel.isDownVoted(),
+        isUpVoted: this.voteModel.isUpVoted(),
       }));
       this.attachSubViews();
 
@@ -84,11 +88,12 @@ export default Backbone.View.extend({
   },
 
   downvoteClicked: function() {
-    if (this.currentUserModel.get('loggedIn') === true) {
-
-    } else {
-      alert("You must be logged in to downvote.")
-    }
+    this.voteModel.doVote("down");
+    //if (this.currentUserModel.get('loggedIn') === true) {
+    //
+    //} else {
+    //  alert("You must be logged in to downvote.")
+    //}
   },
 
   spamFlagClicked: function() {
@@ -96,10 +101,11 @@ export default Backbone.View.extend({
   },
 
   upvoteClicked: function() {
-    if (this.currentUserModel.get('loggedIn') === true) {
-      console.log("logged in");
-    } else {
-      alert("You must be logged in to upvote.");
-    }
+    this.voteModel.doVote("up");
+    //if (this.currentUserModel.get('loggedIn') === true) {
+    //  console.log("logged in");
+    //} else {
+    //  alert("You must be logged in to upvote.");
+    //}
   }
 });

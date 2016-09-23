@@ -22,6 +22,7 @@ import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
 import UserView from 'VIEWSDIR/userView';
+import VoteModel from 'MODELSDIR/voteModel';
 
 var serviceProvider = {
   _createRouter() {
@@ -65,18 +66,23 @@ var serviceProvider = {
   },
 
   getArticleView() {
+    const articleId = this.getRouter().getArticleIdOfCurrentRoute();
+    const voteModel = new VoteModel({
+      articleId: articleId
+    });
     const currentUserModel = new CurrentUserModel();
     currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
     articleModelInst.fetchArticle();
     const flagArticleModalView = new FlagArticleModalView({
-      articleId: this.getRouter().getArticleIdOfCurrentRoute()
+      articleId: articleId
     });
     const articleViewInst = new ArticleView({
       articleModel: articleModelInst,
       currentUserModel: currentUserModel,
       flagArticleModalView: flagArticleModalView,
-      navView: this.getNavView()
+      navView: this.getNavView(),
+      voteModel: voteModel
     });
     return articleViewInst;
   },

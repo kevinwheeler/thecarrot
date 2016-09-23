@@ -74,6 +74,7 @@ MongoClient.connect(MONGO_URI,
       });
 
       const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
+      const bestArticlesJSON = require('./server_code/routeFunctions/bestArticlesJSON')(db);
       const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
       const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
       const getMostRecentArticlesJSON = require('./server_code/routeFunctions/getMostRecentArticlesJSON')(db);
@@ -86,9 +87,10 @@ MongoClient.connect(MONGO_URI,
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
       const postImage = require('./server_code/routeFunctions/postImage')(db);
-      const signS3 = require('./server_code/routeFunctions/signS3')(db);
+      const postVote = require('./server_code/routeFunctions/postVote')(db);
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
+      app.post('/best-articles', bodyParser.json(), bestArticlesJSON);
       app.get('/api/article', getArticleJSON);
       app.get('/:admin((admin/)?)article/:articleSlug', getArticlePage);
       app.get('/most-recent-articles', getMostRecentArticlesJSON);
@@ -102,14 +104,11 @@ MongoClient.connect(MONGO_URI,
       app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
       app.post('/flagged-articles', bodyParser.json(), postFlaggedArticles);
       app.post('/image', upload.single('image'), postImage);
-      let s3Limiter = new RateLimit({
-        delayAfter: 3, // begin slowing down responses after the third request
-        delayMs: 1000, // slow down subsequent responses by 1 second per request
-        max: 50, // limit each IP to 30 requests per windowMs
-        windowMs: 60*1000 // 1 minute
+      const voteLimiter = new RateLimit({
+        delayAfter: 1, // begin slowing down responses after the first request
+        delayMs: 5000, // slow down subsequent responses by 5 second per request
       });
-      app.get('/sign-s3', s3Limiter, signS3);
-
+      app.post('/vote', voteLimiter, bodyParser.urlencoded({extended: false}), postVote);
 
       app.use(express.static(distDir));
       app.use(express.static('public'));

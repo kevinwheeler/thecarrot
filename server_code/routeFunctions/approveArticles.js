@@ -58,7 +58,24 @@ function getRouteFunction(db) {
             }
           )
         }
-      ).then(function updateArticleApproval() {
+      ).then(function updateFirstApprovedAt() {
+        if (approvalVerdict === 'approved') {
+          return articleColl.updateOne(
+            {
+              _id: articleId,
+              firstApprovedAt: {$exists: false}
+            },
+            {
+              $set: {firstApprovedAt: new Date()},
+            },
+            {
+              w: 'majority',
+            }
+          );
+        } else {
+          return Promise.resolve();
+        }
+      }).then(function updateArticleApproval() {
         return articleColl.updateOne(
           {
             _id: articleId

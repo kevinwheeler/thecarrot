@@ -66,9 +66,13 @@ function getRouteFunction(db) {
             imageSlug: sess.imageSlug,
             numAuthenticatedFlags: 0,
             numUnauthenticatedFlags: 0,
+            numDownvotes: 0,
+            numUpvotes: 0,
+            numTotalVotes: 0,
             sidOfAuthor: req.sessionID,
             staffPick: false,
             subline: subline,
+            upvoteScore: 0
           };
           const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
           _.merge(doc, initialSummaryAttributes);
