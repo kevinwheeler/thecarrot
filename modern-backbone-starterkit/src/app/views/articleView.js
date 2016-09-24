@@ -75,7 +75,7 @@ export default Backbone.View.extend({
       }));
       this.attachSubViews();
 
-      if (window.FB !== undefined) {
+      if (window.kmw.facebookInitialized) {
         window.FB.XFBML.parse(this.el);
       }
       return this;

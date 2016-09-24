@@ -13,7 +13,7 @@ export default Backbone.Router.extend({
   // initialize.
   routes: {
     '': 'categoryRoute',
-    'admin/:subroute'       : 'adminRoute',
+    'admin/:subroute': 'adminRoute',
     //'article/:articleSlug'       : 'articleRoute',
     //'admin/article/:articleSlug'       : 'articleRoute',
     'login'       : 'loginRoute',
@@ -141,7 +141,6 @@ export default Backbone.Router.extend({
 
   adminRoute(param) {
     let adminViewInst;
-    console.log("in admin route. param = " + param)
     if (param === 'need-approval-articles') {
       adminViewInst = serviceProvider.getAdminView("needApproval");
     } else if (param === "my-approval-history") {

@@ -52,7 +52,7 @@ export default Backbone.View.extend({
         self.addArticle(model);
       });
 
-      if (window.FB !== undefined) {
+      if (window.kmw.facebookInitialized) {
         window.FB.XFBML.parse(this.el);
       }
       return this;
@@ -83,7 +83,7 @@ export default Backbone.View.extend({
     const newArticleHeight = articleCardHeight - ghostHeight + imageHeight;
     this.columnHeights[shortestColumnIndex] += newArticleHeight;
 
-    if (window.FB !== undefined) {
+    if (window.kmw.facebookInitialized) {
       window.FB.XFBML.parse(newArticleCard);
     }
   },

@@ -16,12 +16,16 @@ export default Backbone.View.extend({
 
   initialize: function(options = {}) {
     this.articleGridView = options.articleGridView;
+    this.navView = options.navView;
     this.$el.html(template());
     this.attachSubViews();
   },
 
   // Attributes below aren't standard backbone attributes. They are custom.
   attachSubViews: function() {
+    const $nav = this.$('.NAV-STUB');
+    $nav.replaceWith(this.navView.$el);
+
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');
     $articleGrid.replaceWith(this.articleGridView.$el);
   }

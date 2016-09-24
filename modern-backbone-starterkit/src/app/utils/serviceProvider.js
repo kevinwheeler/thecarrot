@@ -42,26 +42,29 @@ var serviceProvider = {
   //  return aboutViewInst;
   //},
 
-  getAdminView(subroute) {
+  getAdminView(route) {
 
     let articlesCollection;
     let articleGridView;
-    if (subroute === "approvalHistory") {
+    if (route === "approvalHistory") {
       articlesCollection = new MyApprovalHistoryCollection([]);
       articleGridView = new ApprovalHistoryArticleGridView();
-    } else if (subroute === "needApproval") {
+    } else if (route === "needApproval") {
       articlesCollection = new ArticlesThatNeedApprovalCollection([]);
       articleGridView = new NeedApprovalArticleGridView();
-    } else if (subroute === "flaggedArticles") {
+    } else if (route === "flaggedArticles") {
       articlesCollection = new FlaggedArticlesCollection([]);
       articleGridView = new NeedApprovalArticleGridView();
     } else {
-      throw "invalid collectionToUse";
+      throw "invalid admin route";
     }
     articlesCollection.fetchNextArticles();
     articleGridView.setArticleCollection(articlesCollection);
 
-    let adminViewInst = new AdminView({articleGridView: articleGridView});
+    let adminViewInst = new AdminView({
+      articleGridView: articleGridView,
+      navView: this.getNavView()
+    });
     return adminViewInst;
   },
 

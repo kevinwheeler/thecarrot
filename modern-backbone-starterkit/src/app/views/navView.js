@@ -22,8 +22,8 @@ export default Backbone.View.extend({
   initialize: function(options = {}) {
     this.options = options;
 
-    //this.currentUser = options.currentUser;
-    //this.listenTo(this.currentUser, 'change', this.render);
+    this.currentUser = options.currentUser;
+    this.listenTo(this.currentUser, 'change', this.render);
 
     this.render();
     this.updateWhenBreakpointReached();
@@ -39,6 +39,7 @@ export default Backbone.View.extend({
       this.$el.children().detach();
       this.$el.html(this.template({
         categories: categories,
+        displayAdmin: this.currentUser.get('userType') === 'admin'
         //doneFetching: this.currentUser.get('doneFetching'),
         //loggedIn: this.currentUser.get('loggedIn'),
         //userId: this.currentUser.get('fbId')

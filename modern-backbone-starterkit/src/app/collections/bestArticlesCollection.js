@@ -15,6 +15,8 @@ export default Backbone.Collection.extend({
   },
   model: ArticleModel,
   parse: function(response, options) {
+    console.log("response = ");
+    console.log(response);
     this.currentlyFetching = false;
     this.trigger('doneFetching');
     if (!response.length) {
