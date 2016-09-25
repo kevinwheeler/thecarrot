@@ -5,6 +5,7 @@ const requester = require('request');
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 const updateSummaries = require('../updateSummaries');
 const validations = require('../../modern-backbone-starterkit/src/isomorphic/articleValidations.js');
+const articleRoute = require('../../modern-backbone-starterkit/src/isomorphic/routes.js').articleRoute;
 
 function getRouteFunction(db) {
 
@@ -14,7 +15,7 @@ function getRouteFunction(db) {
     //    to: "kevinwheeler2@yahoo.com",
     //    from: 'noreply@' + process.env.PRODUCTION_DOMAIN_NAME,
     //    subject: process.env.DOMAIN_NAME + ' article in need of approval',
-    //    html: `article needs approval. <a href="${process.env.DOMAIN}/admin/article/${articleURLSlug}">view here.</a>`
+    //    html: `article needs approval. <a href="${process.env.DOMAIN}/admin/article/${articleURLSlug}">view here.</a>` //TODO change prefix from article to headline.
     //  }, function (err, json) {
     //    if (err) {
     //      logError(err);
@@ -41,7 +42,6 @@ function getRouteFunction(db) {
     }
 
     const insertArticleAndRedirect = function() {
-      // id is the id to use for the new record we are inserting
       db.collection('article', (err, collection) => {
         if (err !== null) {
           next(err);
@@ -88,7 +88,7 @@ function getRouteFunction(db) {
                 next(error);
               } else {
                 notifyAdminViaEmail(articleURLSlug);
-                res.redirect('/article/' + articleURLSlug);
+                res.redirect('/' + articleRoute.routePrefix + '/' + articleURLSlug);
               }
             });
         }

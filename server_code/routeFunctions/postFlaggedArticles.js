@@ -1,5 +1,4 @@
 const logError = require('../utils').logError;
-const _ = require('lodash');
 
 function getRouteFunction(db) {
 

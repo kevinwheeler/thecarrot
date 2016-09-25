@@ -99,22 +99,27 @@ function getRouteFunction(db) {
   const routeFunction = function (req, res, next) {
     if (req.user && req.user.userType === 'admin') {
       const IDs = req.body['article_ids'];
-      const approverFbId = req.user.fbId
-      const approvalVerdict = req.body['approval_verdict'];
-      const promises = [];
-      for (let i=0; i < IDs.length; i++) {
-        const articleID = parseInt(IDs[i], 10);
-        promises.push(setApproval(approvalVerdict, articleID, approverFbId, res, next));
-      }
-      Promise.all(promises).then(
-        function(result) {
-          res.redirect('/admin');
-        },
-        function(err){
-          logError(err);
-          next(err);
+      const redirectUrl = req.body['redirect_url'];
+      if (IDs === undefined) {
+        res.status(403).send("You must select at least one article.");
+      } else {
+        const approverFbId = req.user.fbId
+        const approvalVerdict = req.body['approval_verdict'];
+        const promises = [];
+        for (let i=0; i < IDs.length; i++) {
+          const articleID = parseInt(IDs[i], 10);
+          promises.push(setApproval(approvalVerdict, articleID, approverFbId, res, next));
         }
-      );
+        Promise.all(promises).then(
+          function(result) {
+            res.redirect(redirectUrl);
+          },
+          function(err){
+            logError(err);
+            next(err);
+          }
+        );
+      }
     } else {
       res.status(403).send('You are not an admin or are not logged in.');
     }

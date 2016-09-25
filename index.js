@@ -104,7 +104,11 @@ MongoClient.connect(MONGO_URI,
       app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);
       app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
       app.post('/flagged-articles', bodyParser.json(), postFlaggedArticles);
-      app.post('/image', upload.single('image'), postImage);
+      const imageLimiter = new RateLimit({
+        windowMs: 1000*60, // 1 minute
+        max: 5, // limit each IP to 5 requests per windowMs
+      });
+      app.post('/image', imageLimiter, upload.single('image'), postImage);
       const voteLimiter = new RateLimit({
         delayAfter: 1, // begin slowing down responses after the first request
         delayMs: 5000, // slow down subsequent responses by 5 second per request

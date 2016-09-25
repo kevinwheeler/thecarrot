@@ -51,10 +51,13 @@ By = webdriver.By;
 const driver = new webdriver.Builder()
   .forBrowser('chrome')
   .build();
+  
+//const uploadUrl = 'https://www.nothingbutheadlines.lol/upload';
+const uploadUrl = 'http://localhost:5000/upload';
+console.log("using " + uploadUrl + " as the upload url.");
 
 for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
-  driver.get('https://www.nothingbutheadlines.lol/upload');
-  //driver.get('http://localhost:5000/upload');
+  driver.get(uploadUrl);
   driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
   driver.findElement(By.id('kmw-headline-input')).sendKeys("headline " + i);
   driver.findElement(By.id('kmw-subline-input')).sendKeys("subline " + i);

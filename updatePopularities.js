@@ -184,11 +184,11 @@ function monitorHealth(db) {
       ).then(function(result) {
           const howOftenToMonitor = 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 7; /*7 hours*/
           if (result == null || result.lastMonitoredAt < new Date(Date.now() - howOftenToMonitor)) {
-            db.collection('article', (err, articleCol) => {
+            db.collection('article', (err, articleColl) => {
               if (err !== null) {
                 throw err;
               } else {
-                articleCol.find(
+                articleColl.find(
                   {
                     $or: [
                       {'daily_views.lastUpdated':{$lt: acceptableAmountOfTimeSinceLastUpdate.daily}},
