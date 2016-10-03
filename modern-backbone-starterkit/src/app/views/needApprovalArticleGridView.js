@@ -14,11 +14,13 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
+    this.useFlagsURL = options.useFlagsURL;
   },
 
   render: _.throttle(function() {
       const newHTMLString = template({
-        articles: this.articleCollection.toJSON()
+        articles: this.articleCollection.toJSON(),
+        useFlagsURL: this.useFlagsURL
       });
       const newEl = $.parseHTML(newHTMLString)[0];
       const diffDomWrapper = this.$(".diff-dom-wrapper").get(0);

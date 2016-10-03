@@ -15,6 +15,21 @@ const MONGO_OPTIONS = {
 };
 
 
+let authFlagsColl;
+function getAuthenticatedFlagsColl() {
+  const prom = new Promise(function(resolve,reject) {
+    db.collection('authenticated_flags', {}, (err, coll) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        authFlagsColl = coll;
+        resolve();
+      }
+    });
+  })
+  return prom;
+}
+
 let dailyTimeBucketsColl;
 function getDailyTimeBucketsColl() {
   const prom = new Promise(function(resolve,reject) {
@@ -101,11 +116,8 @@ function getApprovalLogColl() {
 
 let articleColl;
 function getArticleColl() {
-  console.log("in func");
   const prom = new Promise(function(resolve,reject) {
-    console.log("2");
     db.collection('article', {}, (err, coll) => {
-      console.log("in thing");
       if (err !== null) {
         reject(err);
       } else {
@@ -166,8 +178,9 @@ function getViewsColl() {
 getDb().then(function(){Promise.all([
   getApprovalLogColl(),
   getArticleColl(),
-  getViewsColl(),
+  getAuthenticatedFlagsColl(),
   getUserColl(),
+  getViewsColl(),
   getTimeBucketsCollections(),
 ])}).then(function() {
   console.log("creating indexes for bestArticlesJSON");
@@ -185,6 +198,16 @@ getDb().then(function(){Promise.all([
     MONGO_OPTIONS
   ).then(function(result) {
     console.log("index created for bestArticleJSON");
+  }).catch(function(err) {
+    handleError(err);
+  });
+  /***************************************************************************/
+  console.log("creating index for getArticleFlags");//TODO
+  authFlagsColl.createIndex(
+    {articleId: 1, _id: -1},
+    MONGO_OPTIONS
+  ).then(function(result) {
+    console.log("index created for getArticleFlags");
   }).catch(function(err) {
     handleError(err);
   });

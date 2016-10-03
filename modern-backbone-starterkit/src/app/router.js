@@ -3,6 +3,7 @@ import Backbone from 'backbone';
 
 import {categories} from 'ISOMORPHICDIR/categories';
 import serviceProvider from './utils/serviceProvider.js';
+import {articleSlugToId} from 'ISOMORPHICDIR/utils'
 const articleRoute = require('ISOMORPHICDIR/routes').articleRoute;
 
 export default Backbone.Router.extend({
@@ -16,6 +17,7 @@ export default Backbone.Router.extend({
     'admin/:subroute': 'adminRoute',
     //'article/:articleSlug'       : 'articleRoute',
     //'admin/article/:articleSlug'       : 'articleRoute',
+    'flags/:articleId': 'flagsRoute',
     'login'       : 'loginRoute',
     'user/:userId'       : 'userRoute',
     'upload': 'uploadRoute'
@@ -43,7 +45,7 @@ export default Backbone.Router.extend({
     }
 
     this.route(articleRoute.backboneRouteString1, "articleRoute");
-    this.route(articleRoute.backboneRouteString2, "articleRoute");
+    //this.route(articleRoute.backboneRouteString2, "articleRoute");
 
     // http://stackoverflow.com/questions/7131909/facebook-callback-appends-to-return-url
     // Facebook adds #_=_ to the end of the redirect url after someone logs in or authenticates using facebook.
@@ -68,21 +70,6 @@ export default Backbone.Router.extend({
       }
       return false;
     }
-  },
-
-  getArticleIdOfCurrentRoute() {
-    let url = window.location.pathname;
-    if ((url.indexOf('/' + articleRoute.routePrefix) !== 0) && (url.indexOf('/' + articleRoute.adminRoutePrefix) !== 0)) {
-      throw "Called getArticleIdOfCurrentRoute() when not in an article route";
-    }
-
-    if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
-      url = url.substr(0, url.length - 1);
-    }
-
-    let articleSlug = url.substring(url.lastIndexOf('/') + 1);
-    const id = parseInt(articleSlug, 10);
-    return id;
   },
 
   // returns the category of the current route. Returns 'home' if we are on the homepage, and returns 'N/A' if we
@@ -132,8 +119,9 @@ export default Backbone.Router.extend({
     });
   },
 
-  articleRoute() {
-    let articleViewInst = serviceProvider.getArticleView();
+  articleRoute(articleSlug) {
+    const articleId = articleSlugToId(articleSlug);
+    let articleViewInst = serviceProvider.getArticleView(articleId);
     const app = $('#js-app');
     app.children().detach();
     $('#js-app').empty().append(articleViewInst.$el);
@@ -153,6 +141,18 @@ export default Backbone.Router.extend({
     const app = $('#js-app');
     app.children().detach();
     $('#js-app').empty().append(adminViewInst.$el);
+  },
+
+  flagsRoute(articleId) {
+    let flagsViewInst = serviceProvider.getFlagsView(articleId);
+    const app = $('#js-app');
+    app.children().detach();
+    $('#js-app').empty().append(flagsViewInst.$el);
+
+    //let userViewInst = serviceProvider.getUserView(userId);
+    //const app = $('#js-app');
+    //app.children().detach();
+    //$('#js-app').empty().append(userViewInst.$el);
   },
 
   userRoute(userId) {

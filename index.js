@@ -54,20 +54,13 @@ MongoClient.connect(MONGO_URI,
       app.get('/admin/flagged-articles', sendIndex);
       app.get('/admin/my-approval-history', sendIndex);
       app.get('/admin/need-approval-articles', sendIndex);
+      app.get('/flags/:articleId', sendIndex);
       app.get('/user/:userid', sendIndex);
       app.get('/upload', sendIndex);
 
       for (let i=0; i < categories.length; i++) {
         app.get('/' + categories[i].urlSlug, sendIndex);
       }
-
-      //app.get('/business', sendIndex);
-      //app.get('/education', sendIndex);
-      //app.get('/other', sendIndex);
-      //app.get('/politics', sendIndex);
-      //app.get('/sports', sendIndex);
-      //app.get('/spirituality', sendIndex);
-      //app.get('/technology', sendIndex);
 
       app.get('/logout', function(req, res) {
         req.logout();
@@ -85,6 +78,7 @@ MongoClient.connect(MONGO_URI,
       const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
+      const getArticleFlags = require('./server_code/routeFunctions/getArticleFlags')(db);
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
       const postImage = require('./server_code/routeFunctions/postImage')(db);
@@ -92,6 +86,7 @@ MongoClient.connect(MONGO_URI,
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
       app.post('/best-articles', bodyParser.json(), bestArticlesJSON);
+      app.get('/article-flags', bodyParser.json(), getArticleFlags);
       app.get('/api/article', getArticleJSON);
       app.get(articleRoute.nodeRouteString, getArticlePage);
       app.get('/most-recent-articles', getMostRecentArticlesJSON);

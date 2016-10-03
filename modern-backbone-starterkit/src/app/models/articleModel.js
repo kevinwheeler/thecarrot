@@ -18,9 +18,7 @@ export default Backbone.Model.extend({
   idAttribute: "_id",
 
   initialize: function(options) {
-    if (options.setIdToCurrentArticle === true) {
-      this._id = serviceProvider.getRouter().getArticleIdOfCurrentRoute();
-    }
+    this._id = options._id;
   },
 
   url: function() {

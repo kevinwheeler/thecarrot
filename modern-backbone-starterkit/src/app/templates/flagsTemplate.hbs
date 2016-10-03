@@ -1,0 +1,42 @@
+<nav class='NAV-STUB'></nav>
+<nav class='FLAG-ARTICLE-MODAL-STUB'></nav>
+<div class="container">
+
+  {{#if userIsntAdmin}}
+    You are either not logged in or not an admin.
+  {{/if}}
+
+  {{#if approvedOrAdmin}}
+    <h1 id="kmw-headline">headline = {{article.headline}}</h1>
+    <h2 id="kmw-subline">subline = {{article.subline}}</h2>
+    <img src="{{article.imageURL}}" class="img-responsive">
+  {{/if}}
+
+  Approval Status: {{approvalStatus}} <br>
+
+  {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}
+  <form action="/approve-articles" method="post">
+    <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
+    <input type="hidden" name="article_ids[]" value="{{article._id}}">
+
+    <label for="kmw-approval">Change approval status.</label>
+    <select id="kmw-article-view-approval" name="approval_verdict">
+      <option value="approved">Approve</option>
+      <option value="denied">Deny</option>
+    </select>
+
+    <input type="hidden" id="kmw-need-approval-redirect-url" name="redirect_url" value="{{articleURL}}">
+    <input type="submit">
+  </form>
+
+
+  Flag messages:
+  {{#each flags}}
+    <div class="flags-flag">
+      {{this.reason}}
+    </div>
+  {{/each}}
+
+
+</div>
+{{!-- <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="200" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div> --}}

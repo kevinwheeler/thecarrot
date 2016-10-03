@@ -2,6 +2,7 @@ import Backbone from 'backbone';
 
 import AdminView from 'VIEWSDIR/adminView';
 import ApprovalHistoryArticleGridView from 'VIEWSDIR/approvalHistoryArticleGridView';
+import FlagsCollection from 'COLLECTIONSDIR/flagsCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import ArticleColumnsView from 'VIEWSDIR/articleColumnsView';
@@ -9,6 +10,7 @@ import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
 import FlagArticleModalView from 'VIEWSDIR/flagArticleModalView';
+import FlagsView from 'VIEWSDIR/flagsView';
 import FlaggedArticlesCollection from 'COLLECTIONSDIR/flaggedArticlesCollection';
 import HomeView from 'VIEWSDIR/homeView';
 import LoginView from 'VIEWSDIR/loginView';
@@ -54,7 +56,9 @@ var serviceProvider = {
       articleGridView = new NeedApprovalArticleGridView();
     } else if (route === "flaggedArticles") {
       articlesCollection = new FlaggedArticlesCollection([]);
-      articleGridView = new NeedApprovalArticleGridView();
+      articleGridView = new NeedApprovalArticleGridView({
+        useFlagsURL: true
+      });
     } else {
       throw "invalid admin route";
     }
@@ -68,14 +72,13 @@ var serviceProvider = {
     return adminViewInst;
   },
 
-  getArticleView() {
-    const articleId = this.getRouter().getArticleIdOfCurrentRoute();
+  getArticleView(articleId) {
     const voteModel = new VoteModel({
       articleId: articleId
     });
     const currentUserModel = new CurrentUserModel();
     currentUserModel.fetchCurrentUser();
-    const articleModelInst = this.getArticleModel({setIdToCurrentArticle: true});
+    const articleModelInst = this.getArticleModel({_id: articleId});
     articleModelInst.fetchArticle();
     const flagArticleModalView = new FlagArticleModalView({
       articleId: articleId
@@ -93,6 +96,22 @@ var serviceProvider = {
   getArticleModel(options) {
     let articleModelInst = new ArticleModel(options);
     return articleModelInst;
+  },
+
+  getFlagsView(articleId) {
+    const currentUserModel = new CurrentUserModel();
+    const flagsCollection = new FlagsCollection([], {articleId: articleId});
+    flagsCollection.fetchNextFlags();
+    currentUserModel.fetchCurrentUser();
+    const articleModelInst = this.getArticleModel({_id: articleId});
+    articleModelInst.fetchArticle();
+    const flagsViewInst = new FlagsView({
+      articleModel: articleModelInst,
+      currentUserModel: currentUserModel,
+      flagsCollection: flagsCollection,
+      navView: this.getNavView(),
+    });
+    return flagsViewInst;
   },
 
   getHomeView() {

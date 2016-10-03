@@ -38,7 +38,7 @@ export default Backbone.View.extend({
       const approvalPending = this.articleModel.get('approval') === 'pending';
       const approvalPendingAndAuthor = approvalPending && viewerIsAuthor;
       const approvalPendingAndNotAuthor = approvalPending && !viewerIsAuthor;
-      const approvalStatus= this.articleModel.get('approval');
+      const approvalStatus = this.articleModel.get('approval');
       const currentUserDoneFetching = this.currentUserModel.get('doneFetching') === true;
       const articleDoneFetching = this.articleModel.get('doneFetching') === true;
       const isAdminRoute = serviceProvider.getRouter().currentRouteIsAdminArticleRoute();
