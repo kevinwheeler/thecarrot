@@ -4,37 +4,62 @@
 }
 
 .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>li>a:hover, .navbar-inverse .navbar-nav>li>a:focus {
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
 
 .navbar-inverse .navbar-nav>li>a:focus, .navbar-inverse .navbar-nav>li>a:hover {
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
 
 .nav>li>a:focus, .nav>li>a:hover {
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
+
+@font-face {
+  font-family: bubblegumSansRegular;
+  src: url(/fonts/BubblegumSans-Regular.otf);
+}
+
+.kmw-nav-item-anchor {
+  font-family: bubblegumSansRegular;
+  text-shadow: 0 1px 3px rgba(64, 64, 64, 1) !important;
+  color: white !important;
+  font-size: 20px;
+}
+
+li.active > .kmw-nav-item-anchor {
+  color: #37fcff !important;
+}
+
 li.active a.kmw-nav-item-anchor {
-  background-color: #f5f8fa !important;
+  //background-color: #f5f8fa !important;
+  background-color: transparent !important;
 }
 
 .navbar-inverse {
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
 
 .navbar-inverse .navbar-toggle .icon-bar {
   //background-color: #000;
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
 
 .navbar-inverse .navbar-toggle:focus, .navbar-inverse .navbar-toggle:hover {
   //background-color: #fff;
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
 
 .navbar-inverse .navbar-toggle:focus .icon-bar, .navbar-inverse .navbar-toggle:hover .icon-bar {
   //background-color: #bbb;
-  background-color: #f5f8fa;
+  //background-color: #f5f8fa;
+  background-color: transparent;
 }
 
 .kmw-navbar-center .navbar-nav {
@@ -42,8 +67,10 @@ li.active a.kmw-nav-item-anchor {
   float: none;
 }
 
-.kmw-navbar{
+.kmw-navbar {
+  border: none !important;
   padding-top: 20px;
+  background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.0) ), url("/images/sky-604411.jpg");
 }
 
 .kmw-navbar.kmw-navbar-sticky{
@@ -82,6 +109,8 @@ li.active a.kmw-nav-item-anchor {
 }
 
 .kmw-navbar-brand {
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(64, 64, 64, 1) !important;
   float: none;
   font-family: "KingThings Spikeless";
   font-size: 50px;

@@ -28,7 +28,6 @@ export default Backbone.View.extend({
     this.render();
     this.updateWhenBreakpointReached();
     this.toggleStickyOnScroll();
-    this.setActiveElement();
   },
 
   tagName: 'nav',
@@ -44,6 +43,7 @@ export default Backbone.View.extend({
         //loggedIn: this.currentUser.get('loggedIn'),
         //userId: this.currentUser.get('fbId')
       }));
+      this.setActiveElement();
       return this;
     }, 16
   ),
@@ -108,7 +108,7 @@ export default Backbone.View.extend({
 
   shouldBeSticky: function() {
     let currentScrollAmount = $(document).scrollTop();
-    let NUM_PIXELS_THRESHOLD = 200;
+    let NUM_PIXELS_THRESHOLD = 0;
     return (currentScrollAmount > NUM_PIXELS_THRESHOLD) && !this.isMobile();
   },
 
