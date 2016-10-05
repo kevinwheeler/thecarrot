@@ -1,15 +1,17 @@
 <header class="navbar navbar-inverse navbar-fixed-top kmw-navbar kmw-navbar-center bs-docs-nav" role="banner">
   <div class="container-fluid">
     <div class="navbar-header kmw-navbar-header kmw-navbar-header-center">
-      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
       <a href="/" class="navbar-brand kmw-navbar-brand">Nothing But Headlines</a>
+      <div class="kmw-toggle-wrapper">
+        <button class="navbar-toggle kmw-navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar kmw-icon-bar"></span>
+          <span class="icon-bar kmw-icon-bar"></span>
+          <span class="icon-bar kmw-icon-bar"></span>
+        </button>
+      </div>
     </div>
-    <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+    <nav class="collapse navbar-collapse bs-navbar-collapse kmw-navbar-collapse" role="navigation">
       <br>
       <ul class="nav navbar-nav">
         {{!-- Routes are duplicated in server code and in router file. --}}

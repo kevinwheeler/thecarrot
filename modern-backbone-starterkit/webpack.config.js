@@ -17,7 +17,6 @@ var sharedExports = {
       loaders : [
         { test: require.resolve('jquery'), loader: 'expose?jQuery!expose?$' },
         { test: /bootstrap.dist.*\.js?$/, loader: 'imports?jQuery=jquery' },
-        { test: /bootstrap-toolkit.min.js$/, loader: 'exports?ResponsiveBootstrapToolkit!imports?jQuery=jquery' },
         { test: /.(gif|png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+)?$/, loader: 'url-loader?limit=100000' },//https://github.com/webpack/css-loader/issues/38
         { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
         { test: /\.hbs$/, loader: 'handlebars-loader' },
@@ -29,7 +28,6 @@ var sharedExports = {
     alias: {
       bootstrapCSS: 'bootstrap/dist/css/bootstrap.min.css',
       bootstrapTheme: 'bootstrap/dist/css/bootstrap-theme.min.css',
-      bootstrapToolkit: 'responsive-bootstrap-toolkit/dist/bootstrap-toolkit.min.js',
       'COLLECTIONSDIR': __dirname + '/src/app/collections',
       'ISOMORPHICDIR': __dirname + '/src/isomorphic',
       'MODELSDIR': __dirname + '/src/app/models',

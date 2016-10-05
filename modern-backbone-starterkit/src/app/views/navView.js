@@ -13,7 +13,6 @@ import 'STYLESDIR/stylus/nav.css';
 import bootstrap from 'bootstrap';
 import {categories} from 'ISOMORPHICDIR/categories';
 import template from 'TEMPLATESDIR/navTemplate.hbs';
-import viewport from 'bootstrapToolkit';
 
 export default Backbone.View.extend({
   //These first few properties are standard Backbone properties. Look them up in Backbone's documentation.
@@ -52,17 +51,18 @@ export default Backbone.View.extend({
   disableSticky: function() {
     this.$('.kmw-navbar-header').removeClass('kmw-navbar-header-sticky');
     this.$('.kmw-navbar').removeClass('kmw-navbar-sticky');
-    this.$('.kmw-nav-hr').removeClass('kmw-nav-hr-sticky');
+    //this.$('.kmw-navbar-brand').removeClass('kmw-sticky');
   },
 
   enableSticky: function() {
     this.$('.kmw-navbar-header').addClass('kmw-navbar-header-sticky');
     this.$('.kmw-navbar').addClass('kmw-navbar-sticky');
-    this.$('.kmw-nav-hr').addClass('kmw-nav-hr-sticky');
+    //this.$('.kmw-navbar-brand').addClass('kmw-sticky');
   },
 
   isMobile: function() {
-    return viewport.is('xs');
+    // breakpoint duplicated in nav.css (not .styl)
+    return window.matchMedia("(max-width: 1100px)").matches
   },
 
   setActiveElement: function() {
@@ -93,17 +93,6 @@ export default Backbone.View.extend({
         }
       }, 100)
     );
-  },
-
-  // http://stackoverflow.com/questions/18546067/why-is-the-window-width-smaller-than-the-viewport-width-set-in-media-queries
-  // Used to compare against breakpoint width. Handles complexities of the width of scrollbar.
-  viewport: function() {
-    let e = window, a = 'inner';
-    if (!('innerWidth' in window)) {
-      a = 'client';
-      e = document.documentElement || document.body;
-    }
-    return {width: e[ a + 'Width' ] , height: e[ a + 'Height' ]};
   },
 
   shouldBeSticky: function() {
