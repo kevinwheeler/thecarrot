@@ -41,6 +41,7 @@ export default Backbone.View.extend({
         numColumns: this.numColumns,
         numColumnsArray: numColumnsArray,
       });
+      this.$el.children().detach();
       this.$el.html(newHTMLString);
       this.displayCategory = this.router.getCategory() === 'home';
       this.$columns = this.$el.find('.article-column');
@@ -55,6 +56,7 @@ export default Backbone.View.extend({
       if (window.kmw.facebookInitialized) {
         window.FB.XFBML.parse(this.el);
       }
+      this.attachSubViews();
       return this;
     }, 16
   ),
@@ -86,6 +88,11 @@ export default Backbone.View.extend({
     if (window.kmw.facebookInitialized) {
       window.FB.XFBML.parse(newArticleCard);
     }
+  },
+
+  attachSubViews: function() {
+    const $mostRecentPopularToggle = this.$('.MOST-RECENT-POPULAR-TOGGLE-STUB');
+    $mostRecentPopularToggle.replaceWith(this.mostRecentPopularToggleView.$el);
   },
 
   fetchMoreResults: function() {
@@ -142,14 +149,18 @@ export default Backbone.View.extend({
     this.reRenderWhenNumberOfColumnsShouldChange();
   },
 
+  setMostRecentPopularToggleView: function(mostRecentPopularToggleView) {
+    this.mostRecentPopularToggleView = mostRecentPopularToggleView;
+  },
+
   reRenderWhenNumberOfColumnsShouldChange: function(){
     const self = this;
-    $(window).resize(function() {
+    $(window).resize(_.debounce(function() {
       if (self.numColumns !== self.getNumColumns()) {
         self.numColumns = self.getNumColumns();
         self.render();
       }
-    });
+    }, 30));
   }
 
 });

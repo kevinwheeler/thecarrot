@@ -25,8 +25,6 @@ export default Backbone.Model.extend({
       response.loggedIn = false;
     }
     response.doneFetching = true;
-    console.log("current user model =");
-    console.log(response);
     return response;
   },
 });

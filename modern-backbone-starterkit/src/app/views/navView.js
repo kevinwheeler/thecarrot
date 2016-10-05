@@ -79,7 +79,7 @@ export default Backbone.View.extend({
 
   updateWhenBreakpointReached: function() {
     let self = this;
-    $(window).resize(_.throttle(function() {
+    $(window).resize(_.debounce(function() {
         if (self.isMobile()) {
           self.$el.addClass('kmw-nav-mobile');
           self.disableSticky();
@@ -91,7 +91,7 @@ export default Backbone.View.extend({
             self.disableSticky();
           }
         }
-      }, 100)
+      }, 30)
     );
   },
 
