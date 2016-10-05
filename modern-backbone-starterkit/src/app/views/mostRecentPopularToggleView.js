@@ -26,6 +26,7 @@ export default Backbone.View.extend({
     this.articleGridView.setMostRecentPopularToggleView(this);
     this.router = options.router;
     this.listenTo(this.router, 'route', this.update);
+    this.listenTo(this.router, 'beforeRoute', this.beforeRoute);
     this.$el.children().detach();
     this.$el.html(template());
     this.update();

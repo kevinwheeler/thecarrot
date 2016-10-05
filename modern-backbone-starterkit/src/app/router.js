@@ -24,9 +24,7 @@ export default Backbone.Router.extend({
   },
 
   execute: function(callback, args, name) {
-    if (this.categoryView !== undefined) {
-      this.categoryView.beforeRoute();
-    }
+    this.trigger('beforeRoute');
     if (callback) {
       callback.apply(this, args);
     }

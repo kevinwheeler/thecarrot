@@ -22,10 +22,6 @@ export default Backbone.View.extend({
     this.attachSubViews();
   },
 
-  beforeRoute: function() {
-    this.mostRecentPopularToggleView.beforeRoute();
-  },
-
   attachSubViews: function() {
     const $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);

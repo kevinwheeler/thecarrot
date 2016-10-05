@@ -41,6 +41,13 @@ export default Backbone.View.extend({
         numColumns: this.numColumns,
         numColumnsArray: numColumnsArray,
       });
+
+      if (this.numColumns > 1) {
+        this.mostRecentPopularToggleView.$el.addClass('article-columns-padding');
+      } else {
+        this.mostRecentPopularToggleView.$el.removeClass('article-columns-padding');
+      }
+
       this.$el.children().detach();
       this.$el.html(newHTMLString);
       this.displayCategory = this.router.getCategory() === 'home';

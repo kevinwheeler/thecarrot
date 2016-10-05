@@ -1,16 +1,22 @@
-<div>
-  <select class="kmw-collection-type-select">
-    <option value="best" selected>Best</option>
-    <option value="most-popular">Most Viewed</option>
-    <option value="most-recent">Most Recent</option>
-  </select>
-  <select class="kmw-time-interval-select">
-    <option value="daily">Today</option>
-    <option value="weekly">This Week</option>
-    <option value="monthly">This Month</option>
-    <option value="all_time" selected>All Time</option>
-  </select>
-</div>
-<div>
-  Skip ahead <input class="kmw-skip-ahead" type="number" name="quantity" min="1" max="1000" value="0"> headlines.
+<div class="recent-popular-toggle">
+  <div>
+    Sort by:
+    <select class="kmw-collection-type-select recent-popular-select">
+      <option class="recent-popular-option" value="best" selected>Best</option>
+      <option class="recent-popular-option" value="most-popular">Most Viewed</option>
+      <option class="recent-popular-option" value="most-recent">Most Recent</option>
+    </select>
+    <span class="kmw-time-interval-wrapper">
+      of
+      <select class="kmw-time-interval-select recent-popular-select">
+        <option class="recent-popular-option" value="daily">Today</option>
+        <option class="recent-popular-option" value="weekly">This Week</option>
+        <option class="recent-popular-option" value="monthly">This Month</option>
+        <option class="recent-popular-option" value="all_time" selected>All Time</option>
+      </select>
+    </span>
+  </div>
+  <div>
+    Skip ahead <input class="kmw-skip-ahead" type="number" name="quantity" min="1" max="1000" value="0"> headlines.
+  </div>
 </div>
