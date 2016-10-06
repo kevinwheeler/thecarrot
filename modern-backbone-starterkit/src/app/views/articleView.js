@@ -24,10 +24,10 @@ export default Backbone.View.extend({
     this.currentUserModel = options.currentUserModel;
     this.flagArticleModalView = options.flagArticleModalView;
     this.voteModel = options.voteModel;
+    this.listenTo(this.voteModel, 'change', this.render);
     this.listenTo(this.articleModel, 'change', this.render);
     this.listenTo(this.currentUserModel, 'change', this.render);
-    this.listenTo(this.voteModel, 'change', this.render);
-
+    this.socialPluginsCached = false;
     this.render();
   },
 
@@ -72,10 +72,15 @@ export default Backbone.View.extend({
         isAdminRouteAndNotDoneFetching: isAdminRouteAndNotDoneFetching,
         isDownVoted: this.voteModel.isDownVoted(),
         isUpVoted: this.voteModel.isUpVoted(),
+        socialPluginsCached: this.socialPluginsCached,
+
       }));
       this.attachSubViews();
+      if (approved && !this.socialPluginsCached) {
+        this.cacheSocialPlugins();
+      }
 
-      if (window.kmw.facebookInitialized) {
+      if (window.kmw.facebookInitialized && !this.socialPluginsCached) {
         window.FB.XFBML.parse(this.el);
       }
       return this;
@@ -85,15 +90,24 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
+
+    if (this.socialPluginsCached) {
+      let $fbLikeStub = this.$('.FB-LIKE-STUB');
+      $fbLikeStub.replaceWith(this.fbLikeEl);
+      let $fbCommentsStub = this.$('.FB-COMMENTS-STUB');
+      $fbCommentsStub.replaceWith(this.fbCommentsEl);
+    }
+  },
+
+  cacheSocialPlugins: function() {
+    this.fbLikeEl = this.$('.fb-like').get(0);
+    console.log("fbLikeEl = " + this.fbLikeEl);
+    this.fbCommentsEl= this.$('.fb-comments').get(0);
+    this.socialPluginsCached = true;
   },
 
   downvoteClicked: function() {
     this.voteModel.doVote("down");
-    //if (this.currentUserModel.get('loggedIn') === true) {
-    //
-    //} else {
-    //  alert("You must be logged in to downvote.")
-    //}
   },
 
   spamFlagClicked: function() {
@@ -102,10 +116,5 @@ export default Backbone.View.extend({
 
   upvoteClicked: function() {
     this.voteModel.doVote("up");
-    //if (this.currentUserModel.get('loggedIn') === true) {
-    //  console.log("logged in");
-    //} else {
-    //  alert("You must be logged in to upvote.");
-    //}
   }
 });

@@ -185,20 +185,32 @@ li.active a.kmw-nav-item-anchor {
   box-shadow: none !important;
 }
 
-desktop-height = 195px;
-mobile-height = 120px;
-
+//desktop-height = 195px;
+//mobile-height = 120px;
 .kmw-nav {
-  min-height: desktop-height;
+  min-height: 195px;
 }
 
-.kmw-nav.kmw-nav-mobile {
-  min-height: mobile-height;
+@media (max-width: 1100px) {
+  .kmw-nav {
+    min-height: 110px;
+  }
 }
+//.kmw-nav {
+//  min-height: desktop-height;
+//}
+//
+//.kmw-nav.kmw-nav-mobile {
+//  min-height: mobile-height;
+//}
 
 @media (max-width: 900px) {
   .kmw-navbar-brand {
     font-size: 5vw;
+  }
+
+  .kmw-nav {
+    min-height: 10vw;
   }
 }
 
