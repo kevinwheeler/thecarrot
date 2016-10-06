@@ -18,11 +18,12 @@ export default Backbone.View.extend({
     'click .kmw-js-downvote': 'downvoteClicked',
   },
 
-  initialize: function(options = {}) {
-    this.navView = options.navView;
+  initialize: function(options) {
+    this.articleGridView = options.articleGridView;
     this.articleModel = options.articleModel;
     this.currentUserModel = options.currentUserModel;
     this.flagArticleModalView = options.flagArticleModalView;
+    this.navView = options.navView;
     this.voteModel = options.voteModel;
     this.listenTo(this.voteModel, 'change', this.render);
     this.listenTo(this.articleModel, 'change', this.render);
@@ -80,9 +81,6 @@ export default Backbone.View.extend({
         this.cacheSocialPlugins();
       }
 
-      if (window.kmw.facebookInitialized && !this.socialPluginsCached) {
-        window.FB.XFBML.parse(this.el);
-      }
       return this;
     }, 16
   ),
@@ -90,6 +88,9 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
+
+    const $articleGrid = this.$('.ARTICLE-GRID-STUB');
+    $articleGrid.replaceWith(this.articleGridView.$el);
 
     if (this.socialPluginsCached) {
       let $fbLikeStub = this.$('.FB-LIKE-STUB');
@@ -100,6 +101,10 @@ export default Backbone.View.extend({
   },
 
   cacheSocialPlugins: function() {
+    if (window.kmw.facebookInitialized) {
+      window.FB.XFBML.parse(this.el);
+    }
+
     this.fbLikeEl = this.$('.fb-like').get(0);
     console.log("fbLikeEl = " + this.fbLikeEl);
     this.fbCommentsEl= this.$('.fb-comments').get(0);
@@ -108,6 +113,10 @@ export default Backbone.View.extend({
 
   downvoteClicked: function() {
     this.voteModel.doVote("down");
+  },
+
+  getArticleGridView: function() {
+    return this.articleGridView;
   },
 
   spamFlagClicked: function() {

@@ -42,12 +42,6 @@ export default Backbone.View.extend({
         numColumnsArray: numColumnsArray,
       });
 
-      if (this.numColumns > 1) {
-        this.mostRecentPopularToggleView.$el.addClass('article-columns-padding');
-      } else {
-        this.mostRecentPopularToggleView.$el.removeClass('article-columns-padding');
-      }
-
       this.$el.children().detach();
       this.$el.html(newHTMLString);
       this.displayCategory = this.router.getCategory() === 'home';
@@ -60,10 +54,6 @@ export default Backbone.View.extend({
         self.addArticle(model);
       });
 
-      if (window.kmw.facebookInitialized) {
-        window.FB.XFBML.parse(this.el);
-      }
-      this.attachSubViews();
       return this;
     }, 16
   ),
@@ -95,11 +85,6 @@ export default Backbone.View.extend({
     if (window.kmw.facebookInitialized) {
       window.FB.XFBML.parse(newArticleCard);
     }
-  },
-
-  attachSubViews: function() {
-    const $mostRecentPopularToggle = this.$('.MOST-RECENT-POPULAR-TOGGLE-STUB');
-    $mostRecentPopularToggle.replaceWith(this.mostRecentPopularToggleView.$el);
   },
 
   fetchMoreResults: function() {
@@ -154,10 +139,6 @@ export default Backbone.View.extend({
     this.listenTo(this.articleCollection, 'noMoreResults', this.onNoMoreResults);
     this.render();
     this.reRenderWhenNumberOfColumnsShouldChange();
-  },
-
-  setMostRecentPopularToggleView: function(mostRecentPopularToggleView) {
-    this.mostRecentPopularToggleView = mostRecentPopularToggleView;
   },
 
   reRenderWhenNumberOfColumnsShouldChange: function(){

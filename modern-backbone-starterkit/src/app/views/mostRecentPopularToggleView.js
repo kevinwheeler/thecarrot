@@ -23,7 +23,6 @@ export default Backbone.View.extend({
   initialize: function(options = {}) {
     this.options = options;
     this.articleGridView = options.articleGridView;
-    this.articleGridView.setMostRecentPopularToggleView(this);
     this.router = options.router;
     this.listenTo(this.router, 'route', this.update);
     this.listenTo(this.router, 'beforeRoute', this.beforeRoute);

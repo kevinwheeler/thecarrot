@@ -2,14 +2,15 @@ import Backbone from 'backbone';
 
 import AdminView from 'VIEWSDIR/adminView';
 import ApprovalHistoryArticleGridView from 'VIEWSDIR/approvalHistoryArticleGridView';
-import FlagsCollection from 'COLLECTIONSDIR/flagsCollection';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
 import ArticleView from 'VIEWSDIR/articleView';
 import ArticleColumnsView from 'VIEWSDIR/articleColumnsView';
 import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
+import BestArticlesCollection from 'COLLECTIONSDIR/bestArticlesCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
 import FlagArticleModalView from 'VIEWSDIR/flagArticleModalView';
+import FlagsCollection from 'COLLECTIONSDIR/flagsCollection';
 import FlagsView from 'VIEWSDIR/flagsView';
 import FlaggedArticlesCollection from 'COLLECTIONSDIR/flaggedArticlesCollection';
 import HomeView from 'VIEWSDIR/homeView';
@@ -73,6 +74,9 @@ var serviceProvider = {
   },
 
   getArticleView(articleId) {
+    const articleGridViewInst = new ArticleColumnsView({
+      router: this.getRouter()
+    });
     const voteModel = new VoteModel({
       articleId: articleId
     });
@@ -84,6 +88,7 @@ var serviceProvider = {
       articleId: articleId
     });
     const articleViewInst = new ArticleView({
+      articleGridView: articleGridViewInst,
       articleModel: articleModelInst,
       currentUserModel: currentUserModel,
       flagArticleModalView: flagArticleModalView,
@@ -96,6 +101,16 @@ var serviceProvider = {
   getArticleModel(options) {
     let articleModelInst = new ArticleModel(options);
     return articleModelInst;
+  },
+
+  getBestArticlesCollection() {
+    const articleCollection = new BestArticlesCollection([], {
+      category: 'all',
+      skipAheadAmount: 0,
+      staffPicksOnly: false,
+      timeInterval: 'all_time',
+    });
+    return articleCollection;
   },
 
   getFlagsView(articleId) {

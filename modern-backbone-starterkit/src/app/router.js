@@ -118,11 +118,16 @@ export default Backbone.Router.extend({
   },
 
   articleRoute(articleSlug) {
+
     const articleId = articleSlugToId(articleSlug);
     let articleViewInst = serviceProvider.getArticleView(articleId);
     const app = $('#js-app');
     app.children().detach();
     $('#js-app').empty().append(articleViewInst.$el);
+
+    const articleCollection = serviceProvider.getBestArticlesCollection();
+    articleCollection.fetchNextArticles();
+    articleViewInst.getArticleGridView().setArticleCollection(articleCollection);
   },
 
   adminRoute(param) {
