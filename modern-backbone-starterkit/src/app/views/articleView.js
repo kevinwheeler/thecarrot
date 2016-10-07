@@ -25,11 +25,14 @@ export default Backbone.View.extend({
     this.flagArticleModalView = options.flagArticleModalView;
     this.navView = options.navView;
     this.voteModel = options.voteModel;
+    this.router = options.router;
     this.listenTo(this.voteModel, 'change', this.render);
     this.listenTo(this.articleModel, 'change', this.render);
     this.listenTo(this.currentUserModel, 'change', this.render);
+    this.listenTo(this.router, 'beforeRoute', this.remove);
     this.socialPluginsCached = false;
     this.render();
+    this.articleGridView.infiniteScroll();
   },
 
   render: _.throttle(function() {
@@ -85,6 +88,11 @@ export default Backbone.View.extend({
     }, 16
   ),
 
+  remove: function() {
+    this.articleGridView.unbindInfiniteScroll();
+    this.stopListening();
+  },
+
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
@@ -106,7 +114,6 @@ export default Backbone.View.extend({
     }
 
     this.fbLikeEl = this.$('.fb-like').get(0);
-    console.log("fbLikeEl = " + this.fbLikeEl);
     this.fbCommentsEl= this.$('.fb-comments').get(0);
     this.socialPluginsCached = true;
   },

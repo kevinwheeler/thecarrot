@@ -45,7 +45,7 @@ export default Backbone.View.extend({
   },
 
   // http://stackoverflow.com/a/8112653
-  areCookiesEnabled: function(){
+  areCookiesEnabled: function() {
     var cookieEnabled = (navigator.cookieEnabled) ? true : false;
 
     if (typeof navigator.cookieEnabled == "undefined" && !cookieEnabled)

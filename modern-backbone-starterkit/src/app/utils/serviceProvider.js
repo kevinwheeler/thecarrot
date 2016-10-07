@@ -93,6 +93,7 @@ var serviceProvider = {
       currentUserModel: currentUserModel,
       flagArticleModalView: flagArticleModalView,
       navView: this.getNavView(),
+      router: this.getRouter(),
       voteModel: voteModel
     });
     return articleViewInst;
