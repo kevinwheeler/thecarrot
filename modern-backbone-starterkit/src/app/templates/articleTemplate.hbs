@@ -1,9 +1,5 @@
 <nav class='NAV-STUB'></nav>
 <div class='FLAG-ARTICLE-MODAL-STUB'></div>
-  {{#unless articleDoneFetching}}
-    Loading...
-  {{/unless}}
-
   {{!-- Headline, subline, and imageURL already escaped in EJS --}}
   {{#if authorOrApprovedOrAdmin}}
     <div class="kmw-article-image-and-widgets-wrapper">
@@ -52,8 +48,9 @@
       <img class="kmw-js-spam-flag kmw-spam-flag" src="/images/flag.svg">
       <img class="kmw-js-upvote kmw-upvote {{#if isUpVoted}}kmw-selected{{/if}}" src="/images/thumbs-up.svg">
       <img class="kmw-js-downvote kmw-downvote {{#if isDownVoted}}kmw-selected{{/if}}" src="/images/thumbs-down.svg">
+      <br>
       {{#unless socialPluginsCached}}
-        <div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-width="100%" data-show-faces="true" data-share="true"></div>
+        <div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
       {{else}}
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
