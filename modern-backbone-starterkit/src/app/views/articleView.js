@@ -5,7 +5,7 @@ import Backbone from 'backbone';
 import serviceProvider from 'UTILSDIR/serviceProvider';
 import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import 'STYLESDIR/stylus/article.css';
-import 'UTILSDIR/facebooksdk';
+import {parseFbElement} from 'UTILSDIR/facebooksdk';
 
 
 //export default Marionette.ItemView.extend({
@@ -109,12 +109,10 @@ export default Backbone.View.extend({
   },
 
   cacheSocialPlugins: function() {
-    if (window.kmw.facebookInitialized) {
-      window.FB.XFBML.parse(this.el);
-    }
-
     this.fbLikeEl = this.$('.fb-like').get(0);
     this.fbCommentsEl= this.$('.fb-comments').get(0);
+    const self = this;
+    parseFbElement(self.el);
     this.socialPluginsCached = true;
   },
 

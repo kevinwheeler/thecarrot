@@ -14,6 +14,7 @@ import 'STYLESDIR/stylus/articleCard.css';
 import 'STYLESDIR/stylus/articleColumns.css';
 import dd from 'UTILSDIR/diffDOM';
 import utils from 'UTILSDIR/utils';
+import {parseFbElement} from 'UTILSDIR/facebooksdk';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
@@ -81,10 +82,7 @@ export default Backbone.View.extend({
     // the ghostHeight may or may not be 0. Therefore we compute the eventual height ourselves (imageHeight).
     const newArticleHeight = articleCardHeight - ghostHeight + imageHeight;
     this.columnHeights[shortestColumnIndex] += newArticleHeight;
-
-    if (window.kmw.facebookInitialized) {
-      window.FB.XFBML.parse(newArticleCard);
-    }
+    parseFbElement(newArticleCard);
   },
 
   fetchMoreResults: function() {
