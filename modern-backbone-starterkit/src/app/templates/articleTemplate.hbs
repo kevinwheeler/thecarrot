@@ -50,7 +50,7 @@
       <img class="kmw-js-downvote kmw-downvote {{#if isDownVoted}}kmw-selected{{/if}}" src="/images/thumbs-down.svg">
       <br>
       {{#unless socialPluginsCached}}
-        <div class="fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+        <div class="fb-like kmw-fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
       {{else}}
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
