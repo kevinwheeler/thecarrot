@@ -29,11 +29,13 @@
         {{/each}}
       </select>
     </div>
-    <h3>5. Terms and Conditions</h3>
+    <h3>5. Captcha + Terms and Conditions</h3>
     <div>
       <div class="kmw-recaptcha"></div>
       <div id="kmw-validation-errors" class="kmw-validation-errors kmw-hidden"></div>
-      <input type="submit" id="kmw-submit">
+      <input type="checkbox" id="kmw-agree">I have read and agree to the <a class="kmw-terms" href="/terms-and-conditions">Terms and Conditions</a>.
+      <br>
+      <input type="submit" value="Submit" id="kmw-submit">
     </div>
   </div>
 

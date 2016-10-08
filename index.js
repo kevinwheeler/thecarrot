@@ -48,6 +48,10 @@ MongoClient.connect(MONGO_URI,
       setupAuthentication(app, db);
 
 
+      app.get('/terms-and-conditions', function(req, res) {
+        res.render('pages/termsAndConditions', {});
+      });
+
       // IMPORTANT: Routes are duplicated in client side code.
       // Namely the router and the nav template.
       app.get('/', sendIndex);

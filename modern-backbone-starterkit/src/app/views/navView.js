@@ -96,7 +96,7 @@ export default Backbone.View.extend({
   },
 
   shouldBeSticky: function() {
-    let currentScrollAmount = $(document).scrollTop();
+    let currentScrollAmount = $("#js-app").scrollTop();
     let NUM_PIXELS_THRESHOLD = 0;
     return (currentScrollAmount > NUM_PIXELS_THRESHOLD) && !this.isMobile();
   },
@@ -114,6 +114,6 @@ export default Backbone.View.extend({
 
     runOnScroll = _.throttle(runOnScroll, 100);
 
-    window.addEventListener("scroll", runOnScroll);
+    $("#js-app")[0].addEventListener("scroll", runOnScroll);
   }
 });

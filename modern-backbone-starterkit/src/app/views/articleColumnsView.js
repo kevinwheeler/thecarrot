@@ -114,16 +114,17 @@ export default Backbone.View.extend({
     if (this.onScrollFunction !== undefined) {
       throw "Attached infinite scroll handler twice."
     }
+    const $app = $("#js-app");
     this.onScrollFunction = _.throttle(function() {
       if (self.articleCollection !== undefined) {
-        const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
+        const distanceFromBottom = $app[0].scrollHeight - $app.scrollTop() - $app[0].clientHeight;
         if (distanceFromBottom < 500)  {
           self.articleCollection.fetchNextArticles();
         }
       }
     }, 50);
 
-    $(window).scroll(this.onScrollFunction);
+    $app.scroll(this.onScrollFunction);
   },
 
   onDoneFetching: function() {
@@ -138,7 +139,7 @@ export default Backbone.View.extend({
     this.$(".js-article-columns-no-more-results").removeClass("kmw-hidden");
   },
 
-  reRenderWhenNumberOfColumnsShouldChange: function(){
+  reRenderWhenNumberOfColumnsShouldChange: function() {
     const self = this;
     $(window).resize(_.debounce(function() {
       if (self.numColumns !== self.getNumColumns()) {
@@ -167,6 +168,6 @@ export default Backbone.View.extend({
   },
 
   unbindInfiniteScroll: function() {
-    $(window).off("scroll", this.onScrollFunction);
+    $("#js-app").off("scroll", this.onScrollFunction);
   },
 });

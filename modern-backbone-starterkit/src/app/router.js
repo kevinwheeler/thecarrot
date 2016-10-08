@@ -36,7 +36,8 @@ export default Backbone.Router.extend({
   },
 
   initialize(options) {
-    $('body').append('<div id="js-app" class="kmw-app"></div>');
+    this.$app = $('<div id="js-app" class="kmw-app"></div>');
+    $('body').append(this.$app);
 
     for (let i=0; i < categories.length; i++) {
       this.route(categories[i].urlSlug, "categoryRoute");
@@ -121,9 +122,8 @@ export default Backbone.Router.extend({
 
     const articleId = articleSlugToId(articleSlug);
     let articleViewInst = serviceProvider.getArticleView(articleId);
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(articleViewInst.$el);
+    this.$app.children().detach();
+    this.$app.empty().append(articleViewInst.$el);
 
     const articleCollection = serviceProvider.getBestArticlesCollection();
     articleCollection.fetchNextArticles();
@@ -141,16 +141,14 @@ export default Backbone.Router.extend({
     } else {
       throw "invalid admin route";
     }
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(adminViewInst.$el);
+    this.$app.children().detach();
+    this.$app.empty().append(adminViewInst.$el);
   },
 
   flagsRoute(articleId) {
     let flagsViewInst = serviceProvider.getFlagsView(articleId);
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(flagsViewInst.$el);
+    this.$app.children().detach();
+    this.$app.empty().append(flagsViewInst.$el);
 
     //let userViewInst = serviceProvider.getUserView(userId);
     //const app = $('#js-app');
@@ -160,9 +158,8 @@ export default Backbone.Router.extend({
 
   userRoute(userId) {
     let userViewInst = serviceProvider.getUserView(userId);
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(userViewInst.$el);
+    this.$app.children().detach();
+    this.$app.empty().append(userViewInst.$el);
   },
 
   categoryRoute() {
@@ -170,9 +167,8 @@ export default Backbone.Router.extend({
       // Note this calls getHomeView instead of getCategoryView. Change this later to be less gacky if desired.
       this.categoryView = serviceProvider.getHomeView();
     }
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(this.categoryView.$el);
+    this.$app.children().detach();
+    this.$app.empty().append(this.categoryView.$el);
     this.categoryView.render();
   },
 
@@ -186,16 +182,14 @@ export default Backbone.Router.extend({
 
   loginRoute() {
     let loginViewInst = serviceProvider.getLoginView();
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(loginViewInst.$el);
+    this.$app.children().detach();
+    this.$app.empty().append(loginViewInst.$el);
   },
 
   uploadRoute() {
     const uploadEl = $("<div><p>Hello</p></div>")[0];
-    const $app = $('#js-app');
-    $app.children().detach();
-    $app.empty().append(uploadEl);
+    this.$app.children().detach();
+    this.$app.empty().append(uploadEl);
     serviceProvider.getUploadView(uploadEl);
   },
 });

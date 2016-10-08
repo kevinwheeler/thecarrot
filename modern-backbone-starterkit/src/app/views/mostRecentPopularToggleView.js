@@ -40,14 +40,16 @@ export default Backbone.View.extend({
 
   infiniteScroll: function() {
     const self = this;
+    const $app = $("#js-app");
+
     const onScrollFunction = function() {
-      const distanceFromBottom = $(document).height() - $(window).scrollTop() - $(window).height();
+      const distanceFromBottom = $app[0].scrollHeight - $app.scrollTop() - $app[0].clientHeight;
       if (distanceFromBottom < 500)  {
         self.articleGridView.fetchMoreResults();
       }
     };
 
-    $(window).scroll(_.throttle(onScrollFunction, 50));
+    $app.scroll(_.throttle(onScrollFunction, 50));
   },
 
   debouncedUpdate: _.debounce(function() {
@@ -56,7 +58,7 @@ export default Backbone.View.extend({
   ),
 
   restoreScrollPosition: function () {
-    $(window).scrollTop(this.scrollPosition);
+    $("#js-app").scrollTop(this.scrollPosition);
   },
 
   // returns true if we aren't supposed to load in a brand new article collection
@@ -89,7 +91,7 @@ export default Backbone.View.extend({
   },
 
   saveScrollPosition: function () {
-    this.scrollPosition = $(window).scrollTop();
+    this.scrollPosition = $("#js-app").scrollTop();
   },
 
    //TODO debounce? I think we update on initialize and on route causing this to run twice in a row.

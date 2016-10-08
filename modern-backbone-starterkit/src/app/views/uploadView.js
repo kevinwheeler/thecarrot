@@ -25,6 +25,7 @@ export default Backbone.View.extend({
   className: 'kmw-upload-view',
 
   events: {
+    'change #kmw-agree': 'agreeChanged',
     'change #kmw-picture-input': 'fileSelected',
     'submit #kmw-article-upload-form': 'onFormSubmitted',
     "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged'
@@ -48,6 +49,17 @@ export default Backbone.View.extend({
     renderElementAsync(recaptchaEl, this.onGrecaptchaSuccessful, this.onGrecaptchaRendered);
     this.bindToModel();
     this.checkIfCookiesAreEnabled();
+  },
+
+  agreeChanged: function() {
+    let $agreeCheckbox = this.$('#kmw-agree');
+    if ($agreeCheckbox[0].checked) {
+      this.model.set('agreedToTerms', true);
+      console.log("agreed");
+    } else {
+      this.model.set('agreedToTerms', false);
+      console.log("didnt agree");
+    }
   },
 
   // http://stackoverflow.com/a/8112653
@@ -104,6 +116,7 @@ export default Backbone.View.extend({
         ${validationError}
       </div>`;
       $validationErrorsContainer.append(errorMessage);
+      this.$('#accordion').accordion("refresh");
     }
 
   },

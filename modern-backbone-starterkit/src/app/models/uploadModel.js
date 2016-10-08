@@ -10,6 +10,7 @@ import articleValidations from 'ISOMORPHICDIR/articleValidations.js';
 export default Backbone.Model.extend({
   // The first few attributes are standard backbone attributes. You can read about them in the docs.
   defaults: {
+    agreedToTerms: false,
     captchaCompleted: false,
     fileCounter: 0,
     headline: null,
@@ -123,6 +124,10 @@ export default Backbone.Model.extend({
 
     if (!this.get('captchaCompleted')) {
       validationErrors.push("Captcha not completed");
+    }
+
+    if (!this.get('agreedToTerms')) {
+      validationErrors.push("You must agree to the terms and conditions.");
     }
 
     if (validationErrors.length) {
