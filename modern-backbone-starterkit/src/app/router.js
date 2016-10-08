@@ -192,9 +192,10 @@ export default Backbone.Router.extend({
   },
 
   uploadRoute() {
-    let uploadViewInst = serviceProvider.getUploadView();
-    const app = $('#js-app');
-    app.children().detach();
-    $('#js-app').empty().append(uploadViewInst.$el);
+    const uploadEl = $("<div><p>Hello</p></div>")[0];
+    const $app = $('#js-app');
+    $app.children().detach();
+    $app.empty().append(uploadEl);
+    serviceProvider.getUploadView(uploadEl);
   },
 });

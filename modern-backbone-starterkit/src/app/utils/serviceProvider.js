@@ -158,8 +158,9 @@ var serviceProvider = {
     return this.navView;
   },
 
-  getUploadView() {
+  getUploadView(el) {
     let uploadViewInst = new UploadView({
+      el: el,
       model: this.getUploadModel(),
       navView: this.getNavView()
     });

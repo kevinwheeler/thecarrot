@@ -3,10 +3,17 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
+import 'jquery-ui/themes/base/core.css';
+import 'jquery-ui/themes/base/theme.css';
+import 'jquery-ui/themes/base/accordion.css';
+import 'jquery-ui/ui/core';
+import 'jquery-ui/ui/widgets/accordion';
+
+
 import {categories} from 'ISOMORPHICDIR/categories';
 import Spinner from 'UTILSDIR/spin';
 import template from 'TEMPLATESDIR/uploadTemplate.hbs';
-import {grecaptchaLoaded, renderElementOnLoad} from 'UTILSDIR/recaptcha'
+import {renderElementAsync} from 'UTILSDIR/recaptcha'
 
 import 'STYLESDIR/stylus/upload.css';
 
@@ -27,19 +34,18 @@ export default Backbone.View.extend({
     this.navView = options.navView;
     this.$el.children().detach();
     this.$el.html(template({
-      categories: categories
+      categories: categories,
+      imageHref: window.kmw.imageBaseUrl + 'static/article-image.jpg',
+      headlineHref: window.kmw.imageBaseUrl + 'static/article-headline.jpg',
+      sublineHref: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
     }));
+    this.$('#accordion').accordion({
+      heightStyle: "content"
+    });
     this.attachSubViews();
     const recaptchaEl = this.$('.kmw-recaptcha').get(0);
-    _.bindAll(this, 'grecaptchaSuccessful');
-    if (grecaptchaLoaded) {
-      window.grecaptcha.render(recaptchaEl, {
-        'callback': this.grecaptchaSuccessful,
-        'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh'//TODO move this to an environment variable.
-      });
-    } else {
-      renderElementOnLoad(recaptchaEl, this.grecaptchaSuccessful);
-    }
+    _.bindAll(this, 'onGrecaptchaSuccessful', 'onGrecaptchaRendered');
+    renderElementAsync(recaptchaEl, this.onGrecaptchaSuccessful, this.onGrecaptchaRendered);
     this.bindToModel();
     this.checkIfCookiesAreEnabled();
   },
@@ -126,8 +132,11 @@ export default Backbone.View.extend({
     }
   },
 
-  grecaptchaSuccessful: function() {
-    console.log("in grecaptcha successful");
+  onGrecaptchaRendered: function() {
+    this.$('#accordion').accordion("refresh");
+  },
+
+  onGrecaptchaSuccessful: function() {
     this.model.set('captchaCompleted', true);
   },
 

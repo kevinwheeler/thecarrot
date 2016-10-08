@@ -4,7 +4,7 @@ import Backbone from 'backbone';
 import Spinner from 'UTILSDIR/spin';
 import 'STYLESDIR/stylus/flagArticleModal.css';
 import template from 'TEMPLATESDIR/flagArticleModalTemplate.hbs';
-import {grecaptchaLoaded, renderElementOnLoad} from 'UTILSDIR/recaptcha'
+import {renderElementAsync} from 'UTILSDIR/recaptcha'
 
 import 'remodal';
 import 'remodalCSS';
@@ -28,13 +28,7 @@ export default Backbone.View.extend({
     }));
 
     const recaptchaEl = this.$('.kmw-recaptcha').get(0);
-    if (grecaptchaLoaded) {
-      window.grecaptcha.render(recaptchaEl, {
-        'sitekey': '6LeFjiETAAAAAMLWg5ccuWZCgavMCitFq-C4RpYh' //TODO move this to an environment variable.
-      });
-    } else {
-      renderElementOnLoad(recaptchaEl);
-    }
+    renderElementAsync(recaptchaEl);
     //TODO do we need to remove this to avoid memory leak?
     this.remodalInst = this.$el.remodal();
   },
