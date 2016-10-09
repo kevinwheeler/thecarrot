@@ -55,6 +55,11 @@
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
       <br/>
+      {{#unless socialPluginsParsed}}
+        <div class="kmw-loading-comments">
+          Loading facebook comments...
+        </div>
+      {{/unless}}
       {{#unless socialPluginsCached}}
         <div class="fb-comments" data-href="{{articleURL}}" data-width="100%" data-colorscheme="light" data-numposts="5"></div>
       {{else}}

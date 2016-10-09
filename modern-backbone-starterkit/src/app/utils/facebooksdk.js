@@ -10,8 +10,10 @@ window.fbAsyncInit = function() {
 
   facebookInitialized = true;
   for (let i=0; i < elementsToParseOnLoad.length; i++) {
-    const el = elementsToParseOnLoad[i];
-    window.FB.XFBML.parse(el);
+    const pair = elementsToParseOnLoad[i];
+    const el = pair[0];
+    const cb = pair[1];
+    window.FB.XFBML.parse(el, cb);
   }
 };
 
@@ -23,11 +25,11 @@ window.fbAsyncInit = function() {
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
 
-const parseFbElement =  function(el) {
+const parseFbElement =  function(el, cb) {
   if (facebookInitialized) {
-    window.FB.XFBML.parse(el);
+    window.FB.XFBML.parse(el, cb);
   } else {
-    elementsToParseOnLoad.push(el);
+    elementsToParseOnLoad.push([el, cb]);
   }
 }
 

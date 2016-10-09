@@ -31,6 +31,7 @@ export default Backbone.View.extend({
     this.listenTo(this.currentUserModel, 'change', this.render);
     this.listenTo(this.router, 'beforeRoute', this.remove);
     this.socialPluginsCached = false;
+    this.socialPluginsParsed = false;
     this.render();
     this.articleGridView.infiniteScroll();
   },
@@ -77,6 +78,7 @@ export default Backbone.View.extend({
         isDownVoted: this.voteModel.isDownVoted(),
         isUpVoted: this.voteModel.isUpVoted(),
         socialPluginsCached: this.socialPluginsCached,
+        socialPluginsParsed: this.socialPluginsParsed,
 
       }));
       this.attachSubViews();
@@ -111,8 +113,8 @@ export default Backbone.View.extend({
   cacheSocialPlugins: function() {
     this.fbLikeEl = this.$('.fb-like').get(0);
     this.fbCommentsEl= this.$('.fb-comments').get(0);
-    const self = this;
-    parseFbElement(self.el);
+    _.bindAll(this, 'onSocialPluginsParsed');
+    parseFbElement(this.el, this.onSocialPluginsParsed);
     this.socialPluginsCached = true;
   },
 
@@ -122,6 +124,11 @@ export default Backbone.View.extend({
 
   getArticleGridView: function() {
     return this.articleGridView;
+  },
+
+  onSocialPluginsParsed: function() {
+    this.socialPluginsParsed = true;
+    this.render();
   },
 
   spamFlagClicked: function() {
