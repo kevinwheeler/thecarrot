@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const getNextId = require('../utils').getNextId;
 const getURLSlug = require('../slugutil').getURLSlug;
 const logError = require('../utils').logError;
 const requester = require('request');
@@ -24,6 +25,21 @@ function getRouteFunction(db) {
     //);
   }
 
+  let articleColl;
+  function getArticleColl() {
+    const prom = new Promise(function(resolve,reject) {
+      db.collection('article', {}, (err, coll) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          articleColl = coll;
+          resolve();
+        }
+      });
+    })
+    return prom;
+  }
+
 
   const routeFunction = function (req, res, next) {
 
@@ -32,7 +48,7 @@ function getRouteFunction(db) {
     const sess = req.session;
     // TODO does this assume people only upload one picture, etc?
     // probably not, we probably re-set this session variable every time they upload a picture / hit signS3 route
-    const articleId = sess.articleId;
+    //const articleId = sess.articleId;
     const headline = req.body.headline;
     const subline = req.body.subline;
     const category = req.body.category;
@@ -42,56 +58,50 @@ function getRouteFunction(db) {
     }
 
     const insertArticleAndRedirect = function() {
-      db.collection('article', (err, collection) => {
-        if (err !== null) {
-          next(err);
-        } else {
-          //let imageURL;
-          //if (process.env.NODE_ENV === 'production') {
-          //  imageURL = `https://createaheadlineimages.s3.amazonaws.com/${imageSlug}`;
-          //} else {
-          //  imageURL = `https://kevinwheeler-thecarrotimageslocal.s3.amazonaws.com/${imageSlug}`;
-          //}
-          const articleURLSlug = getURLSlug(articleId, headline);
-          const doc = {
-            _id: articleId,
-            approval: 'pending',
-            articleURLSlug: articleURLSlug,
-            category: category,
-            dateCreated: new Date(),
-            flaginess: 0,
-            headline: headline,
-            imageHeight: sess.imageHeight,
-            imageWidth: sess.imageWidth,
-            imageSlug: sess.imageSlug,
-            numAuthenticatedFlags: 0,
-            numUnauthenticatedFlags: 0,
-            numDownvotes: 0,
-            numUpvotes: 0,
-            numTotalVotes: 0,
-            sidOfAuthor: req.sessionID,
-            staffPick: false,
-            subline: subline,
-            upvoteScore: 0
-          };
-          const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
-          _.merge(doc, initialSummaryAttributes);
+      getArticleColl(
+      ).then(getNextId.bind(null, db, "articleId")
+      ).then(function(articleId) {
+        const articleURLSlug = getURLSlug(articleId, headline);
+        const doc = {
+          _id: articleId,
+          approval: 'pending',
+          articleURLSlug: articleURLSlug,
+          category: category,
+          dateCreated: new Date(),
+          flaginess: 0,
+          headline: headline,
+          imageId: sess.imageId,
+          numAuthenticatedFlags: 0,
+          numUnauthenticatedFlags: 0,
+          numDownvotes: 0,
+          numUpvotes: 0,
+          numTotalVotes: 0,
+          sidOfAuthor: req.sessionID,
+          staffPick: false,
+          subline: subline,
+          upvoteScore: 0
+        };
+        const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
+        _.merge(doc, initialSummaryAttributes);
 
-          if (req.user) { // TODO make sure not posting anonymously
-            doc.authorId = req.user.fbId;
-          }
-          collection.insert(doc, {
-              w: "majority",
-            },
-            (error, result) => {
-              if (error !== null) {
-                next(error);
-              } else {
-                notifyAdminViaEmail(articleURLSlug);
-                res.redirect('/' + articleRoute.routePrefix + '/' + articleURLSlug);
-              }
-            });
+        if (req.user) { // TODO make sure not posting anonymously
+          doc.authorId = req.user.fbId;
         }
+        articleColl.insert(doc, {
+            w: "majority",
+          },
+          (err, result) => {
+            if (err !== null) {
+              logError(err);
+              next(err);
+            } else {
+              notifyAdminViaEmail(articleURLSlug);
+              res.redirect('/' + articleRoute.routePrefix + '/' + articleURLSlug);
+            }
+          });
+      }).catch(function(err) {
+        logError(err);
+        next(err);
       });
     }
 
