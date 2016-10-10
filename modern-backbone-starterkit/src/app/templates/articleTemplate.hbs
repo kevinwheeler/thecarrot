@@ -45,18 +45,30 @@
 
   {{#if approved}}
     <div class="kmw-article-image-and-widgets-wrapper">
-      <img class="kmw-js-spam-flag kmw-spam-flag" src="/images/flag.svg">
+      <img class="kmw-js-spam-flag kmw-spam-flag kmw-align-with-comments" src="/images/flag.svg">
       <img class="kmw-js-upvote kmw-upvote {{#if isUpVoted}}kmw-selected{{/if}}" src="/images/thumbs-up.svg">
       <img class="kmw-js-downvote kmw-downvote {{#if isDownVoted}}kmw-selected{{/if}}" src="/images/thumbs-down.svg">
       <br>
+      <div class="kmw-like-page kmw-font-stuff kmw-align-with-comments">
+        Like <a class="kmw-our-page" href="https://www.facebook.com/nothingbutheadlines">our Facebook page</a> for more hilarity.
+      </div>
       {{#unless socialPluginsCached}}
-        <div class="fb-like kmw-fb-like" data-href="{{articleURL}}" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-show-faces="true" data-share="false"></div>
       {{else}}
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
       <br/>
+      <div class="kmw-share-headline kmw-font-stuff kmw-align-with-comments">
+        Share this headline on Facebook.
+      </div>
+      {{#unless socialPluginsCached}}
+        <div class="fb-share-button kmw-fb-share kmw-align-with-comments" data-href="{{articleURL}}" data-layout="button_count" data-size="small" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{urlEncodedArticleURL}}&amp;src=sdkpreparse">Share</a></div>
+      {{else}}
+        <div class='FB-SHARE-STUB'></div>
+      {{/unless}}
+      <br/>
       {{#unless socialPluginsParsed}}
-        <div class="kmw-loading-comments">
+        <div class="kmw-loading-comments kmw-font-stuff kmw-align-with-comments">
           Loading facebook comments...
         </div>
       {{/unless}}
@@ -67,9 +79,9 @@
       {{/unless}}
       <!--<div class="row">-->
         <div class="{{!col-xs-12 }}kmw-landing-copywriting">
-          New here? There are no actual articles on this website. Since 60% of the time when people share articles, they
-          never even clicked on or read the article<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
-          website to only headlines. You can easily <a class="create-and-share" href="/upload">create your own headline and share it on Facebook.</a>
+          Since data shows that 60% of the time when people share articles, they never even clicked on the article before sharing
+          it<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
+          website to only headlines (there are no actual articles here). You can easily <a class="create-and-share" href="/upload">create your own headline and share it on Facebook.</a>
         </div>
         <div class="article-other-headlines">
           Other Headlines You May Like:

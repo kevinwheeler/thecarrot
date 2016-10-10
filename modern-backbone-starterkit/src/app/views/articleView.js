@@ -54,6 +54,8 @@ export default Backbone.View.extend({
       const isAdminRouteAndNotDoneFetching = isAdminRoute && !currentUserDoneFetching;
       const isAdminRouteAndNotAdmin = isAdminRoute && currentUserDoneFetching && !isAdmin;
 
+      const articleURL = [location.protocol, '//', location.host, location.pathname].join('');
+      const urlEncodedArticleURL = encodeURIComponent(articleURL);
       this.$el.children().detach();
       this.$el.html(template({
         authorOrApprovedOrAdmin: authorOrApprovedOrAdmin,
@@ -66,7 +68,7 @@ export default Backbone.View.extend({
         article: this.articleModel.toJSON(),
         articleDoneFetching: articleDoneFetching,
         //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
-        articleURL: [location.protocol, '//', location.host, location.pathname].join(''),
+        articleURL: articleURL,
         citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
         currentUserDoneFetching: currentUserDoneFetching,
         imageURL: this.articleModel.get('imageURL'),
@@ -79,7 +81,7 @@ export default Backbone.View.extend({
         isUpVoted: this.voteModel.isUpVoted(),
         socialPluginsCached: this.socialPluginsCached,
         socialPluginsParsed: this.socialPluginsParsed,
-
+        urlEncodedArticleURL: urlEncodedArticleURL,
       }));
       this.attachSubViews();
       if (approved && !this.socialPluginsCached) {
@@ -105,6 +107,8 @@ export default Backbone.View.extend({
     if (this.socialPluginsCached) {
       let $fbLikeStub = this.$('.FB-LIKE-STUB');
       $fbLikeStub.replaceWith(this.fbLikeEl);
+      let $fbShareStub= this.$('.FB-SHARE-STUB');
+      $fbShareStub.replaceWith(this.fbShareEl);
       let $fbCommentsStub = this.$('.FB-COMMENTS-STUB');
       $fbCommentsStub.replaceWith(this.fbCommentsEl);
     }
@@ -112,6 +116,7 @@ export default Backbone.View.extend({
 
   cacheSocialPlugins: function() {
     this.fbLikeEl = this.$('.fb-like').get(0);
+    this.fbShareEl = this.$('.fb-share-button').get(0);
     this.fbCommentsEl= this.$('.fb-comments').get(0);
     _.bindAll(this, 'onSocialPluginsParsed');
     parseFbElement(this.el, this.onSocialPluginsParsed);
