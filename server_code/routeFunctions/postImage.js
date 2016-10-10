@@ -5,13 +5,6 @@ const getNextId = require('../utils').getNextId;
 const getDimensions = require('image-size');
 
 function getRouteFunction(db) {
-  let request;
-  let response;
-  let next2;
-  let imageId;
-  let imageSlug;
-  let imageWidth;
-  let imageHeight;
 
   let imageColl;
   function getImageColl() {
@@ -74,15 +67,7 @@ function getRouteFunction(db) {
     return validationErrors;
   }
 
-  const uploadImageToS3 = function(id) {
-    imageId = id;
-    const file = request.file;
-    const filename = file.originalname;
-    imageSlug = getFilenameSlug(id, filename);
-    let sess = request.session;
-    //sess.articleId = id;
-    sess.imageId = id;
-
+  const uploadImageToS3 = function(imageSlug, file) {
     const s3 = new aws.S3();
     const S3_BUCKET = process.env.S3_BUCKET;
     const s3Params = {
@@ -98,10 +83,12 @@ function getRouteFunction(db) {
     return s3.putObject(s3Params).promise();
   }
 
-  const addToImageColl = function() {
+  const addToImageColl = function(imageId, imageSlug, imageWidth, imageHeight) {
+    console.log("imageId = ");
+    console.log(imageId);
     return imageColl.insertOne({//TODO add more fields and stuffs.
       _id: imageId,
-      aspectRatio: width/height,
+      aspectRatio: imageWidth/imageHeight,
       featured: false,
       height: imageHeight,
       slug: imageSlug,
@@ -112,22 +99,30 @@ function getRouteFunction(db) {
   }
 
   const routeFunction = function (req, res, next) {
-    request = req;
-    response = res;
-    next2 = next;
     const file = req.file;
+    const sess = req.session;
     const dimensions = getDimensions(file.buffer);
-    imageWidth = dimensions.width;
-    imageHeight = dimensions.height;
+    const imageWidth = dimensions.width;
+    const imageHeight = dimensions.height;
+    let imageId;
+    let imageSlug;
+
 
     let validationErrors = validateParams(file.mimetype, file.size, imageWidth, imageHeight);
     if (validationErrors !== null) {
       res.status(400).send(validationErrors.message);
     } else {
       getNextId(db, "imageId"
-      ).then(uploadImageToS3
-      ).then(getImageColl
-      ).then(addToImageColl
+      ).then(function(id) {
+          sess.imageId = id;
+          const filename = file.originalname;
+          imageId = id;
+          imageSlug = getFilenameSlug(imageId, filename);
+        }
+      ).then(function() {
+          return Promise.all([uploadImageToS3(imageSlug, file), getImageColl()]);
+        }
+      ).then(function(){addToImageColl(imageId, imageSlug, imageWidth, imageHeight)}
       ).then(function() {
         res.status(200).send();
       }).catch(function(err) {
