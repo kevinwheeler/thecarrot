@@ -21,6 +21,44 @@ function getNextId(db, counterName) {
   return nextIdPromise;
 }
 
+let imageColl;
+function getImageColl(db) {
+  const prom = new Promise(function(resolve,reject) {
+    db.collection('image', {}, (err, coll) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        imageColl = coll;
+        resolve();
+      }
+    });
+  })
+  return prom;
+}
+
+function joinArticleWithImage(db, article) {
+  const prom = new Promise(function(resolve,reject) {
+    getImageColl(db).then(function() {
+      imageColl.find({
+        _id: article.imageId
+      }).limit(1).next().then(function(result) {
+        if (result === null) {
+          reject("Image not found in image collection.");
+        } else {
+          article.imageWidth = result.width;
+          article.imageHeight = result.height;
+          article.imageSlug = result.slug;
+          resolve();
+        }
+      });
+
+      imageColl.findOne();
+    })
+  });
+  return prom;
+
+}
+
 const logError = function(err) {
   console.error(err.stack || err);
 
@@ -71,6 +109,7 @@ const wtimeout = 15 * 1000;
 
 module.exports = {
   getNextId: getNextId,
+  joinArticleWithImage: joinArticleWithImage,
   logError: logError,
   publicArticleFields: publicArticleFields,
   publicArticleFieldsProjection: publicArticleFieldsProjection,

@@ -1,10 +1,24 @@
 const _ = require('lodash');
 const logError = require('../utils').logError;
 const send404 = require('../utils').send404;
+const joinArticleWithImage = require('../utils').joinArticleWithImage;
 const privateArticleFields = require('../utils').privateArticleFields;
 const updateSummaries = require('../updateSummaries');
 function getRouteFunction(db) {
-
+  let articleColl;
+  function getArticleColl() {
+    const prom = new Promise(function(resolve,reject) {
+      db.collection('article', {}, (err, coll) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          articleColl = coll;
+          resolve();
+        }
+      });
+    })
+    return prom;
+  }
 
   // If one person views the same article 1000 times, we don't want to increment the number of views that this article
   // has each time. So this function determines whether or not we actually want to increment the number of views.
@@ -90,43 +104,42 @@ function getRouteFunction(db) {
      }
      const validationErrors = validateParams(articleId, incrementViews);
      if (validationErrors !== null) {
-       res.status(400).send("Something went wrong.");
+       res.status(400).send("Invalid parameters.");
      } else {
-       db.collection('article', (err, articleColl) => {
-         if (err !== null) {
-           logError(err);
-           next(err);
+       getArticleColl(
+       ).then(function getArticle() {
+         return articleColl.find({'_id': articleId}).next();
+       }).then(function(article) {
+         if (article === null) {
+           send404(res);
          } else {
-           articleColl.find({'_id': articleId}).next( function(err, article) {
-             if (err !== null) {
-               logError(err);
-               next(err);
-             } else {
-               if (article === null) {
-                 send404(res);
-               } else {
-                 if ((req.user && req.user.fbId === article.authorId || req.sessionID === article.sidOfAuthor)) {
-                   article.viewerIsAuthor = true;
-                 } else {
-                   article.viewerIsAuthor = false;
-                 }
-                 if (incrementViews) {
-                   getShouldIncrementViews(articleId, req.ip).then(function(shouldIncrement) {
-                     if (shouldIncrement) {
-                       updateSummaries.incrementCounts(db, 'views', articleId);
-                       updateShouldIncrementViews(articleId, req.ip);
-                     }
-                   }).catch(function(err) {
-                     logError(err);
-                   });
-                 }
-                 // return article except with private fields omitted.
-                 const args = [article].concat(privateArticleFields);
-                 res.json(_.omit.apply(null, args));
+           if ((req.user && req.user.fbId === article.authorId || req.sessionID === article.sidOfAuthor)) {
+             article.viewerIsAuthor = true;
+           } else {
+             article.viewerIsAuthor = false;
+           }
+           if (incrementViews) {
+             getShouldIncrementViews(articleId, req.ip).then(function(shouldIncrement) {
+               if (shouldIncrement) {
+                 updateSummaries.incrementCounts(db, 'views', articleId);
+                 updateShouldIncrementViews(articleId, req.ip);
                }
-             }
+             }).catch(function(err) {
+               logError(err);
+             });
+           }
+
+           joinArticleWithImage(db, article).then(function() {
+             const args = [article].concat(privateArticleFields);
+             res.json(_.omit.apply(null, args));
+           }).catch(function(err) {
+             next(err);
            });
+           // return article except with private fields omitted.
          }
+       }).catch(function(err) {
+         logError(err);
+         next(err);
        });
      }
    };

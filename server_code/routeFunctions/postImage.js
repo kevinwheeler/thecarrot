@@ -6,7 +6,7 @@ const getDimensions = require('image-size');
 
 function getRouteFunction(db) {
 
-  let imageColl;
+  let imagecoll;
   function getImageColl() {
     const prom = new Promise(function(resolve,reject) {
       db.collection('image', {}, (err, coll) => {
@@ -84,8 +84,6 @@ function getRouteFunction(db) {
   }
 
   const addToImageColl = function(imageId, imageSlug, imageWidth, imageHeight) {
-    console.log("imageId = ");
-    console.log(imageId);
     return imageColl.insertOne({//TODO add more fields and stuffs.
       _id: imageId,
       aspectRatio: imageWidth/imageHeight,
@@ -126,6 +124,7 @@ function getRouteFunction(db) {
       ).then(function() {
         res.status(200).send();
       }).catch(function(err) {
+        logError(err);
         next(err);
       });
     }
