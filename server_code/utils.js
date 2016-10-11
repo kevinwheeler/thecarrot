@@ -83,6 +83,7 @@ const publicArticleFieldsProjection = {
   dateCreated: true,
   headline: true,
   imageHeight: true,
+  imageId: true,
   imageSlug: true,
   imageWidth: true,
   numDownvotes: true,
