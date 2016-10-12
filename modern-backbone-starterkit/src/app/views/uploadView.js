@@ -22,10 +22,11 @@ import 'STYLESDIR/stylus/upload.css';
 export default Backbone.View.extend({
   // The first few attributes are all standard backbone attributes that can be
   // found in the backbone documentation.
-  className: 'kmw-upload-view',
+  //className: 'kmw-upload-view',
 
   events: {
     'change #kmw-agree': 'agreeChanged',
+    'kmwChange #kmw-bypass-recaptcha-secret': 'recaptchaSecretChanged',
     'change #kmw-picture-input': 'fileSelected',
     'submit #kmw-article-upload-form': 'onFormSubmitted',
     "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged'
@@ -122,8 +123,10 @@ export default Backbone.View.extend({
   },
 
   doneUploading: function() {
+    const $doneUploading = $('<div id="kmw-done-uploading" style="display: none"></div>');
+    this.$el.append($doneUploading);
     // This event is used by the createSampleData.js file in the migrations directory.
-    this.$el.trigger('doneUploading');
+    //this.$el.trigger('doneUploading');
     const $target = this.$("#kmw-loading-wheel");
     $target.addClass("kmw-hidden");
   },
@@ -161,6 +164,10 @@ export default Backbone.View.extend({
       this.displayValidationErrors(validationErrors);
       return false;
     }
+  },
+
+  recaptchaSecretChanged: function() {
+    this.model.set('bypassRecaptcha', true);
   },
 
   setModelFields: function() {

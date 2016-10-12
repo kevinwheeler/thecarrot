@@ -41,6 +41,10 @@ const IMAGE_DIR = __dirname + '/images/';
 //}
 
 
+const logError = function(err) {
+  console.error(err.stack || err);
+  console.trace("Caught from:");
+}
 
 
 
@@ -48,6 +52,7 @@ const webdriver = require('selenium-webdriver');
 require('dotenv').config({path: __dirname + '/../.env'});
 
 By = webdriver.By;
+until = webdriver.until;
 const driver = new webdriver.Builder()
   .forBrowser('chrome')
   .build();
@@ -59,8 +64,23 @@ console.log("using " + uploadUrl + " as the upload url.");
 for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
   driver.get(uploadUrl);
   driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
+  driver.findElement(By.id('kmw-headline-tab')).click();
+  driver.wait(function () {
+      return driver.findElement(By.id('kmw-headline-input')).isDisplayed();;
+    }, 10*1000
+  );
   driver.findElement(By.id('kmw-headline-input')).sendKeys("headline " + i);
+  driver.findElement(By.id('kmw-subline-tab')).click();
+  driver.wait(function () {
+      return driver.findElement(By.id('kmw-subline-input')).isDisplayed();
+    }, 10*1000
+  );
   driver.findElement(By.id('kmw-subline-input')).sendKeys("subline " + i);
+  driver.findElement(By.id('kmw-category-tab')).click();
+  driver.wait(function () {
+      return driver.findElement(By.id('kmw-category-select')).isDisplayed();
+    }, 10*1000
+  );
   const selectList = driver.findElement(By.id('kmw-category-select'));
   const optionsPromise = selectList.findElements(By.css('option'));
   optionsPromise.then(function(options) {
@@ -71,27 +91,42 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
       const elToSelect = options[index];
       elToSelect.click();
     }, function(err) {
-      console.error("error1!");
+      logError(err);
       process.exit(1);
     }
   ).then(function(){
+      driver.findElement(By.id('kmw-terms-tab')).click();
+      driver.wait(function () {
+          //var elementPresent = until.elementLocated(By.id("kmw-agree"));
+          return driver.findElement(By.id('kmw-agree')).isDisplayed();
+          //console.log("is element present? = ");
+          //console.log(elementPresent);
+          //return elementPresent;
+        }, 10*1000
+      );
+      driver.findElement(By.id('kmw-agree')).click();
       const script = `
       
         var kmwRecaptcha = document.getElementById("kmw-bypass-recaptcha-secret");
         kmwRecaptcha.value= "${process.env.BYPASS_RECAPTCHA_SECRET}";
-        jQuery('.kmw-upload-view').on("doneUploading", function(){
-          document.getElementById('kmw-article-upload-form').submit();
-        });
+        var $recaptcha = jQuery(kmwRecaptcha);
+        $recaptcha.trigger('kmwChange');
+        setInterval(function() {
+            if ($('#kmw-done-uploading').length !== 0) {
+              document.getElementById('kmw-article-upload-form').submit();
+            }
+          }, 1000
+        );
         return null;
       `
       driver.executeScript(script).then(function(returnValue) {
       });
     }, function(err){
-    console.error("error2!");
+    logError(err);
     process.exit(1);
     }
-  ).then(function(){}, function(err){
-    console.error("error3!");
+  ).then(function(){}, function(err) {
+    logError(err);
     process.exit(1);
   });
   driver.wait(function () {

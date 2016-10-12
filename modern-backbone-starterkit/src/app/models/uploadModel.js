@@ -122,7 +122,7 @@ export default Backbone.Model.extend({
       validationErrors.push("No Image uploaded.");
     }
 
-    if (!this.get('captchaCompleted')) {
+    if (!this.get('bypassRecaptcha') && !this.get('captchaCompleted')) {
       validationErrors.push("Captcha not completed");
     }
 

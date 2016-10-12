@@ -1,23 +1,23 @@
 <nav class='NAV-STUB'></nav>
 <form action="/article" id="kmw-article-upload-form" method="post">
   <div id="accordion">
-    <h3>1. Choose a picture. </h3>
+    <h3 id="kmw-picture-tab">1. Choose a picture. </h3>
     <div>
       <label for="kmw-picture-input">Picture</label>
       <input accept="image/*" id="kmw-picture-input" type="file">
       <div id="kmw-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
     </div>
-    <h3>2. Choose a headline. </h3>
+    <h3 id="kmw-headline-tab">2. Choose a headline. </h3>
     <div>
       <label for="kmw-headline-input">Headline</label>
       <input type="text" id="kmw-headline-input" name="headline">
     </div>
-    <h3>3. Choose a subline (optional). </h3>
+    <h3 id="kmw-subline-tab">3. Choose a subline (optional). </h3>
     <div>
       <label for="kmw-subline-input">Subline</label>
       <input type="text" id="kmw-subline-input" name="subline">
     </div>
-    <h3>4. Choose a category. </h3>
+    <h3 id="kmw-category-tab">4. Choose a category. </h3>
     <div>
       <label for="kmw-category-select">Category</label>
       <select id="kmw-category-select" name="category">
@@ -29,7 +29,7 @@
         {{/each}}
       </select>
     </div>
-    <h3>5. Captcha + Terms and Conditions</h3>
+    <h3 id="kmw-terms-tab">5. Captcha + Terms and Conditions</h3>
     <div>
       <div class="kmw-recaptcha"></div>
       <div id="kmw-validation-errors" class="kmw-validation-errors kmw-hidden"></div>
@@ -39,7 +39,7 @@
     </div>
   </div>
 
-  <input type="hidden" id="kmw-bypass-recaptcha-secret" name="kmw-bypass-recaptcha-secret" value="whatt">
+  <input type="hidden" id="kmw-bypass-recaptcha-secret" name="kmw-bypass-recaptcha-secret" value="">
   <input type="hidden" id="kmw-image-id" name="kmw-image-id">
 
 </form>
