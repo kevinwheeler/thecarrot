@@ -1,3 +1,4 @@
+const escapeArticle = require('../../modern-backbone-starterkit/src/isomorphic/utils').escapeArticle;
 const joinArticleWithImage = require('../utils').joinArticleWithImage;
 const logError = require('../utils').logError;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
@@ -27,35 +28,40 @@ function getRouteFunction(db) {
               // This will avoid duplicate content SEO issues.
               send404(res);
             } else {
-              if (adminPage || article.approval === 'approved') {
                 joinArticleWithImage(db, article).then(function() {
-                  let title = article.headline;
-                  let description;
-                  if (article.subline.length) {
-                    description = article.subline;
+                  escapeArticle(article);
+                  const articleString = JSON.stringify(article);
+                  if (adminPage || article.approval === 'approved') {
+                    let title = article.headline;
+                    let description;
+                    if (article.subline.length) {
+                      description = article.subline;
+                    } else {
+                      description = article.headline;
+                    }
+
+                    res.render('pages/article', {
+                      article: article,
+                      articleString: articleString,
+                      description: description,
+                      fbAppId: process.env.FACEBOOK_APP_ID,
+                      imageBaseUrl: process.env.IMAGE_BASE_URL,
+                      imageURL: process.env.IMAGE_BASE_URL + article.imageSlug,
+                      title: title,
+                      url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
+                     articleApproval: article.approval
+                   });
                   } else {
-                    description = article.headline;
-                  }
-                  res.render('pages/article', {
-                    article: article,
-                    description: description,
-                    fbAppId: process.env.FACEBOOK_APP_ID,
-                    imageBaseUrl: process.env.IMAGE_BASE_URL,
-                    imageURL: process.env.IMAGE_BASE_URL + article.imageSlug,
-                    title: title,
-                    url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
-                    articleApproval: article.approval
-                  });
+                    res.render('pages/article', {
+                      articleApproval: article.approval,
+                      articleString: articleString,
+                      fbAppId: process.env.FACEBOOK_APP_ID,
+                      imageBaseUrl: process.env.IMAGE_BASE_URL
+                    });
+                 }
                 }).catch(function(err) {
                   next(err);
                 });
-              } else {
-                res.render('pages/article', {
-                  articleApproval: article.approval,
-                  fbAppId: process.env.FACEBOOK_APP_ID,
-                  imageBaseUrl: process.env.IMAGE_BASE_URL
-                });
-              }
             }
           }
         });

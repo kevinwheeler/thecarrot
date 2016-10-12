@@ -62,6 +62,12 @@ const uploadUrl = 'http://localhost:5000/upload';
 console.log("using " + uploadUrl + " as the upload url.");
 
 for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
+  let headline;
+  if (i === 1) {
+    headline = "<script>alert('sup');</script>"
+  } else {
+    headline = "headline " + i;
+  }
   driver.get(uploadUrl);
   driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
   driver.findElement(By.id('kmw-headline-tab')).click();
@@ -69,7 +75,7 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
       return driver.findElement(By.id('kmw-headline-input')).isDisplayed();;
     }, 10*1000
   );
-  driver.findElement(By.id('kmw-headline-input')).sendKeys("headline " + i);
+  driver.findElement(By.id('kmw-headline-input')).sendKeys(headline);
   driver.findElement(By.id('kmw-subline-tab')).click();
   driver.wait(function () {
       return driver.findElement(By.id('kmw-subline-input')).isDisplayed();

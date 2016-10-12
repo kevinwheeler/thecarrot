@@ -25,6 +25,7 @@ import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
 import UserView from 'VIEWSDIR/userView';
+import {unescapeArticle} from 'ISOMORPHICDIR/utils';
 import VoteModel from 'MODELSDIR/voteModel';
 
 var serviceProvider = {
@@ -83,7 +84,6 @@ var serviceProvider = {
     const currentUserModel = new CurrentUserModel();
     currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({_id: articleId});
-    articleModelInst.fetchArticle();
     const flagArticleModalView = new FlagArticleModalView({
       articleId: articleId
     });
@@ -100,7 +100,13 @@ var serviceProvider = {
   },
 
   getArticleModel(options) {
-    let articleModelInst = new ArticleModel(options);
+    let articleModelInst;
+    if (window.kmw.article !== undefined && options._id == window.kmw.article._id) {
+      articleModelInst = new ArticleModel(window.kmw.article, {parse: true});
+    } else {
+      articleModelInst = new ArticleModel(options);
+      articleModelInst.fetchArticle();
+    }
     return articleModelInst;
   },
 
@@ -189,6 +195,9 @@ var serviceProvider = {
   },
 
   initialize() {
+    if (window.kmw.article !== undefined) {
+      unescapeArticle(window.kmw.article);
+    }
     this._createRouter();
     this._createNavView();
   },

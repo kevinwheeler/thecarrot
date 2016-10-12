@@ -18,7 +18,7 @@ export default Backbone.Model.extend({
   idAttribute: "_id",
 
   initialize: function(options) {
-    this._id = options._id;
+    this._id = options._id; //TODO is this redundant?
   },
 
   url: function() {
