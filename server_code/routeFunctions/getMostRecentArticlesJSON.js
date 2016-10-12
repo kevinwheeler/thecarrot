@@ -1,4 +1,5 @@
 const logError = require('../utils').logError;
+const joinArticleArrayWithImages = require('../utils').joinArticleArrayWithImages;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 const categories = require('../../modern-backbone-starterkit/src/isomorphic/categories').categories;
 
@@ -66,6 +67,7 @@ function getRouteFunction(db) {
       if (validationErrors !== null) {
         reject(validationErrors);
       } else {
+        let articlesClosure;
         db.collection('article', (err, collection) => {
           if (err !== null) {
             reject(err);
@@ -82,15 +84,16 @@ function getRouteFunction(db) {
               filter.staffPick = true;
             }
 
-            collection.find(filter).project(publicArticleFieldsProjection).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
-              function (err, articles) {
-                if (err !== null) {
-                  reject(err);
-                } else {
-                  resolve(articles);
-                }
+            collection.find(filter).project(publicArticleFieldsProjection).sort([['_id', -1]]).skip(skipAheadAmount).limit(howMany).toArray().then(
+              function (articles) {
+                articlesClosure = articles;
+                return joinArticleArrayWithImages(db, articles);
               }
-            );
+            ).then(function() {
+              resolve(articlesClosure);
+            }).catch(function(err) {
+              reject(err);
+            });
           }
         });
       }

@@ -1,4 +1,5 @@
 const logError = require('../utils').logError;
+const joinArticleArrayWithImages = require('../utils').joinArticleArrayWithImages;
 
 function getRouteFunction(db) {
 
@@ -32,6 +33,7 @@ function getRouteFunction(db) {
       if (validationErrors !== null) {
         reject(validationErrors);
       } else {
+        let articlesClosure;
         db.collection('article', (err, articleColl) => {
           if (err !== null) {
             reject(err);
@@ -40,15 +42,16 @@ function getRouteFunction(db) {
             articleColl.find({
               _id: {$gte: minId},
               approval: 'pending'
-            }).sort([['_id', 1]]).limit(howMany).toArray(
-              function (err, articles) {
-                if (err !== null) {
-                  reject(err);
-                } else {
-                  resolve(articles);
-                }
+            }).sort([['_id', 1]]).limit(howMany).toArray().then(
+              function (articles) {
+                articlesClosure = articles;
+                return joinArticleArrayWithImages(db, articles);
               }
-            );
+            ).then(function() {
+              resolve(articlesClosure);
+            }).catch(function(err) {
+              reject(err);
+            });
           }
         });
       }

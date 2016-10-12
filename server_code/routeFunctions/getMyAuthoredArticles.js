@@ -1,3 +1,4 @@
+//TODO join articles with image information.
 const logError = require('../utils').logError;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 

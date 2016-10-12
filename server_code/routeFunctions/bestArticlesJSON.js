@@ -1,4 +1,5 @@
 const categories = require('../../modern-backbone-starterkit/src/isomorphic/categories').categories;
+const joinArticleArrayWithImages = require('../utils').joinArticleArrayWithImages;
 const logError = require('../utils').logError;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 
@@ -65,6 +66,7 @@ function getRouteFunction(db) {
 // will have the property clientError set to true so that the caller can send an http 4xx response instead of a 5xx response.
   function getBestArticlesJSON(db, dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly) {
     const prom = new Promise(function(resolve, reject) {
+      let articlesClosure;
       const validationErrors = validateParams(dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly);
       if (validationErrors !== null) {
         reject(validationErrors)
@@ -97,15 +99,16 @@ function getRouteFunction(db) {
               filter.firstApprovedAt = {$gt: new Date(Date.now() - 1000 /*sec*/ * 60 /*min*/ * 60 /*hour*/ * 24 /*day*/ * 365)}
             }
 
-            articleColl.find(filter).project(publicArticleFieldsProjection).sort([['upvoteScore', -1]]).skip(skipAheadAmount).limit(howMany).toArray(
-              function (err, articles) {
-                if (err !== null) {
-                  reject(err);
-                } else {
-                  resolve(articles);
-                }
+            articleColl.find(filter).project(publicArticleFieldsProjection).sort([['upvoteScore', -1]]).skip(skipAheadAmount).limit(howMany).toArray().then(
+              function (articles) {
+                articlesClosure = articles;
+                return joinArticleArrayWithImages(db, articles);
               }
-            );
+            ).then(function() {
+              resolve(articlesClosure);
+            }).catch(function(err) {
+              reject(err);
+            });
           }
         });
       }

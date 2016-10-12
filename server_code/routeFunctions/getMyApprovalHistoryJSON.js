@@ -1,3 +1,4 @@
+const joinArticleArrayWithImages = require('../utils').joinArticleArrayWithImages;
 const logError = require('../utils').logError;
 const _ = require('lodash');
 
@@ -83,7 +84,11 @@ function getRouteFunction(db) {
                               article.approvalId = approvalLogEntry._id;
                               returnValue.push(article);
                             }
-                            resolve(returnValue);
+                            joinArticleArrayWithImages(db, returnValue).then(function() {
+                              resolve(returnValue);
+                            }).catch(function(err) {
+                              reject(err);
+                            });
                           }
                         }
                       );

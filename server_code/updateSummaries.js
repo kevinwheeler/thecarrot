@@ -3,6 +3,7 @@
  *
  */
 const categories = require('../modern-backbone-starterkit/src/isomorphic/categories').categories;
+const joinArticleArrayWithImages = require('./utils').joinArticleArrayWithImages;
 const publicArticleFieldsProjection = require('./utils').publicArticleFieldsProjection;
 const timebucket = require('timebucket');
 
@@ -165,6 +166,7 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
         if (err !== null) {
           reject(err);
         } else {
+          let articlesClosure;
           let views = timeInterval + '_views';
           if (timeInterval !== 'all_time') {
             views += '.views';
@@ -181,15 +183,15 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
           if (staffPicksOnly === true) {
             filter.staffPick = true;
           }
-          articleColl.find(filter).project(publicArticleFieldsProjection).sort([[views, -1]]).skip(skipAheadAmount).limit(howMany).toArray(
-            function (err, articles) {
-              if (err !== null) {
-                reject(err);
-              } else {
-                resolve(articles);
-              }
-            }
-          );
+          articleColl.find(filter).project(publicArticleFieldsProjection).sort([[views, -1]]).skip(skipAheadAmount).limit(howMany).toArray().then(
+            function (articles) {
+              articlesClosure = articles;
+              return joinArticleArrayWithImages(db, articles);
+          }).then(function() {
+            resolve(articlesClosure);
+          }).catch(function(err) {
+            reject(err);
+          });
         }
       });
     }

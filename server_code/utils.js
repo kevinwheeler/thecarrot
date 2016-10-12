@@ -41,22 +41,73 @@ function joinArticleWithImage(db, article) {
     getImageColl(db).then(function() {
       imageColl.find({
         _id: article.imageId
-      }).limit(1).next().then(function(result) {
-        if (result === null) {
+      }).limit(1).next().then(function(image) {
+        if (image === null) {
           reject("Image not found in image collection.");
         } else {
-          article.imageWidth = result.width;
-          article.imageHeight = result.height;
-          article.imageSlug = result.slug;
+          article.imageWidth = image.width;
+          article.imageHeight = image.height;
+          article.imageSlug = image.slug;
           resolve();
         }
       });
-
-      imageColl.findOne();
     })
   });
   return prom;
 
+}
+
+function joinArticleArrayWithImages(db, articles) {
+  const prom = new Promise(function(resolve,reject) {
+    getImageColl(db).then(function() {
+
+      const imageIDs = articles.map(function (article) {
+        return article.imageId;
+      });
+      imageColl.find({
+        _id: {$in: imageIDs}
+      }).toArray(
+        function (err, images) {
+          if (err !== null) {
+            reject(err);
+          } else {
+
+            const imageIdToImageMap = {};
+            for (let i=0; i < images.length; i++) {
+              const image = images[i];
+              imageIdToImageMap[image._id] = image;
+            }
+
+            let success = true;
+            let failingImageId;
+            let failingArticleId;
+
+            for (let i=0; i < articles.length; i++) {
+              const article = articles[i];
+              const image = imageIdToImageMap[article.imageId];
+              if (image === undefined) {
+                failingArticleId = article._id;
+                failingImageId = article.imageId;
+                success = false;
+                break;
+              }
+              article.imageWidth = image.width;
+              article.imageHeight = image.height;
+              article.imageSlug = image.slug;
+            }
+            if (success) {
+              resolve();
+            } else {
+              reject("Failed to find image with id " + failingImageId + " for article with id " + failingArticleId);
+            }
+          }
+        }
+      );
+    }).catch(function(err) {
+      reject(err);
+    });
+  });
+  return prom;
 }
 
 const logError = function(err) {
@@ -111,6 +162,7 @@ const wtimeout = 15 * 1000;
 module.exports = {
   getNextId: getNextId,
   joinArticleWithImage: joinArticleWithImage,
+  joinArticleArrayWithImages: joinArticleArrayWithImages,
   logError: logError,
   publicArticleFields: publicArticleFields,
   publicArticleFieldsProjection: publicArticleFieldsProjection,

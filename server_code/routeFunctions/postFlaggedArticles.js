@@ -1,3 +1,4 @@
+const joinArticleArrayWithImages = require('../utils').joinArticleArrayWithImages;
 const logError = require('../utils').logError;
 
 function getRouteFunction(db) {
@@ -52,6 +53,7 @@ function getRouteFunction(db) {
       if (validationErrors !== null) {
         reject(validationErrors);
       } else {
+        let articlesClosure;
         getArticleColl().then(function getArticlesJSON() {
           return articleColl.find({
             _id: {
@@ -60,8 +62,11 @@ function getRouteFunction(db) {
             flaginess: {$ne: 0}
           }).sort([['flaginess', -1]]).skip(skipAheadAmount).limit(howMany).toArray();
         }).then(function(articles) {
-          resolve(articles);
-        }).catch(function(err){
+          articlesClosure = articles;
+          return joinArticleArrayWithImages(db, articles);
+        }).then(function() {
+          resolve(articlesClosure);
+        }).catch(function(err) {
           reject(err);
         })
       }

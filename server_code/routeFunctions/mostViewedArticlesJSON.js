@@ -1,5 +1,5 @@
-const logError = require('../utils').logError;
 const getMostViewedArticlesJSON = require('../updateSummaries').getMostViewedArticlesJSON;
+const logError = require('../utils').logError;
 
 function getRouteFunction(db) {
   const routeFunction = function (req, res, next) {
