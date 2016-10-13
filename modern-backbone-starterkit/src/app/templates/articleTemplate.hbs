@@ -5,8 +5,8 @@
     <div class="kmw-article-image-and-widgets-wrapper">
       <img class="kmw-article-image" src="{{imageURL}}">
     </div>
-    <h1 class="kmw-article-headline">{{article.headline}}</h1>
-    <h2 class="kmw-article-subline">{{article.subline}}</h2>
+    <h1 class="kmw-article-headline kmw-align-with-comments">{{article.headline}}</h1>
+    <h2 class="kmw-article-subline kmw-align-with-comments">{{article.subline}}</h2>
   {{/if}}
 
   {{#if approvalPendingAndAuthor}}
@@ -53,7 +53,7 @@
         Like <a target="_blank" class="kmw-our-page" href="https://www.facebook.com/nothingbutheadlines">our Facebook page</a> for much hilarity.
       </div>
       {{#unless socialPluginsCached}}
-        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-show-faces="true" data-share="false"></div>
+        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-width="320px" data-show-faces="true" data-share="false"></div>
       {{else}}
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
@@ -92,4 +92,3 @@
       <!--</div>-->
     </div>
   {{/if}}
-{{!-- <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="200" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div> --}}
