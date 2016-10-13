@@ -1,6 +1,7 @@
 const aws = require('aws-sdk');
 const bodyParser = require('body-parser');
 const categories = require('./modern-backbone-starterkit/src/isomorphic/categories').categories;
+const escapeUserInfo = require('./modern-backbone-starterkit/src/isomorphic/utils').escapeUserInfo;
 const express = require('express');
 const articleRoute = require('./modern-backbone-starterkit/src/isomorphic/routes').articleRoute;
 const logError = require('./server_code/utils').logError;
@@ -14,6 +15,7 @@ const setupAuthentication = require('./server_code/authentication');
 const setupInitialConfiguration = require('./server_code/configuration');
 const timebucket = require('timebucket');
 const updateSummaries = require('./server_code/updateSummaries');
+const userInfo = require('./server_code/routeFunctions/getUserInfoJSON');
 const url = require('url');
 const wtimeout = require('./server_code/utils').wtimeout;
 
@@ -37,15 +39,28 @@ MongoClient.connect(MONGO_URI,
     } else {
 
       setupInitialConfiguration(app);
+      setupAuthentication(app, db);
 
       const sendIndex = function(req, res) {
-        res.render('pages/index', {
-          fbAppId: process.env.FACEBOOK_APP_ID,
-          imageBaseUrl: process.env.IMAGE_BASE_URL
+        let currentUserPromise;
+        if (req.user) {
+          currentUserPromise = userInfo.getUserInfoJSON(db, req.user.fbId);
+        } else {
+          currentUserPromise = Promise.resolve(userInfo.notLoggedInUserInfoJSON());
+        }
+
+        currentUserPromise.then(function(currentUser) {
+          escapeUserInfo(currentUser);
+          res.render('pages/index', {
+            currentUser: JSON.stringify(currentUser),
+            fbAppId: process.env.FACEBOOK_APP_ID,
+            imageBaseUrl: process.env.IMAGE_BASE_URL
+          });
+        }).catch(function(err) {
+          next(err);
         });
       }
 
-      setupAuthentication(app, db);
 
 
       app.get('/terms-and-conditions', function(req, res) {
@@ -79,7 +94,7 @@ MongoClient.connect(MONGO_URI,
       const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
       const getMyAuthoredArticles = require('./server_code/routeFunctions/getMyAuthoredArticles')(db);
       const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
-      const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
+      //const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
       const getArticleFlags = require('./server_code/routeFunctions/getArticleFlags')(db);
@@ -97,7 +112,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
       app.get('/my-authored-articles', getMyAuthoredArticles);
       app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
-      app.get('/userinfo', getUserInfo);
+      //app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
       app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);

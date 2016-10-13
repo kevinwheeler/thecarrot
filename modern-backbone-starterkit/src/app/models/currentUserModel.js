@@ -8,15 +8,15 @@ export default Backbone.Model.extend({
     doneFetching: false
   },
 
-  url: '/userinfo',
-
-  fetchCurrentUser: function() {
-    this.fetch({
-      data: {
-        'user_id': 'currentUser'
-      }
-    });
-  },
+  //url: '/userinfo',
+  //
+  //fetchCurrentUser: function() {
+  //  this.fetch({
+  //    data: {
+  //      'user_id': 'currentUser'
+  //    }
+  //  });
+  //},
 
   parse: function(response, options) {
     if (Object.keys(response).length) {

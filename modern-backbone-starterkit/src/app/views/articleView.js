@@ -28,7 +28,6 @@ export default Backbone.View.extend({
     this.router = options.router;
     this.listenTo(this.voteModel, 'change', this.render);
     this.listenTo(this.articleModel, 'change', this.render);
-    this.listenTo(this.currentUserModel, 'change', this.render);
     this.listenTo(this.router, 'beforeRoute', this.remove);
     this.socialPluginsCached = false;
     this.socialPluginsParsed = false;
@@ -44,7 +43,6 @@ export default Backbone.View.extend({
       const approvalPendingAndAuthor = approvalPending && viewerIsAuthor;
       const approvalPendingAndNotAuthor = approvalPending && !viewerIsAuthor;
       const approvalStatus = this.articleModel.get('approval');
-      const currentUserDoneFetching = this.currentUserModel.get('doneFetching') === true;
       const articleDoneFetching = this.articleModel.get('doneFetching') === true;
       const isAdminRoute = serviceProvider.getRouter().currentRouteIsAdminArticleRoute();
       const isAdmin = this.currentUserModel.get('userType') === 'admin';
@@ -70,7 +68,6 @@ export default Backbone.View.extend({
         //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
         articleURL: articleURL,
         citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
-        currentUserDoneFetching: currentUserDoneFetching,
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,
         isAdminAndIsAdminRoute: isAdminAndIsAdminRoute,
@@ -133,7 +130,8 @@ export default Backbone.View.extend({
 
   onSocialPluginsParsed: function() {
     this.socialPluginsParsed = true;
-    this.render();
+    console.log("asdfasdf");
+    this.$(".kmw-loading-comments").css('display', 'none');
   },
 
   spamFlagClicked: function() {

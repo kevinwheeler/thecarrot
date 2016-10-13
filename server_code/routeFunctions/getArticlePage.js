@@ -1,5 +1,7 @@
 const escapeArticle = require('../../modern-backbone-starterkit/src/isomorphic/utils').escapeArticle;
+const escapeUserInfo = require('../../modern-backbone-starterkit/src/isomorphic/utils').escapeUserInfo;
 const joinArticleWithImage = require('../utils').joinArticleWithImage;
+const userInfo = require('./getUserInfoJSON');
 const logError = require('../utils').logError;
 const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 const send404 = require('../utils').send404;
@@ -10,6 +12,13 @@ function getRouteFunction(db) {
     const adminPage = !!req.params.admin;
     let articleSlug = req.params.articleSlug;
     let articleId = parseInt(articleSlug, 10); // extract leading integers
+     let currentUserPromise;
+     if (req.user) {
+       currentUserPromise = userInfo.getUserInfoJSON(db, req.user.fbId);
+     } else {
+       currentUserPromise = Promise.resolve(userInfo.notLoggedInUserInfoJSON());
+     }
+
     db.collection('article', (err, collection) => {
       if (err !== null) {
         logError(err);
@@ -29,7 +38,10 @@ function getRouteFunction(db) {
               send404(res);
             } else {
                 joinArticleWithImage(db, article).then(function() {
+                  return currentUserPromise;
+                }).then(function(currentUser) {
                   escapeArticle(article);
+                  escapeUserInfo(currentUser);
                   const articleString = JSON.stringify(article);
                   if (adminPage || article.approval === 'approved') {
                     let title = article.headline;
@@ -43,6 +55,7 @@ function getRouteFunction(db) {
                     res.render('pages/article', {
                       article: article,
                       articleString: articleString,
+                      currentUser: JSON.stringify(currentUser),
                       description: description,
                       fbAppId: process.env.FACEBOOK_APP_ID,
                       imageBaseUrl: process.env.IMAGE_BASE_URL,
@@ -55,6 +68,7 @@ function getRouteFunction(db) {
                     res.render('pages/article', {
                       articleApproval: article.approval,
                       articleString: articleString,
+                      currentUser: JSON.stringify(currentUser),
                       fbAppId: process.env.FACEBOOK_APP_ID,
                       imageBaseUrl: process.env.IMAGE_BASE_URL
                     });

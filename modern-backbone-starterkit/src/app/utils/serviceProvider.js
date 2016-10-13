@@ -25,20 +25,23 @@ import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
 import UserView from 'VIEWSDIR/userView';
-import {unescapeArticle} from 'ISOMORPHICDIR/utils';
+import {unescapeArticle, unescapeUserInfo} from 'ISOMORPHICDIR/utils';
 import VoteModel from 'MODELSDIR/voteModel';
 
 var serviceProvider = {
-  _createRouter() {
-    this.router = new Router();
+  _createCurrentUserModel() {
+    this.currentUserModelInst = new CurrentUserModel(window.kmw.currentUser, {parse: true});
   },
 
   _createNavView() {
-    const currentUser = new CurrentUserModel();
-    currentUser.fetchCurrentUser();
+    const currentUser = this.getCurrentUserModel();
     this.navView = new NavView({
       currentUser: currentUser,
     });
+  },
+
+  _createRouter() {
+    this.router = new Router();
   },
 
   //getAboutView() {
@@ -81,8 +84,7 @@ var serviceProvider = {
     const voteModel = new VoteModel({
       articleId: articleId
     });
-    const currentUserModel = new CurrentUserModel();
-    currentUserModel.fetchCurrentUser();
+    const currentUserModel = this.getCurrentUserModel();
     const articleModelInst = this.getArticleModel({_id: articleId});
     const flagArticleModalView = new FlagArticleModalView({
       articleId: articleId
@@ -120,11 +122,14 @@ var serviceProvider = {
     return articleCollection;
   },
 
+  getCurrentUserModel() {
+    return this.currentUserModelInst;
+  },
+
   getFlagsView(articleId) {
-    const currentUserModel = new CurrentUserModel();
+    const currentUserModel = this.getCurrentUserModel();
     const flagsCollection = new FlagsCollection([], {articleId: articleId});
     flagsCollection.fetchNextFlags();
-    currentUserModel.fetchCurrentUser();
     const articleModelInst = this.getArticleModel({_id: articleId});
     articleModelInst.fetchArticle();
     const flagsViewInst = new FlagsView({
@@ -198,7 +203,14 @@ var serviceProvider = {
     if (window.kmw.article !== undefined) {
       unescapeArticle(window.kmw.article);
     }
+
+    if (window.kmw.currentUser !== undefined) {
+      unescapeUserInfo(window.kmw.currentUser);
+    }
+
+
     this._createRouter();
+    this._createCurrentUserModel();
     this._createNavView();
   },
 
