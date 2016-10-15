@@ -3,9 +3,27 @@
   <div id="accordion">
     <h3 id="kmw-picture-tab">1. Choose a picture. </h3>
     <div>
-      <label for="kmw-picture-input">Picture</label>
-      <input accept="image/*" id="kmw-picture-input" type="file">
-      <div id="kmw-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
+      <a href="#" class="kmw-breadcrumb-main">Main</a> <span class="kmw-arrow kmw-hidden">></span>
+      <a href="#" class="kmw-breadcrumb-upload kmw-hidden">Upload Image</a>
+      <a href="#" class="kmw-breadcrumb-select kmw-hidden">Select Image</a>
+      <div class="kmw-picture-default">
+        Would you like to:
+        <br>
+        <button type="button" class="kmw-choose-upload btn btn-primary">Upload An Image</button>
+        <br>
+        Or
+        <br>
+        <button type="button" class="kmw-choose-select btn btn-primary">Select From Our Images</button>
+
+      </div>
+      <div class="kmw-picture-upload kmw-hidden">
+        <label for="kmw-picture-input">Picture</label>
+        <input accept="image/*" id="kmw-picture-input" type="file">
+        <div id="kmw-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
+      </div>
+      <div class="kmw-picture-select kmw-hidden">
+        picture select
+      </div>
     </div>
     <h3 id="kmw-headline-tab">2. Choose a headline. </h3>
     <div>

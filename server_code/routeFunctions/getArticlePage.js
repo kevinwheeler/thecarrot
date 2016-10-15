@@ -54,6 +54,7 @@ function getRouteFunction(db) {
 
                     res.render('pages/article', {
                       article: article,
+                      articleApproval: article.approval,
                       articleString: articleString,
                       currentUser: JSON.stringify(currentUser),
                       description: description,
@@ -62,7 +63,6 @@ function getRouteFunction(db) {
                       imageURL: process.env.IMAGE_BASE_URL + article.imageSlug,
                       title: title,
                       url: req.protocol + '://' + req.get('host') + req.originalUrl, //http://stackoverflow.com/a/10185427
-                     articleApproval: article.approval
                    });
                   } else {
                     res.render('pages/article', {

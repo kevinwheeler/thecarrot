@@ -29,7 +29,11 @@ export default Backbone.View.extend({
     'kmwChange #kmw-bypass-recaptcha-secret': 'recaptchaSecretChanged',
     'change #kmw-picture-input': 'fileSelected',
     'submit #kmw-article-upload-form': 'onFormSubmitted',
-    "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged'
+    "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged',
+
+    "click .kmw-breadcrumb-main": "breadcrumbMainClicked",
+    "click .kmw-choose-upload": "chooseUpload",
+    "click .kmw-choose-select": "chooseSelect",
   },
 
   initialize: function(options = {}) {
@@ -98,10 +102,49 @@ export default Backbone.View.extend({
     });
   },
 
+  breadcrumbMainClicked: function() {
+    this.displayPictureDefault();
+  },
+
   checkIfCookiesAreEnabled: function() {
     if (!this.areCookiesEnabled()) {
       alert("Cookies must be enabled in order for this site to work properly.");
     }
+  },
+
+  chooseSelect: function() {
+    this.displayPictureSelect();
+  },
+
+  chooseUpload: function() {
+    this.displayPictureUpload();
+  },
+
+  displayPictureDefault: function() {
+    this.$('.kmw-picture-default').removeClass('kmw-hidden');
+    this.$('.kmw-picture-upload').addClass('kmw-hidden');
+    this.$('.kmw-picture-select').addClass('kmw-hidden');
+
+    this.$('.kmw-arrow').addClass('kmw-hidden');
+    this.$('.kmw-breadcrumb-select').addClass('kmw-hidden');
+    this.$('.kmw-breadcrumb-upload').addClass('kmw-hidden');
+  },
+
+  displayPictureSelect: function() {
+    this.$('.kmw-picture-default').addClass('kmw-hidden');
+    this.$('.kmw-picture-select').removeClass('kmw-hidden');
+
+    this.$('.kmw-arrow').removeClass('kmw-hidden');
+    this.$('.kmw-breadcrumb-select').removeClass('kmw-hidden');
+
+  },
+
+  displayPictureUpload: function() {
+    this.$('.kmw-picture-default').addClass('kmw-hidden');
+    this.$('.kmw-picture-upload').removeClass('kmw-hidden');
+
+    this.$('.kmw-arrow').removeClass('kmw-hidden');
+    this.$('.kmw-breadcrumb-upload').removeClass('kmw-hidden');
   },
 
   displayValidationErrors: function(validationErrors) {

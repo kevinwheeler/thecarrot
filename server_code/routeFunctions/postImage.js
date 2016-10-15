@@ -6,7 +6,7 @@ const getDimensions = require('image-size');
 
 function getRouteFunction(db) {
 
-  let imagecoll;
+  let imageColl;
   function getImageColl() {
     const prom = new Promise(function(resolve,reject) {
       db.collection('image', {}, (err, coll) => {
@@ -87,6 +87,7 @@ function getRouteFunction(db) {
     return imageColl.insertOne({//TODO add more fields and stuffs.
       _id: imageId,
       aspectRatio: imageWidth/imageHeight,
+      dateCreated: new Date(),
       featured: false,
       height: imageHeight,
       slug: imageSlug,
