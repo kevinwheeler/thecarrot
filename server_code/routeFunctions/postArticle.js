@@ -25,6 +25,21 @@ function getRouteFunction(db) {
     //);
   }
 
+  let imageColl;
+  function getImageColl() {
+    const prom = new Promise(function(resolve, reject) {
+      db.collection('image', {}, (err, coll) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          imageColl = coll;
+          resolve();
+        }
+      });
+    })
+    return prom;
+  }
+
   let articleColl;
   function getArticleColl() {
     const prom = new Promise(function(resolve,reject) {
@@ -40,6 +55,34 @@ function getRouteFunction(db) {
     return prom;
   }
 
+  const additionalValidations = function(agreedToTerms, imageSelectionMethod, imageId) {
+    let validationErrors = [];
+    if (agreedToTerms === undefined) {
+      validationErrors.push("Must agree to terms.");
+    }
+
+    if (imageSelectionMethod !== 'uploadNew' && imageSelectionMethod !== 'previouslyUploaded') {
+      validationErrors.push("imageSelectionMethod invalid.");
+    }
+
+    if (typeof(imageId) !== "number") {
+      validationErrors.push("Image id is not a number");
+      return Promise.resolve(validationErrors);
+    } else {
+      return getImageColl().then(function() {
+        return imageColl.find({
+          _id: imageId
+        }).limit(1).next().then(function(image) {
+          if (image === null) {
+            validationErrors.push("Image not found in image collection.");
+          }
+        });
+      }).then(function() {
+        return Promise.resolve(validationErrors);
+      });
+    }
+  };
+
 
   const routeFunction = function (req, res, next) {
 
@@ -52,84 +95,112 @@ function getRouteFunction(db) {
     const headline = req.body.headline;
     const subline = req.body.subline;
     const category = req.body.category;
-    const validationErrors = validations.validateEverything(headline, subline, category);
-    if (validationErrors) {
-      next(validationErrors.join(", "));
-    }
-
-    const insertArticleAndRedirect = function() {
-      getArticleColl(
-      ).then(getNextId.bind(null, db, "articleId")
-      ).then(function(articleId) {
-        const articleURLSlug = getURLSlug(articleId, headline);
-        const doc = {
-          _id: articleId,
-          approval: 'pending',
-          articleURLSlug: articleURLSlug,
-          category: category,
-          dateCreated: new Date(),
-          flaginess: 0,
-          headline: headline,
-          imageId: sess.imageId,
-          numAuthenticatedFlags: 0,
-          numUnauthenticatedFlags: 0,
-          numDownvotes: 0,
-          numUpvotes: 0,
-          numTotalVotes: 0,
-          sidOfAuthor: req.sessionID,
-          staffPick: false,
-          subline: subline,
-          upvoteScore: 0
-        };
-        const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
-        _.merge(doc, initialSummaryAttributes);
-
-        if (req.user) { // TODO make sure not posting anonymously
-          doc.authorId = req.user.fbId;
-        }
-        articleColl.insert(doc, {
-            w: "majority",
-          },
-          (err, result) => {
-            if (err !== null) {
-              logError(err);
-              next(err);
-            } else {
-              notifyAdminViaEmail(articleURLSlug);
-              res.redirect('/' + articleRoute.routePrefix + '/' + articleURLSlug);
-            }
-          });
-      }).catch(function(err) {
-        logError(err);
-        next(err);
-      });
-    }
-
-    if (req.body['kmw-bypass-recaptcha-secret'] === process.env.BYPASS_RECAPTCHA_SECRET) {
-      insertArticleAndRedirect();
+    const agreedToTerms = req.body.agreed_to_terms;
+    const imageSelectionMethod = req.body.image_selection_method;
+    let imageId;
+    if (imageSelectionMethod === 'uploadNew') {
+      imageId = sess.imageId;
     } else {
-      const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: req.body['g-recaptcha-response']};
-
-      //id = the id to use for the new record we are inserting.
-      requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
-        function(err, httpResponse, body) {
-          if (err) {
-            logError(err);
-            res.status(500).send('Something went wrong! Please try again.');
-          }
-          else {
-            var bodyJSON = JSON.parse(body);
-            if (bodyJSON.success) {
-              // Captcha successful.
-              insertArticleAndRedirect();
-            }
-            else {
-              // Captcha failed.
-              res.redirect('/upload?captcha=fail'); //TODO
-            }
-          }
-        });
+      imageId = parseInt(req.body.image_id, 10);
     }
+
+    //set model fields include re-usable image checkbox
+    //
+    //if selectionmethod = uploadnew, make sure re-usable is true or false
+
+    // do we want to make sure the image exists in either case whether they are uploading a new image or selecting an image.
+    // if they are uploading a new image we don't get the image id as a paremter, we get it from the session, so there is
+    // the possiblity that the image id should always be correct, depending on how we set it up.
+
+    const validationErrors = validations.validateEverything(headline, subline, category);
+    additionalValidations(agreedToTerms, imageSelectionMethod, imageId).then(function(additionalValidationErrors) {
+      if (validationErrors) {
+        additionalValidationErrors.concat(validationErrors);
+      }
+
+      if (additionalValidationErrors.length) {
+        res.status(400).send("Invalid parameters.");
+        //next(validationErrors.join(", "));
+      } else {
+
+        const insertArticleAndRedirect = function() {
+          getArticleColl(
+          ).then(getNextId.bind(null, db, "articleId")
+          ).then(function(articleId) {
+            const articleURLSlug = getURLSlug(articleId, headline);
+            const doc = {
+              _id: articleId,
+              approval: 'pending',
+              articleURLSlug: articleURLSlug,
+              category: category,
+              dateCreated: new Date(),
+              flaginess: 0,
+              headline: headline,
+              imageId: imageId,
+              numAuthenticatedFlags: 0,
+              numUnauthenticatedFlags: 0,
+              numDownvotes: 0,
+              numUpvotes: 0,
+              numTotalVotes: 0,
+              sidOfAuthor: req.sessionID,
+              staffPick: false,
+              subline: subline,
+              upvoteScore: 0
+            };
+            const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
+            _.merge(doc, initialSummaryAttributes);
+
+            if (req.user) { // TODO make sure not posting anonymously
+              doc.authorId = req.user.fbId;
+            }
+            articleColl.insert(doc, {
+                w: "majority",
+              },
+              (err, result) => {
+                if (err !== null) {
+                  logError(err);
+                  next(err);
+                } else {
+                  notifyAdminViaEmail(articleURLSlug);
+                  res.redirect('/' + articleRoute.routePrefix + '/' + articleURLSlug);
+                }
+              });
+          }).catch(function(err) {
+            logError(err);
+            next(err);
+          });
+        }
+
+        if (req.body['kmw-bypass-recaptcha-secret'] === process.env.BYPASS_RECAPTCHA_SECRET) {
+          insertArticleAndRedirect();
+        } else {
+          const recaptchaVerifyJSON = {secret: RECAPTCHA_SECRET, response: req.body['g-recaptcha-response']};
+
+          //id = the id to use for the new record we are inserting.
+          requester.post({url:'https://www.google.com/recaptcha/api/siteverify', form: recaptchaVerifyJSON},
+            function(err, httpResponse, body) {
+              if (err) {
+                logError(err);
+                res.status(500).send('Something went wrong! Please try again.');
+              }
+              else {
+                var bodyJSON = JSON.parse(body);
+                if (bodyJSON.success) {
+                  // Captcha successful.
+                  insertArticleAndRedirect();
+                }
+                else {
+                  // Captcha failed.
+                  res.redirect('/upload?captcha=fail'); //TODO
+                }
+              }
+            });
+        }
+      }
+    }).catch(function(err) {
+      logError(err);
+      next(err);
+    });
   };
 
   return routeFunction;

@@ -54,7 +54,6 @@ function joinArticleWithImage(db, article) {
     })
   });
   return prom;
-
 }
 
 function joinArticleArrayWithImages(db, articles) {

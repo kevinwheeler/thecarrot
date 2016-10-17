@@ -25,10 +25,9 @@ export default Backbone.View.extend({
   //className: 'kmw-upload-view',
 
   events: {
-    'change #kmw-agree': 'agreeChanged',
     'kmwChange #kmw-bypass-recaptcha-secret': 'recaptchaSecretChanged',
     'change #kmw-picture-input': 'fileSelected',
-    'submit #kmw-article-upload-form': 'onFormSubmitted',
+    'submit form': 'onFormSubmitted',
     "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged',
 
     "click .kmw-breadcrumb-main": "breadcrumbMainClicked",
@@ -53,18 +52,9 @@ export default Backbone.View.extend({
     _.bindAll(this, 'onGrecaptchaSuccessful', 'onGrecaptchaRendered');
     renderElementAsync(recaptchaEl, this.onGrecaptchaSuccessful, this.onGrecaptchaRendered);
     this.bindToModel();
-    this.checkIfCookiesAreEnabled();
-  },
 
-  agreeChanged: function() {
-    let $agreeCheckbox = this.$('#kmw-agree');
-    if ($agreeCheckbox[0].checked) {
-      this.model.set('agreedToTerms', true);
-      console.log("agreed");
-    } else {
-      this.model.set('agreedToTerms', false);
-      console.log("didnt agree");
-    }
+    this.model.set('imageSelectionMethod', 'unchosen');
+    this.checkIfCookiesAreEnabled();
   },
 
   // http://stackoverflow.com/a/8112653
@@ -104,6 +94,8 @@ export default Backbone.View.extend({
 
   breadcrumbMainClicked: function() {
     this.displayPictureDefault();
+    this.model.set('imageSelectionMethod', 'unchosen');
+    this.$('#kmw-image-selection-method').val('unchosen');
   },
 
   checkIfCookiesAreEnabled: function() {
@@ -114,10 +106,14 @@ export default Backbone.View.extend({
 
   chooseSelect: function() {
     this.displayPictureSelect();
+    this.model.set('imageSelectionMethod', 'previouslyUploaded');
+    this.$('#kmw-image-selection-method').val('previouslyUploaded');
   },
 
   chooseUpload: function() {
     this.displayPictureUpload();
+    this.model.set('imageSelectionMethod', 'uploadNew');
+    this.$('#kmw-image-selection-method').val('uploadNew');
   },
 
   displayPictureDefault: function() {
@@ -136,7 +132,6 @@ export default Backbone.View.extend({
 
     this.$('.kmw-arrow').removeClass('kmw-hidden');
     this.$('.kmw-breadcrumb-select').removeClass('kmw-hidden');
-
   },
 
   displayPictureUpload: function() {
@@ -145,6 +140,7 @@ export default Backbone.View.extend({
 
     this.$('.kmw-arrow').removeClass('kmw-hidden');
     this.$('.kmw-breadcrumb-upload').removeClass('kmw-hidden');
+
   },
 
   displayValidationErrors: function(validationErrors) {
@@ -202,8 +198,9 @@ export default Backbone.View.extend({
   onFormSubmitted: function(e) {
     this.setModelFields();
     let validationErrors = this.model.validate();
+    console.log("in on form submitted");
     if (validationErrors) {
-      //e.preventDefault();
+      console.log("in if");
       this.displayValidationErrors(validationErrors);
       return false;
     }
@@ -217,6 +214,15 @@ export default Backbone.View.extend({
     this.model.set('category', this.$("#kmw-category-select").val());
     this.model.set('headline', this.$("#kmw-headline-input").val());
     this.model.set('subline', this.$("#kmw-subline-input").val());
+    if (this.model.get('imageSelectionMethod') === 'previouslyUploaded') {
+      this.model.set('imageId', parseInt(this.$("#kmw-image-id").val(), 10));
+    }
+    let $agreeCheckbox = this.$('#kmw-agree');
+    if ($agreeCheckbox[0].checked) {
+      this.model.set('agreedToTerms', true);
+    } else {
+      this.model.set('agreedToTerms', false);
+    }
   },
 
   uploading: function() {
