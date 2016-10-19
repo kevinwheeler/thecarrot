@@ -96,19 +96,30 @@ function getRouteFunction(db) {
   }
 
   const addToImageColl = function(imageId, imageSlug, imageWidth, imageHeight, featureImage) {
+    const aspectRatio = imageWidth/imageHeight;
+    const FACEBOOK_RECOMMENDED_ASPECT_RATIO = 1.91;
+    const FACEBOOK_RECOMMENDED_MINIMUM_WIDTH = 1200;
+    const FACEBOOK_RECOMMENDED_MINIMUM_HEIGHT = 630;
     let doc = {
       _id: imageId,
-      aspectRatio: imageWidth/imageHeight,
+      aspectRatio: aspectRatio,
       featured: false,
       height: imageHeight,
-      reusable: false,
+      userAllowsReusable: false,
+      reusableApproval: "pending",
       slug: imageSlug,
       width: imageWidth,
     };
+    const delta = Math.abs(aspectRatio - FACEBOOK_RECOMMENDED_ASPECT_RATIO);
+    if (delta < .1 && imageWidth >= FACEBOOK_RECOMMENDED_MINIMUM_WIDTH && imageHeight >= FACEBOOK_RECOMMENDED_MINIMUM_HEIGHT ) {
+      doc.potentialForReusable = true;
+    } else {
+      doc.potentialForReusable = false;
+    }
 
     if (featureImage) {
       doc.featured = true;
-      doc.reusable = true;
+      doc.reusableApproval = "approved";
     }
 
     return imageColl.insertOne(
@@ -124,7 +135,7 @@ function getRouteFunction(db) {
     let featureImage;
     if (req.body.feature_image === "true") {
       featureImage = true;
-    } else if (req.body.feature_iamge === "false") {
+    } else if (req.body.feature_image === "false") {
       featureImage = false;
     }
     const sess = req.session;

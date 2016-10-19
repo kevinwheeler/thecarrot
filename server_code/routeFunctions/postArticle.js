@@ -89,14 +89,12 @@ function getRouteFunction(db) {
     const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
 
     const sess = req.session;
-    // TODO does this assume people only upload one picture, etc?
-    // probably not, we probably re-set this session variable every time they upload a picture / hit signS3 route
-    //const articleId = sess.articleId;
     const headline = req.body.headline;
     const subline = req.body.subline;
     const category = req.body.category;
     const agreedToTerms = req.body.agreed_to_terms;
     const imageSelectionMethod = req.body.image_selection_method;
+    const userAllowsImageReuse = req.body.user_allows_image_reuse;
     let imageId;
     if (imageSelectionMethod === 'uploadNew') {
       imageId = sess.imageId;
@@ -109,7 +107,9 @@ function getRouteFunction(db) {
     //if selectionmethod = uploadnew, make sure re-usable is true or false
 
     const validationErrors = validations.validateEverything(headline, subline, category);
-    additionalValidations(agreedToTerms, imageSelectionMethod, imageId).then(function(additionalValidationErrors) {
+    getImageColl(
+    ).then(function() {return additionalValidations(agreedToTerms, imageSelectionMethod, imageId)}
+    ).then(function(additionalValidationErrors) {
       if (validationErrors) {
         additionalValidationErrors.concat(validationErrors);
       }
@@ -159,6 +159,19 @@ function getRouteFunction(db) {
                   res.redirect('/' + articleRoute.routePrefix + '/' + articleURLSlug);
                 }
               });
+
+            if (userAllowsImageReuse) {
+              imageColl.updateOne(
+                {
+                _id: imageId
+                },
+                {
+                  $set: {userAllowsReusable: true}
+                }
+              ).catch(function(err) {
+                logError(err);
+              });
+            }
           }).catch(function(err) {
             logError(err);
             next(err);

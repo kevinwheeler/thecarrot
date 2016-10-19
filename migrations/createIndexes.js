@@ -268,6 +268,16 @@ getDb().then(function(){Promise.all([
     handleError(err);
   });
   /***************************************************************************/
+  console.log("creating index for getTextSearchesImages");
+  imageColl.createIndex(
+    {slug: "text"},
+    MONGO_OPTIONS
+  ).then(function(result) {
+    console.log("index created for getTextSearchImages");
+  }).catch(function(err) {
+    handleError(err);
+  });
+  /***************************************************************************/
   console.log("creating index for getUserInfoJSON");
   userColl.createIndex(
     {fbId: 1},

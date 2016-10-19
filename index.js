@@ -96,6 +96,7 @@ MongoClient.connect(MONGO_URI,
       const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
       const getMyAuthoredArticles = require('./server_code/routeFunctions/getMyAuthoredArticles')(db);
       const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
+      const getTextSearchImages = require('./server_code/routeFunctions/getTextSearchImages')(db);
       //const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
@@ -114,6 +115,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/most-recent-articles', getMostRecentArticlesJSON);
       app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
       app.get('/my-authored-articles', getMyAuthoredArticles);
+      app.get('/text-search-images', getTextSearchImages);
       app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
       //app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
