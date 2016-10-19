@@ -9,6 +9,7 @@ import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import BestArticlesCollection from 'COLLECTIONSDIR/bestArticlesCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
+import FeaturedImagesCollection from 'COLLECTIONSDIR/featuredImagesCollection';
 import FlagArticleModalView from 'VIEWSDIR/flagArticleModalView';
 import FlagsCollection from 'COLLECTIONSDIR/flagsCollection';
 import FlagsView from 'VIEWSDIR/flagsView';
@@ -20,6 +21,7 @@ import MyApprovalHistoryCollection from 'COLLECTIONSDIR/myApprovalHistoryCollect
 import MyAuthoredArticlesCollection from 'COLLECTIONSDIR/myAuthoredArticlesCollection';
 import NavView from 'VIEWSDIR/navView';
 import NeedApprovalArticleGridView from 'VIEWSDIR/needApprovalArticleGridView';
+import PictureSelectView from 'VIEWSDIR/pictureSelectView';
 import Router from '../router';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
@@ -169,11 +171,21 @@ var serviceProvider = {
     return this.navView;
   },
 
-  getUploadView(el) {
+  getPictureSelectView() {
+    const featuredImagesCollectionInst = new FeaturedImagesCollection();
+    featuredImagesCollectionInst.fetch();
+    return new PictureSelectView({
+      featuredImagesCollection: featuredImagesCollectionInst
+    });
+  },
+
+  getUploadView(el, isAdminRoute) {
     let uploadViewInst = new UploadView({
       el: el,
+      isAdminRoute: isAdminRoute,
       model: this.getUploadModel(),
-      navView: this.getNavView()
+      navView: this.getNavView(),
+      pictureSelectView: this.getPictureSelectView()
     });
     return uploadViewInst;
   },

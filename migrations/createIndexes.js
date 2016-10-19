@@ -144,6 +144,21 @@ function getDb() {
   return prom;
 }
 
+let imageColl;
+function getImageColl() {
+  const prom = new Promise(function(resolve,reject) {
+    db.collection('image', {}, (err, coll) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        imageColl = coll;
+        resolve();
+      }
+    });
+  })
+  return prom;
+}
+
 let userColl;
 function getUserColl() {
   const prom = new Promise(function(resolve,reject) {
@@ -179,6 +194,7 @@ getDb().then(function(){Promise.all([
   getApprovalLogColl(),
   getArticleColl(),
   getAuthenticatedFlagsColl(),
+  getImageColl(),
   getUserColl(),
   getViewsColl(),
   getTimeBucketsCollections(),

@@ -108,10 +108,6 @@ function getRouteFunction(db) {
     //
     //if selectionmethod = uploadnew, make sure re-usable is true or false
 
-    // do we want to make sure the image exists in either case whether they are uploading a new image or selecting an image.
-    // if they are uploading a new image we don't get the image id as a paremter, we get it from the session, so there is
-    // the possiblity that the image id should always be correct, depending on how we set it up.
-
     const validationErrors = validations.validateEverything(headline, subline, category);
     additionalValidations(agreedToTerms, imageSelectionMethod, imageId).then(function(additionalValidationErrors) {
       if (validationErrors) {
@@ -120,9 +116,7 @@ function getRouteFunction(db) {
 
       if (additionalValidationErrors.length) {
         res.status(400).send("Invalid parameters.");
-        //next(validationErrors.join(", "));
       } else {
-
         const insertArticleAndRedirect = function() {
           getArticleColl(
           ).then(getNextId.bind(null, db, "articleId")

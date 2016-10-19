@@ -26,7 +26,7 @@ function getRouteFunction(db) {
     return fileType.match(imageMimeTypeRegex) !== null;
   }
 
-  function validateParams(mimetype, size, width, height) {
+  function validateParams(mimetype, size, width, height, featureImage, userIsAdmin) {
     /*
      * TODO make isomorphic.
      * Add validations for image width/height.
@@ -58,6 +58,18 @@ function getRouteFunction(db) {
       validationErrors.push("Image height must be at least 200 pixel.");
     }
 
+    if (featureImage !== true && featureImage !== false) {
+      validationErrors.push("featureImage invalid.");
+    }
+
+    if (userIsAdmin !== true && userIsAdmin !== false) {
+      validationErrors.push("userIsAdmin invalid.");
+    }
+
+    if (featureImage === true && userIsAdmin !== true) {
+      validationErrors.push("Trying to feature image, but user isn't an admin or isn't logged in.");
+    }
+
     if (validationErrors.length) {
       validationErrors = new Error(JSON.stringify(validationErrors));
       validationErrors.clientError = true;
@@ -83,22 +95,40 @@ function getRouteFunction(db) {
     return s3.putObject(s3Params).promise();
   }
 
-  const addToImageColl = function(imageId, imageSlug, imageWidth, imageHeight) {
-    return imageColl.insertOne({//TODO add more fields and stuffs.
+  const addToImageColl = function(imageId, imageSlug, imageWidth, imageHeight, featureImage) {
+    let doc = {
       _id: imageId,
       aspectRatio: imageWidth/imageHeight,
       featured: false,
       height: imageHeight,
+      reusable: false,
       slug: imageSlug,
       width: imageWidth,
-    }, {
-      w: 'majority'
-    });
+    };
+
+    if (featureImage) {
+      doc.featured = true;
+      doc.reusable = true;
+    }
+
+    return imageColl.insertOne(
+      doc,
+      {
+        w: 'majority'
+      }
+    );
   }
 
   const routeFunction = function (req, res, next) {
     const file = req.file;
+    let featureImage;
+    if (req.body.feature_image === "true") {
+      featureImage = true;
+    } else if (req.body.feature_iamge === "false") {
+      featureImage = false;
+    }
     const sess = req.session;
+    const userIsAdmin = !!(req.user && req.user.userType === "admin");
     const dimensions = getDimensions(file.buffer);
     const imageWidth = dimensions.width;
     const imageHeight = dimensions.height;
@@ -106,7 +136,7 @@ function getRouteFunction(db) {
     let imageSlug;
 
 
-    let validationErrors = validateParams(file.mimetype, file.size, imageWidth, imageHeight);
+    let validationErrors = validateParams(file.mimetype, file.size, imageWidth, imageHeight, featureImage, userIsAdmin);
     if (validationErrors !== null) {
       res.status(400).send(validationErrors.message);
     } else {
@@ -120,7 +150,7 @@ function getRouteFunction(db) {
       ).then(function() {
           return Promise.all([uploadImageToS3(imageSlug, file), getImageColl()]);
         }
-      ).then(function(){addToImageColl(imageId, imageSlug, imageWidth, imageHeight)}
+      ).then(function(){addToImageColl(imageId, imageSlug, imageWidth, imageHeight, featureImage)}
       ).then(function() {
         res.status(200).send();
       }).catch(function(err) {

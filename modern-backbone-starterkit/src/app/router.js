@@ -14,13 +14,13 @@ export default Backbone.Router.extend({
   // initialize.
   routes: {
     '': 'categoryRoute',
+    '(:admin/)upload': 'uploadRoute',
     'admin/:subroute': 'adminRoute',
     //'article/:articleSlug'       : 'articleRoute',
     //'admin/article/:articleSlug'       : 'articleRoute',
     'flags/:articleId': 'flagsRoute',
     'login'       : 'loginRoute',
     'user/:userId'       : 'userRoute',
-    'upload': 'uploadRoute'
   },
 
   execute: function(callback, args, name) {
@@ -186,10 +186,16 @@ export default Backbone.Router.extend({
     this.$app.empty().append(loginViewInst.$el);
   },
 
-  uploadRoute() {
+  uploadRoute(param) {
+    let isAdminRoute = false;
+    if (param === "admin") {
+      isAdminRoute = true;
+    } else if (param !== null) {
+      throw "Invalid upload route.";
+    }
     const uploadEl = $("<div class='kmw-upload-view'></div>")[0];
     this.$app.children().detach();
     this.$app.empty().append(uploadEl);
-    serviceProvider.getUploadView(uploadEl);
+    serviceProvider.getUploadView(uploadEl, isAdminRoute);
   },
 });

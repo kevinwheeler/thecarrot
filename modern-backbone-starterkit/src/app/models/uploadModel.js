@@ -29,7 +29,7 @@ export default Backbone.Model.extend({
     this.set('fileCounter', this.get('fileCounter') + 1);
   },
 
-  uploadFile: function(file) {
+  uploadFile: function(file, featureImage) {
     this.set('fileCounter', this.get('fileCounter') + 1);
     const fileCounter = this.get('fileCounter');
     this.set('uploaded', false);
@@ -37,6 +37,7 @@ export default Backbone.Model.extend({
 
     var formData = new FormData();
     formData.append('image', file);
+    formData.append('feature_image', featureImage);
 
     const self = this;
     $.ajax({

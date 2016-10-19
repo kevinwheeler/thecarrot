@@ -73,6 +73,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/admin/flagged-articles', sendIndex);
       app.get('/admin/my-approval-history', sendIndex);
       app.get('/admin/need-approval-articles', sendIndex);
+      app.get('/admin/upload', sendIndex);
       app.get('/flags/:articleId', sendIndex);
       app.get('/user/:userid', sendIndex);
       app.get('/upload', sendIndex);
@@ -90,6 +91,7 @@ MongoClient.connect(MONGO_URI,
       const bestArticlesJSON = require('./server_code/routeFunctions/bestArticlesJSON')(db);
       const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
       const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
+      const getFeaturedImagesJSON = require('./server_code/routeFunctions/getFeaturedImagesJSON')(db);
       const getMostRecentArticlesJSON = require('./server_code/routeFunctions/getMostRecentArticlesJSON')(db);
       const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
       const getMyAuthoredArticles = require('./server_code/routeFunctions/getMyAuthoredArticles')(db);
@@ -108,6 +110,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/article-flags', bodyParser.json(), getArticleFlags);
       app.get('/api/article', getArticleJSON);
       app.get(articleRoute.nodeRouteString, getArticlePage);
+      app.get('/featured-images', getFeaturedImagesJSON);
       app.get('/most-recent-articles', getMostRecentArticlesJSON);
       app.get('/api/my-approval-history', getMyApprovalHistoryJSON);
       app.get('/my-authored-articles', getMyAuthoredArticles);

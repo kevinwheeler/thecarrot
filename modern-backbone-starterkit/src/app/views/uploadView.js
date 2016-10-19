@@ -29,6 +29,7 @@ export default Backbone.View.extend({
     'change #kmw-picture-input': 'fileSelected',
     'submit form': 'onFormSubmitted',
     "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged',
+    "change #kmw-image-id": 'imageIdChanged',
 
     "click .kmw-breadcrumb-main": "breadcrumbMainClicked",
     "click .kmw-choose-upload": "chooseUpload",
@@ -37,11 +38,14 @@ export default Backbone.View.extend({
 
   initialize: function(options = {}) {
     this.navView = options.navView;
+    this.pictureSelectView = options.pictureSelectView;
+    this.isAdminRoute = options.isAdminRoute;
     this.$el.children().detach();
     this.$el.html(template({
       categories: categories,
-      imageHref: window.kmw.imageBaseUrl + 'static/article-image.jpg',
       headlineHref: window.kmw.imageBaseUrl + 'static/article-headline.jpg',
+      imageHref: window.kmw.imageBaseUrl + 'static/article-image.jpg',
+      isAdminRoute: this.isAdminRoute,
       sublineHref: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
     }));
     this.$('#accordion').accordion({
@@ -73,6 +77,9 @@ export default Backbone.View.extend({
   attachSubViews: function() {
     let $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
+
+    let $pictureSelect = this.$('.PICTURE-SELECT-STUB');
+    $pictureSelect.replaceWith(this.pictureSelectView.$el);
   },
 
   bindToModel: function() {
@@ -182,9 +189,14 @@ export default Backbone.View.extend({
         alert("File too big. Files must be smaller than 8 MB.");
       } else {
         //this.model.getSignedRequest(file);
-        this.model.uploadFile(file);
+        const featureImage = this.isAdminRoute;
+        this.model.uploadFile(file, featureImage);
       }
     }
+  },
+
+  imageIdChanged: function() {
+    this.model.set('imageId', parseInt(this.$("#kmw-image-id").val(), 10));
   },
 
   onGrecaptchaRendered: function() {
@@ -214,9 +226,9 @@ export default Backbone.View.extend({
     this.model.set('category', this.$("#kmw-category-select").val());
     this.model.set('headline', this.$("#kmw-headline-input").val());
     this.model.set('subline', this.$("#kmw-subline-input").val());
-    if (this.model.get('imageSelectionMethod') === 'previouslyUploaded') {
-      this.model.set('imageId', parseInt(this.$("#kmw-image-id").val(), 10));
-    }
+    //if (this.model.get('imageSelectionMethod') === 'previouslyUploaded') {
+    //  this.model.set('imageId', parseInt(this.$("#kmw-image-id").val(), 10));
+    //}
     let $agreeCheckbox = this.$('#kmw-agree');
     if ($agreeCheckbox[0].checked) {
       this.model.set('agreedToTerms', true);

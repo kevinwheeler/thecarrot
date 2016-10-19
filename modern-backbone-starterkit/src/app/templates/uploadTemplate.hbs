@@ -10,7 +10,7 @@
       <div class="kmw-picture-default">
         Would you like to:
         <br>
-        <button type="button" class="kmw-choose-upload btn btn-primary">Upload An Image</button>
+        <button type="button" id="kmw-choose-upload" class="kmw-choose-upload btn btn-primary">Upload An Image</button>
         <br>
         Or
         <br>
@@ -18,16 +18,19 @@
       </div>
 
       <div class="kmw-picture-upload kmw-hidden">
+        {{#if isAdminRoute}}
+          In admin Route. Any image uploaded will automatically be featured (assuming you are logged in and an admin).
+        {{/if}}
+        <!--<input type="hidden" name="feature-image" value="{{#if isAdminRoute}}true{{else}}false{{/if}}">-->
         <label for="kmw-picture-input">Picture</label>
         <input accept="image/*" id="kmw-picture-input" type="file">
         <div id="kmw-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
+        <input type="checkbox" id="kmw-image-reusable" name="image_reusable" checked>
+        <label for="kmw-image-reusable">Allow other people to use this image for their headlines too.</label>
       </div>
 
       <div class="kmw-picture-select kmw-hidden">
-        picture select
-        <br>
-        image id:
-        <input type="number" id="kmw-image-id" name="image_id">
+        <div class='PICTURE-SELECT-STUB'></div>
       </div>
 
     </div>

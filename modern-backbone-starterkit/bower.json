@@ -14,5 +14,7 @@
     "src/bower_components",
     "tests"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "image-picker": "0.3.0"
+  }
 }
