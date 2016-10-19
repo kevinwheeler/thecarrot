@@ -196,6 +196,8 @@ export default Backbone.View.extend({
   },
 
   imageIdChanged: function() {
+    console.log("image id changed. id = ");
+    console.log(parseInt(this.$("#kmw-image-id").val(), 10));
     this.model.set('imageId', parseInt(this.$("#kmw-image-id").val(), 10));
   },
 

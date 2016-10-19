@@ -7,7 +7,20 @@ image id:
   <select id="kmw-image-id" name="image_id" class="image-picker kmw-image-picker">
     <option value=""></option>
     {{#each images}}
-        <option data-img-src="{{this.url}}" value="{{this._id}}">sup</option>
+        <option data-img-src="{{this.url}}" value="{{this._id}}"{{#if this.selected}} selected="selected"{{/if}}>sup</option>
     {{/each}}
   </select>
+  <div class="picture-arrows-container">
+    <img src="/images/Green_Arrow.svg" class="picture-arrow picture-arrow-left{{#if leftArrowDisabled}} disabled{{/if}}">
+    {{#if doneFetching}}
+      {{#if resultsExist}}
+        Images {{numberOfFirstResult}} - {{numberOfLastResult}}
+      {{else}}
+        No Results Found.
+      {{/if}}
+    {{else}}
+      Loading results...
+    {{/if}}
+    <img src="/images/Green_Arrow.svg" class="picture-arrow picture-arrow-right{{#if rightArrowDisabled}} disabled{{/if}}">
+  </div>
 </div>
