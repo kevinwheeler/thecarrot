@@ -73,6 +73,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/admin/flagged-articles', sendIndex);
       app.get('/admin/my-approval-history', sendIndex);
       app.get('/admin/need-approval-articles', sendIndex);
+      app.get('/admin/need-approval-images', sendIndex);
       app.get('/admin/upload', sendIndex);
       app.get('/flags/:articleId', sendIndex);
       app.get('/user/:userid', sendIndex);
@@ -88,6 +89,7 @@ MongoClient.connect(MONGO_URI,
       });
 
       const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
+      const approveImages = require('./server_code/routeFunctions/approveImages')(db);
       const bestArticlesJSON = require('./server_code/routeFunctions/bestArticlesJSON')(db);
       const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
       const getArticlePage = require('./server_code/routeFunctions/getArticlePage')(db);
@@ -96,6 +98,7 @@ MongoClient.connect(MONGO_URI,
       const getMyApprovalHistoryJSON = require('./server_code/routeFunctions/getMyApprovalHistoryJSON')(db);
       const getMyAuthoredArticles = require('./server_code/routeFunctions/getMyAuthoredArticles')(db);
       const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
+      const getNeedApprovalImagesJSON = require('./server_code/routeFunctions/getNeedApprovalImagesJSON')(db);
       const getTextSearchImages = require('./server_code/routeFunctions/getTextSearchImages')(db);
       //const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
@@ -107,6 +110,7 @@ MongoClient.connect(MONGO_URI,
       const postVote = require('./server_code/routeFunctions/postVote')(db);
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
+      app.post('/approve-images', bodyParser.urlencoded({extended: true}), approveImages);
       app.post('/best-articles', bodyParser.json(), bestArticlesJSON);
       app.get('/article-flags', bodyParser.json(), getArticleFlags);
       app.get('/api/article', getArticleJSON);
@@ -117,6 +121,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/my-authored-articles', getMyAuthoredArticles);
       app.get('/text-search-images', getTextSearchImages);
       app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
+      app.get('/images-that-need-approval', getNeedApprovalImagesJSON);
       //app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);

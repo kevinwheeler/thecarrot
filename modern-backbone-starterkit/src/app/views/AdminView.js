@@ -15,7 +15,7 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
-    this.articleGridView = options.articleGridView;
+    this.gridView = options.gridView;
     this.navView = options.navView;
     this.$el.html(template());
     this.attachSubViews();
@@ -26,7 +26,7 @@ export default Backbone.View.extend({
     const $nav = this.$('.NAV-STUB');
     $nav.replaceWith(this.navView.$el);
 
-    const $articleGrid = this.$('.ARTICLE-GRID-STUB');
-    $articleGrid.replaceWith(this.articleGridView.$el);
+    const $grid = this.$('.GRID-STUB');
+    $grid.replaceWith(this.gridView.$el);
   }
 });

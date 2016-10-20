@@ -1,0 +1,24 @@
+<div class="diff-dom-wrapper">
+  <form action="/approve-images" method="post">
+    <div class="container">
+      <div class="row">
+        {{#each images}}
+          <div class="col-xs-12 col-sm-6" style="border: 2px solid black;">
+            <img src="{{this.imageURL}}" class="img-responsive">
+            <input type="checkbox" name="image_ids[]" value="{{this._id}}"/>
+            <h2 class="">{{this.slug}}</h2>
+          </div>
+        {{/each}}
+      </div>
+      <div style="text-align: center;">
+        {{! THIS FORM IS DUPLICATED IN articleTemplate.hbs }}
+        <select id="kmw-image-approval" name="approval_verdict">
+          <option value="approved">Approve</option>
+          <option value="denied">Deny</option>
+        </select>
+        <!--<input type="hidden" id="kmw-need-approval-redirect-url" name="redirect_url" value="/admin/need-approval-articles">-->
+        <input type="submit">
+      </div>
+    </div>
+  </form>
+</div>

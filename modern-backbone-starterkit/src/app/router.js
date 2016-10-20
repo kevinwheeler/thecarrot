@@ -134,6 +134,8 @@ export default Backbone.Router.extend({
     let adminViewInst;
     if (param === 'need-approval-articles') {
       adminViewInst = serviceProvider.getAdminView("needApproval");
+    } else if (param === "need-approval-images") {
+       adminViewInst = serviceProvider.getAdminView("needApprovalImages");
     } else if (param === "my-approval-history") {
        adminViewInst = serviceProvider.getAdminView("approvalHistory");
     } else if (param === 'flagged-articles') {

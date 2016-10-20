@@ -15,14 +15,17 @@ import FlagsCollection from 'COLLECTIONSDIR/flagsCollection';
 import FlagsView from 'VIEWSDIR/flagsView';
 import FlaggedArticlesCollection from 'COLLECTIONSDIR/flaggedArticlesCollection';
 import HomeView from 'VIEWSDIR/homeView';
+import ImagesThatNeedApprovalCollection from 'COLLECTIONSDIR/imagesThatNeedApprovalCollection';
 import LoginView from 'VIEWSDIR/loginView';
 import MostRecentPopularToggleView from 'VIEWSDIR/mostRecentPopularToggleView';
 import MyApprovalHistoryCollection from 'COLLECTIONSDIR/myApprovalHistoryCollection';
 import MyAuthoredArticlesCollection from 'COLLECTIONSDIR/myAuthoredArticlesCollection';
 import NavView from 'VIEWSDIR/navView';
 import NeedApprovalArticleGridView from 'VIEWSDIR/needApprovalArticleGridView';
+import NeedApprovalImageGridView from 'VIEWSDIR/needApprovalImageGridView';
 import PictureSelectView from 'VIEWSDIR/pictureSelectView';
 import Router from '../router';
+import TextSearchImagesCollection from 'COLLECTIONSDIR/textSearchImagesCollection';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
@@ -53,27 +56,32 @@ var serviceProvider = {
 
   getAdminView(route) {
 
+    // Hacky, but was a quick fix. We call it articlesCollection even though it may be
+    // a image collection now. Clean up later if we actually care.
     let articlesCollection;
-    let articleGridView;
+    let gridView;
     if (route === "approvalHistory") {
       articlesCollection = new MyApprovalHistoryCollection([]);
-      articleGridView = new ApprovalHistoryArticleGridView();
+      gridView = new ApprovalHistoryArticleGridView();
     } else if (route === "needApproval") {
       articlesCollection = new ArticlesThatNeedApprovalCollection([]);
-      articleGridView = new NeedApprovalArticleGridView();
+      gridView = new NeedApprovalArticleGridView();
+    } else if (route === "needApprovalImages") {
+      articlesCollection = new ImagesThatNeedApprovalCollection([]);
+      gridView = new NeedApprovalImageGridView();
     } else if (route === "flaggedArticles") {
       articlesCollection = new FlaggedArticlesCollection([]);
-      articleGridView = new NeedApprovalArticleGridView({
+      gridView = new NeedApprovalArticleGridView({
         useFlagsURL: true
       });
     } else {
       throw "invalid admin route";
     }
     articlesCollection.fetchNextArticles();
-    articleGridView.setArticleCollection(articlesCollection);
+    gridView.setArticleCollection(articlesCollection);
 
     let adminViewInst = new AdminView({
-      articleGridView: articleGridView,
+      gridView: gridView,
       navView: this.getNavView()
     });
     return adminViewInst;
@@ -172,8 +180,12 @@ var serviceProvider = {
   },
 
   getPictureSelectView() {
-    const featuredImagesCollectionInst = new FeaturedImagesCollection();
-    featuredImagesCollectionInst.fetch();
+    //const featuredImagesCollectionInst = new FeaturedImagesCollection();
+    //featuredImagesCollectionInst.fetch();
+    const featuredImagesCollectionInst = new TextSearchImagesCollection([], {
+      query: "1"
+    });
+    featuredImagesCollectionInst.fetchImages();
     return new PictureSelectView({
       featuredImagesCollection: featuredImagesCollectionInst
     });

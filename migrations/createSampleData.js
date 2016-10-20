@@ -30,7 +30,8 @@ const fs = require('fs');
 //};
 
 const NUM_ARTICLES_TO_CREATE = 22;
-const IMAGE_DIR = __dirname + '/images/';
+//const IMAGE_DIR = __dirname + '/images/';
+const IMAGE_DIR = __dirname + '/imagez/';
 
 //for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
 //  download(`http://dummyimage.com/1200x630/000/fff&text=${i}`, __dirname + '/images/' + i + '.png', function(err) {
@@ -58,9 +59,9 @@ const driver = new webdriver.Builder()
   .build();
   
 //const uploadUrl = 'https://www.nothingbutheadlines.lol/upload';
-//const uploadUrl = 'http://localhost:5000/upload';
+const uploadUrl = 'http://localhost:5000/upload';
 
-const uploadUrl = 'http://localhost:5000/admin/upload';
+//const uploadUrl = 'http://localhost:5000/admin/upload';
 driver.get('http://localhost:5000/login');
 driver.wait(function () {
     return driver.isElementPresent(By.id("js-app"));
@@ -71,6 +72,7 @@ driver.wait(function () {
 console.log("using " + uploadUrl + " as the upload url.");
 
 for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
+  const imageNumber = i % 5 + 1;
   let headline;
   if (i === 1) {
     headline = "<script>alert('sup');</script>"
@@ -83,7 +85,8 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
       return driver.findElement(By.id('kmw-picture-input')).isDisplayed();
     }, 10*1000
   );
-  driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
+  //driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
+  driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + imageNumber + '.jpg');
   driver.findElement(By.id('kmw-headline-tab')).click();
   driver.wait(function () {
       return driver.findElement(By.id('kmw-headline-input')).isDisplayed();
