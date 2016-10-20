@@ -1,11 +1,10 @@
-picture select new
-<br>
 <label for="picture-search-terms">Image search terms</label>
-<input type="text" id="picture-search-terms" placeholder="Search terms.">
+<input type="text" id="picture-search-terms" placeholder="Search terms." value="{{searchTerm}}">
 <button type="button" id="picture-search-go" class="picture-search-go btn btn-primary">Search</button>
+<input type="hidden" id="kmw-image-id-hidden" name="image_id" class="image-picker kmw-image-picker">
 
 <div class="container-fluid">
-  <select id="kmw-image-id" name="image_id" class="image-picker kmw-image-picker">
+  <select id="kmw-image-id" class="image-picker kmw-image-picker">
     <option value=""></option>
     {{#each images}}
         <option data-img-src="{{this.url}}" value="{{this._id}}"{{#if this.selected}} selected="selected"{{/if}}>sup</option>

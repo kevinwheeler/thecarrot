@@ -1,3 +1,6 @@
+/*
+ * Actually returns non-featured images too, but it just sorts it such that featured images are displayed first.
+ */
 const logError = require('../utils').logError;
 
 function getRouteFunction(db) {
@@ -21,8 +24,8 @@ function getRouteFunction(db) {
     getImageColl(
     ).then(function() {
       return imageColl.find({
-        featured: true
-      }).limit(1000).toArray();
+        reusableApproval: "approved",
+      }).sort([['featured', -1]]).limit(1000).toArray();
     }).then(function(images) {
       res.json(images);
     }).catch(function(err) {

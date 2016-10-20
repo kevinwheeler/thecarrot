@@ -9,7 +9,6 @@ import ArticleModel from 'MODELSDIR/articleModel';
 import ArticlesThatNeedApprovalCollection from 'COLLECTIONSDIR/articlesThatNeedApprovalCollection';
 import BestArticlesCollection from 'COLLECTIONSDIR/bestArticlesCollection';
 import CurrentUserModel from 'MODELSDIR/currentUserModel';
-import FeaturedImagesCollection from 'COLLECTIONSDIR/featuredImagesCollection';
 import FlagArticleModalView from 'VIEWSDIR/flagArticleModalView';
 import FlagsCollection from 'COLLECTIONSDIR/flagsCollection';
 import FlagsView from 'VIEWSDIR/flagsView';
@@ -25,7 +24,6 @@ import NeedApprovalArticleGridView from 'VIEWSDIR/needApprovalArticleGridView';
 import NeedApprovalImageGridView from 'VIEWSDIR/needApprovalImageGridView';
 import PictureSelectView from 'VIEWSDIR/pictureSelectView';
 import Router from '../router';
-import TextSearchImagesCollection from 'COLLECTIONSDIR/textSearchImagesCollection';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
 import UserModel from 'MODELSDIR/UserModel';
@@ -182,12 +180,12 @@ var serviceProvider = {
   getPictureSelectView() {
     //const featuredImagesCollectionInst = new FeaturedImagesCollection();
     //featuredImagesCollectionInst.fetch();
-    const featuredImagesCollectionInst = new TextSearchImagesCollection([], {
-      query: "1"
-    });
-    featuredImagesCollectionInst.fetchImages();
+    //const featuredImagesCollectionInst = new TextSearchImagesCollection([], {
+    //  query: "1"
+    //});
+    //featuredImagesCollectionInst.fetchImages();
     return new PictureSelectView({
-      featuredImagesCollection: featuredImagesCollectionInst
+      //featuredImagesCollection: featuredImagesCollectionInst
     });
   },
 

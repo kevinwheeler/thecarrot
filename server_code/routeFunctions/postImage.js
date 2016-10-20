@@ -120,6 +120,7 @@ function getRouteFunction(db) {
     if (featureImage) {
       doc.featured = true;
       doc.reusableApproval = "approved";
+      doc.userAllowsReusable = true;
     }
 
     return imageColl.insertOne(

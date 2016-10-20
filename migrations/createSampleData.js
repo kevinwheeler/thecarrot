@@ -59,9 +59,9 @@ const driver = new webdriver.Builder()
   .build();
   
 //const uploadUrl = 'https://www.nothingbutheadlines.lol/upload';
-const uploadUrl = 'http://localhost:5000/upload';
+//const uploadUrl = 'http://localhost:5000/upload';
 
-//const uploadUrl = 'http://localhost:5000/admin/upload';
+const uploadUrl = 'http://localhost:5000/admin/upload';
 driver.get('http://localhost:5000/login');
 driver.wait(function () {
     return driver.isElementPresent(By.id("js-app"));

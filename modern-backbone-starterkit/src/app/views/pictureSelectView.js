@@ -3,6 +3,8 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 //import Marionette from 'backbone.marionette';
 
+import FeaturedImagesCollection from 'COLLECTIONSDIR/featuredImagesCollection';
+import TextSearchImagesCollection from 'COLLECTIONSDIR/textSearchImagesCollection';
 import template from 'TEMPLATESDIR/pictureSelectTemplate.hbs';
 import 'image-picker/image-picker/image-picker.min.js';
 import 'image-picker/image-picker/image-picker.css';
@@ -20,17 +22,21 @@ export default Backbone.View.extend({
     "click .picture-arrow-left": "displayPreviousImages",
     "click .picture-arrow-right": "displayNextImages",
     "change #kmw-image-id": 'imageIdChanged', // we also have event handling for this event in the uploadView.
+    "click #picture-search-go": 'searchTermChanged', // we also have event handling for this event in the uploadView.
+    "keypress #picture-search-terms": 'keypressTerms', // we also have event handling for this event in the uploadView.
   },
 
   initialize: function(options) {
     this.indexOfFirst = 0;
-    this.featuredImagesCollection = options.featuredImagesCollection;
-    this.listenTo(this.featuredImagesCollection, 'sync', this.render);
+    this.imageCollection = new FeaturedImagesCollection();
+    this.imageCollection.fetch();
+    this.listenTo(this.imageCollection, 'sync', this.render);
     this.render();
+    this.searchTerm = this.$("#picture-search-terms").val();
   },
 
   render: _.throttle(function () {
-      const images = this.featuredImagesCollection.toJSON();
+      const images = this.imageCollection.toJSON();
       const upperBound = Math.min(this.indexOfFirst + NUM_IMAGES_PER_PAGE, images.length);
       const imagesSubset = images.slice(this.indexOfFirst, upperBound);
       const previousResultsExist = this.indexOfFirst !== 0;
@@ -47,14 +53,18 @@ export default Backbone.View.extend({
         this.imagePicker.destroy();
       }
       this.$el.html(template({
-        doneFetching: this.featuredImagesCollection.doneFetching,
+        doneFetching: this.imageCollection.doneFetching,
         images: imagesSubset,
         leftArrowDisabled: !previousResultsExist,
         numberOfFirstResult: this.indexOfFirst + 1,
         numberOfLastResult: upperBound,
         rightArrowDisabled: !nextResultsExist,
         resultsExist: images.length !== 0,
+        searchTerm: this.searchTerm,
       }));
+      if (this.selectedImageId) {
+        this.$("#kmw-image-id-hidden").val("" + this.selectedImageId);
+      }
       const $imagePicker = this.$(".kmw-image-picker");
       $imagePicker.imagepicker({
 
@@ -68,12 +78,13 @@ export default Backbone.View.extend({
       $LIs.addClass("col-md-6");
       $LIs.addClass("col-lg-4");
       $LIs.addClass("kmw-picture-li");
+
       return this;
     }, 16
   ),
 
   displayNextImages: function() {
-    if (this.indexOfFirst + NUM_IMAGES_PER_PAGE >= this.featuredImagesCollection.length) {
+    if (this.indexOfFirst + NUM_IMAGES_PER_PAGE >= this.imageCollection.length) {
       return;
     } else {
       this.indexOfFirst = this.indexOfFirst + NUM_IMAGES_PER_PAGE;
@@ -88,5 +99,38 @@ export default Backbone.View.extend({
 
   imageIdChanged: function() {
     this.selectedImageId = parseInt(this.$("#kmw-image-id").val(), 10);
+    this.$("#kmw-image-id-hidden").val("" + this.selectedImageId);
+  },
+
+  keypressTerms: function(e) {
+    //http://stackoverflow.com/questions/11365632/how-to-detect-when-the-user-presses-enter-in-an-input-field
+    if (!e) e = window.event;
+    var keyCode = e.keyCode || e.which;
+    if (keyCode == '13'){
+      this.searchTermChanged();
+    }
+
+  },
+
+  searchTermChanged: function() {
+    const newSearchTerm = this.$("#picture-search-terms").val();
+    if (newSearchTerm !== this.searchTerm) {
+
+      this.stopListening(this.imageCollection);
+      this.searchTerm = newSearchTerm;
+
+      if (this.searchTerm.length) {
+        this.imageCollection = new TextSearchImagesCollection([], {
+          query: this.searchTerm
+        });
+        this.imageCollection.fetchImages();
+      } else {
+        this.imageCollection = new FeaturedImagesCollection([]);
+        this.imageCollection.fetch();
+      }
+
+      this.listenTo(this.imageCollection, 'sync', this.render);
+      this.render();
+    }
   }
 });
