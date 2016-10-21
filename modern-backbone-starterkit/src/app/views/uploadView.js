@@ -34,6 +34,11 @@ export default Backbone.View.extend({
     "click .kmw-breadcrumb-main": "breadcrumbMainClicked",
     "click .kmw-choose-upload": "chooseUpload",
     "click .kmw-choose-select": "chooseSelect",
+
+    "click .kmw-picture-next": "openHeadlineTab",
+    "click #kmw-headline-next": "openSublineTab",
+    "click #kmw-subline-next": "openCategoryTab",
+    "click #kmw-category-next": "openTermsTab",
   },
 
   initialize: function(options = {}) {
@@ -43,10 +48,10 @@ export default Backbone.View.extend({
     this.$el.children().detach();
     this.$el.html(template({
       categories: categories,
-      headlineHref: window.kmw.imageBaseUrl + 'static/article-headline.jpg',
-      imageHref: window.kmw.imageBaseUrl + 'static/article-image.jpg',
+      headlineSrc: window.kmw.imageBaseUrl + 'static/article-headline.jpg',
+      imageSrc: window.kmw.imageBaseUrl + 'static/article-image.jpg',
       isAdminRoute: this.isAdminRoute,
-      sublineHref: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
+      sublineSrc: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
     }));
     this.$('#accordion').accordion({
       heightStyle: "content"
@@ -216,6 +221,22 @@ export default Backbone.View.extend({
       this.displayValidationErrors(validationErrors);
       return false;
     }
+  },
+
+  openHeadlineTab: function() {
+    this.$("#kmw-headline-tab").click();
+  },
+
+  openSublineTab: function() {
+    this.$("#kmw-subline-tab").click();
+  },
+
+  openCategoryTab: function() {
+    this.$("#kmw-category-tab").click();
+  },
+
+  openTermsTab: function() {
+    this.$("#kmw-terms-tab").click();
   },
 
   recaptchaSecretChanged: function() {

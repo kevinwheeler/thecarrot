@@ -1,13 +1,24 @@
 <nav class='NAV-STUB'></nav>
 <form action="/article" id="kmw-article-upload-form" method="post">
-  <div id="accordion">
-    <h3 id="kmw-picture-tab">1. Choose a picture. </h3>
+  <div id="accordion" class="kmw-accordion">
+    <h3 id="kmw-picture-tab">1. <span class="kmw-accordion-header">Choose a picture.</span></h3>
     <div>
       <a href="#" class="kmw-breadcrumb-main">Upload an image or select an image?</a> <span class="kmw-arrow kmw-hidden">></span>
       <a href="#" class="kmw-breadcrumb-upload kmw-hidden">Upload Image</a>
       <a href="#" class="kmw-breadcrumb-select kmw-hidden">Select Image</a>
 
       <div class="kmw-picture-default">
+        <div class="container-fluid">
+          <div class="row">
+            Please select an image that will be displayed when your headline is shared on Facebook. It should look
+            something like this when shared on Facebook:
+          </div>
+          <div class="row">
+            <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+              <img src="{{imageSrc}}" class="img-responsive">
+            </div>
+          </div>
+        </div>
         Would you like to:
         <br>
         <button type="button" id="kmw-choose-upload" class="kmw-choose-upload btn btn-primary">Upload An Image</button>
@@ -27,6 +38,8 @@
         <div id="kmw-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
         <input type="checkbox" id="kmw-image-reusable" name="user_allows_image_reuse" checked>
         <label for="kmw-image-reusable">Allow other people to use this image for their headlines too.</label>
+        <br>
+        <button type="button" class="btn btn-primary upload-next-button kmw-picture-next">Next</button>
       </div>
 
       <div class="kmw-picture-select kmw-hidden">
@@ -34,18 +47,41 @@
       </div>
 
     </div>
-    <h3 id="kmw-headline-tab">2. Choose a headline. </h3>
-    <div>
-      <label for="kmw-headline-input">Headline</label>
-      <input type="text" id="kmw-headline-input" name="headline">
+    <h3 id="kmw-headline-tab">2. <span class="kmw-accordion-header">Choose a headline.</span></h3>
+    <div class="center-text">
+      <div class="container-fluid">
+        <div class="row">
+          Please enter a headline. The headline should look something like this when shared to Facebook.
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+            <img src="{{headlineSrc}}" class="img-responsive">
+          </div>
+        </div>
+      </div>
+      <label for="kmw-headline-input">Headline:</label>
+      <textarea id="kmw-headline-input" class="form-control kmw-headline-input" name="headline" placeholder="Please enter a headline."></textarea>
+      <br>
+      <button type="button" id="kmw-headline-next" class="btn btn-primary upload-next-button">Next</button>
     </div>
-    <h3 id="kmw-subline-tab">3. Choose a subline (optional). </h3>
-    <div>
-      <label for="kmw-subline-input">Subline</label>
-      <input type="text" id="kmw-subline-input" name="subline">
+    <h3 id="kmw-subline-tab">3. <span class="kmw-accordion-header">Choose a subline (optional).</span></h3>
+    <div class="center-text">
+      <div class="container-fluid">
+        <div class="row">
+          Please enter a subline. The subline should look something like this when shared to Facebook.
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+            <img src="{{sublineSrc}}" class="img-responsive">
+          </div>
+        </div>
+      </div>
+      <label for="kmw-subline-input">Subline:</label>
+      <textarea class="form-control " id="kmw-subline-input" name="subline" placeholder="Please enter a subline."></textarea>
+      <button type="button" id="kmw-subline-next" class="btn btn-primary upload-next-button">Next</button>
     </div>
-    <h3 id="kmw-category-tab">4. Choose a category. </h3>
-    <div>
+    <h3 id="kmw-category-tab">4. <span class="kmw-accordion-header">Choose a category.</span></h3>
+    <div class="center-text">
       <label for="kmw-category-select">Category</label>
       <select id="kmw-category-select" name="category">
         <option value="" disabled selected>Select a category</option>
@@ -55,14 +91,20 @@
           </li>
         {{/each}}
       </select>
-    </div>
-    <h3 id="kmw-terms-tab">5. Captcha + Terms and Conditions</h3>
-    <div>
-      <div class="kmw-recaptcha"></div>
-      <div id="kmw-validation-errors" class="kmw-validation-errors kmw-hidden"></div>
-      <input type="checkbox" id="kmw-agree" name="agreed_to_terms">I have read and agree to the <a class="kmw-terms" href="/terms-and-conditions">Terms and Conditions</a>.
       <br>
-      <input type="submit" value="Submit" id="kmw-submit">
+      <button type="button" id="kmw-category-next" class="btn btn-primary upload-next-button">Next</button>
+    </div>
+    <h3 id="kmw-terms-tab">5. <span class="kmw-accordion-header">Captcha + Terms and Conditions</span></h3>
+    <div class="center-text">
+      <div class="kmw-terms-container">
+        <div class="kmw-recaptcha"></div>
+        <div id="kmw-validation-errors" class="kmw-validation-errors kmw-hidden"></div>
+        <div class="kmw-terms-text-container">
+          <input type="checkbox" id="kmw-agree" name="agreed_to_terms">I have read and agree to the <a class="kmw-terms" href="/terms-and-conditions">Terms and Conditions</a>.
+        </divcl>
+        <br>
+        <input type="submit" class="btn btn-primary form-control" value="Submit" id="kmw-submit">
+      </div>
     </div>
   </div>
 

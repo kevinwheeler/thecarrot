@@ -113,6 +113,7 @@ export default Backbone.View.extend({
   },
 
   searchTermChanged: function() {
+    this.indexOfFirst = 0;
     const newSearchTerm = this.$("#picture-search-terms").val();
     if (newSearchTerm !== this.searchTerm) {
 
