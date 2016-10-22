@@ -17,5 +17,5 @@ function indexOfMin(arr) {
 }
 
 export default {
-  indexOfMin: indexOfMin
+  indexOfMin
 };

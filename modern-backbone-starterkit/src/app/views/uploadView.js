@@ -26,7 +26,6 @@ export default Backbone.View.extend({
 
   events: {
     'kmwChange #kmw-bypass-recaptcha-secret': 'recaptchaSecretChanged',
-    'change #kmw-picture-input': 'fileSelected',
     'submit form': 'onFormSubmitted',
     "change textarea.[name='g-recaptcha-response']": 'grecaptchaChanged',
     "change #kmw-image-id": 'imageIdChanged',
@@ -39,6 +38,8 @@ export default Backbone.View.extend({
     "click #kmw-headline-next": "openSublineTab",
     "click #kmw-subline-next": "openCategoryTab",
     "click #kmw-category-next": "openTermsTab",
+
+    "change #kmw-picture-input": "pictureInputChanged",
   },
 
   initialize: function(options = {}) {
@@ -53,6 +54,11 @@ export default Backbone.View.extend({
       isAdminRoute: this.isAdminRoute,
       sublineSrc: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
     }));
+    this.setupDragEvents();
+
+    $("#kmw-headline-input").on("change keyup paste", this.headlineChanged);
+    $("#kmw-subline-input").on("change keyup paste", this.sublineChanged);
+
     this.$('#accordion').accordion({
       heightStyle: "content"
     });
@@ -178,26 +184,19 @@ export default Backbone.View.extend({
     this.$el.append($doneUploading);
     // This event is used by the createSampleData.js file in the migrations directory.
     //this.$el.trigger('doneUploading');
+    const $uploading = this.$(".kmw-image-uploading");
+    $uploading.addClass("kmw-hidden");
     const $target = this.$("#kmw-loading-wheel");
     $target.addClass("kmw-hidden");
   },
 
   fileSelected: function(e) {
-    const files = e.target.files;
-    if (files.length === 0) {
-      this.model.clearFileSelection();
-    } else {
-      const file = files[0];
-      const eightMegabytes = 8 * 1000 * 1000;
-      const fileSize = file.size;
-      if (fileSize >= eightMegabytes) {
-        alert("File too big. Files must be smaller than 8 MB.");
-      } else {
-        //this.model.getSignedRequest(file);
-        const featureImage = this.isAdminRoute;
-        this.model.uploadFile(file, featureImage);
-      }
-    }
+  },
+
+  headlineChanged() {
+    const $headline = $("#kmw-headline-input");
+    $headline.val($headline.val().replace(/\n/g, '')); // Remove and newlines.
+    const headlineLength = $headline.val().length;
   },
 
   imageIdChanged: function() {
@@ -212,12 +211,11 @@ export default Backbone.View.extend({
     this.model.set('captchaCompleted', true);
   },
 
+
   onFormSubmitted: function(e) {
     this.setModelFields();
     let validationErrors = this.model.validate();
-    console.log("in on form submitted");
     if (validationErrors) {
-      console.log("in if");
       this.displayValidationErrors(validationErrors);
       return false;
     }
@@ -258,6 +256,64 @@ export default Backbone.View.extend({
     }
   },
 
+  setupDragEvents: function() {
+      const self = this;
+      const $imageDragArea = this.$(".image-drag-area");
+      $imageDragArea.on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      })
+      .on('dragover dragenter', function() {
+        $imageDragArea.addClass('is-dragover');
+      })
+      .on('dragleave dragend drop', function() {
+        $imageDragArea.removeClass('is-dragover');
+      })
+      .on('drop', function(e) {
+        const file = e.originalEvent.dataTransfer.files[0];
+        self.imageSelected(file);
+      });
+  },
+
+  sublineChanged() {
+    const $subline = $("#kmw-subline-input");
+    $subline.val($subline.val().replace(/\n/g, '')); // Remove and newlines.
+    const sublineLength = $subline.val().length;
+  },
+
+  // Display an image preview for the image they just selected.
+  pictureInputChanged: function(e) {
+    const input = e.target;
+    if (input.files && input.files[0]) {
+      this.imageSelected(input.files[0]);
+    }
+  },
+
+  imageSelected: function(file) {
+    var imageType = /image.*/;
+    if (file.type.match(imageType)) {
+      // it's an image, process it
+
+      const featureImage = this.isAdminRoute;
+      this.model.uploadFile(file, featureImage);
+
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        const $imagePreview = $('#kmw-image-preview');
+        $imagePreview.attr('src', e.target.result);
+        $imagePreview.removeClass("no-image-selected");
+        $('.image-preview-outer-container').removeClass("no-image-selected");
+        $('.image-preview-inner-container').removeClass("no-image-selected");
+        $('.drag-image-text').addClass("image-selected");
+      };
+
+      reader.readAsDataURL(file);
+
+    } else {
+      alert("The file isn't an image.");
+    }
+  },
+
   uploading: function() {
     const opts = {
       lines: 12             // The number of lines to draw
@@ -281,6 +337,8 @@ export default Backbone.View.extend({
       , hwaccel: false        // Whether to use hardware acceleration (might be buggy)
       , position: 'absolute'  // Element positioning
     }
+    const $uploading = this.$(".kmw-image-uploading");
+    $uploading.removeClass("kmw-hidden");
     const $target = this.$("#kmw-loading-wheel");
     $target.removeClass("kmw-hidden");
     const spinner = new Spinner(opts).spin($target.get(0));

@@ -10,7 +10,7 @@
     });
 
     window.kmw.facebookInitialized = true;
-    for (let i=0; i < window.kmw.fbElementsToParseOnLoad.length; i++) {
+    for (var i=0; i < window.kmw.fbElementsToParseOnLoad.length; i++) {
       const pair = window.kmw.fbElementsToParseOnLoad[i];
       const el = pair[0];
       const cb = pair[1];
