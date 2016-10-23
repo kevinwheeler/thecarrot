@@ -40,6 +40,8 @@ export default Backbone.View.extend({
     "click #kmw-category-next": "openTermsTab",
 
     "change #kmw-picture-input": "pictureInputChanged",
+
+    "click .kmw-image-search-go": "imageSearch",
   },
 
   initialize: function(options = {}) {
@@ -201,6 +203,13 @@ export default Backbone.View.extend({
 
   imageIdChanged: function() {
     this.model.set('imageId', parseInt(this.$("#kmw-image-id").val(), 10));
+  },
+
+  imageSearch: function(e) {
+    const searchTerms = $("#kmw-image-search-terms").val().replace(/\s+/g, "+");
+    const googleURL = `https://www.google.com/search?q=${searchTerms}&tbm=isch&tbs=isz:ex,iszw:1200,iszh:630`;
+    var win = window.open(googleURL, '_blank');
+    win.focus();
   },
 
   onGrecaptchaRendered: function() {

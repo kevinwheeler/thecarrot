@@ -37,21 +37,41 @@
         <!--<input type="hidden" name="feature-image" value="{{#if isAdminRoute}}true{{else}}false{{/if}}">-->
 
         <!--<label for="kmw-picture-input">Picture</label>-->
-
-        <label class="btn btn-default btn-file kmw-choose-image">
-          Choose Image <input accept="image/*" id="kmw-picture-input" style="display:none" type="file">
-        </label>
-        <div class="choose-image-or">
-          Or
+        <div class="upload-image-step-1 ">
+          <h2>Step 1: Find an image.</h2>
+          <div class="upload-image-instructions left-text">
+            <div class="kmw-fb-criteria">
+              In order for Facebook to display your image properly,
+              <a target="_blank" class="kmw-anchor" href="https://developers.facebook.com/docs/sharing/best-practices#images">it needs to meet a set of criteria.</a>
+            </div>
+            <div class="kmw-short-version">
+              Short version: The easiest way we know of to find qualifying images is to google image search for images that are exactly
+              1200x630 pixels. However, please do not use any copyrighted images.
+            </div>
+            <div class="kmw-image-search center-text">
+              Search Google for 1200x630 pixel images:
+              <input class="form-control kmw-image-search-terms" id="kmw-image-search-terms" placeholder="Search Terms..">
+              <button type="button" class="btn btn-default kmw-image-search-go">Search</button>
+            </div>
+          </div>
         </div>
-        <div class="container-fluid image-preview-outer-container no-image-selected">
-          <div class="row">
-            <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
-              <div class="image-preview-inner-container no-image-selected image-drag-area">
-                <div class="drag-image-text">
-                  Drag an image here.
+        <div class="upload-image-step-2">
+          <h2>Step 2: Upload Your Image.</h2>
+          <label class="btn btn-default btn-file kmw-choose-image">
+            Choose Image <input accept="image/*" id="kmw-picture-input" style="display:none" type="file">
+          </label>
+          <div class="choose-image-or">
+            Or
+          </div>
+          <div class="container-fluid image-preview-outer-container no-image-selected">
+            <div class="row">
+              <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+                <div class="image-preview-inner-container no-image-selected image-drag-area">
+                  <div class="drag-image-text">
+                    Drag an image here.
+                  </div>
+                  <img id="kmw-image-preview" class="kmw-image-preview no-image-selected img-responsive" src="#"/>
                 </div>
-                <img id="kmw-image-preview" class="kmw-image-preview no-image-selected img-responsive" src="#"/>
               </div>
             </div>
           </div>
