@@ -137,10 +137,9 @@
         <div class="row">
           <label for="kmw-category-select">Category</label>
           <select id="kmw-category-select" name="category">
-            <option value="" disabled selected>Select a category</option>
             {{#each categories}}
               <li>
-                <option value="{{this.otherSlug}}">{{this.prettyName}}</option>
+                <option value="{{this.otherSlug}}"{{#if this.selected}} selected{{/if}}>{{this.prettyName}}</option>
               </li>
             {{/each}}
           </select>

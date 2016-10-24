@@ -37,7 +37,8 @@
     {
       otherSlug: 'other',
       prettyName: "Other",
-      urlSlug: 'other'
+      urlSlug: 'other',
+      selected: true,
     },
   ];
 

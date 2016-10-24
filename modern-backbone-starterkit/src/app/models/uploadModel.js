@@ -55,8 +55,8 @@ export default Backbone.Model.extend({
         } else {
         }
       },
-      error : function() {
-        alert("An error has occured. Please re-select your image.");
+      error : function(request, status, error) {
+        alert("An error has occurred while uploading image. Please refresh.");
       }
     });
   },

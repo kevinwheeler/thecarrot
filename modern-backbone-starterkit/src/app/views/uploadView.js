@@ -15,6 +15,8 @@ import Spinner from 'UTILSDIR/spin';
 import template from 'TEMPLATESDIR/uploadTemplate.hbs';
 import {renderElementAsync} from 'UTILSDIR/recaptcha'
 
+import validateImage from 'ISOMORPHICDIR/imageValidations';
+
 import 'STYLESDIR/stylus/upload.css';
 
 
@@ -192,9 +194,6 @@ export default Backbone.View.extend({
     $target.addClass("kmw-hidden");
   },
 
-  fileSelected: function(e) {
-  },
-
   headlineChanged() {
     const $headline = $("#kmw-headline-input");
     $headline.val($headline.val().replace(/\n/g, '')); // Remove and newlines.
@@ -299,28 +298,48 @@ export default Backbone.View.extend({
   },
 
   imageSelected: function(file) {
-    var imageType = /image.*/;
-    if (file.type.match(imageType)) {
-      // it's an image, process it
-
-      const featureImage = this.isAdminRoute;
-      this.model.uploadFile(file, featureImage);
-
+    const filename = file.name;
+    // http://stackoverflow.com/a/12900504
+    const extension = filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+    // A subset of the types supported by the image-size library used server-side.
+    if (extension.match(/bmp/i)  ||
+        extension.match(/gif/i)  ||
+        extension.match(/jpg/i)  ||
+        extension.match(/jpeg/i) ||
+        extension.match(/png/i)  ||
+        extension.match(/svg/i)
+    ) {
+      const self = this;
       var reader = new FileReader();
+
       reader.onload = function (e) {
-        const $imagePreview = $('#kmw-image-preview');
-        $imagePreview.attr('src', e.target.result);
-        $imagePreview.removeClass("no-image-selected");
-        $('.image-preview-outer-container').removeClass("no-image-selected");
-        $('.image-preview-inner-container').removeClass("no-image-selected");
-        $('.drag-image-text').addClass("image-selected");
+        var img = new Image;
+        img.onload = function() {
+          const validationErrors = validateImage(img.width, img.height, file.size);
+          if (validationErrors.length) {
+            alert(validationErrors.join('\n'));
+          } else {
+            const featureImage = self.isAdminRoute;
+            self.model.uploadFile(file, featureImage);
+
+            const $imagePreview = $('#kmw-image-preview');
+            $imagePreview.attr('src', e.target.result);
+            $imagePreview.removeClass("no-image-selected");
+            $('.image-preview-outer-container').removeClass("no-image-selected");
+            $('.image-preview-inner-container').removeClass("no-image-selected");
+            $('.drag-image-text').addClass("image-selected");
+          }
+        };
+        img.src = reader.result;
+
       };
 
       reader.readAsDataURL(file);
 
     } else {
-      alert("The file isn't an image.");
+      alert("Supported image types: bmp, gif, jpg/jpeg, png, svg.");
     }
+
   },
 
   uploading: function() {

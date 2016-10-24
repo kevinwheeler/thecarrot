@@ -2,6 +2,7 @@ const aws = require('aws-sdk');
 const getFilenameSlug = require('../slugutil').getFilenameSlug;
 const logError = require('../utils').logError;
 const getNextId = require('../utils').getNextId;
+const isomorphicValidations = require('../../modern-backbone-starterkit/src/isomorphic/imageValidations.js');
 const getDimensions = require('image-size');
 
 function getRouteFunction(db) {
@@ -21,42 +22,12 @@ function getRouteFunction(db) {
     return prom;
   }
 
-  function fileTypeIsValid(fileType) {
-    const imageMimeTypeRegex = /image\/.*/;
-    return fileType.match(imageMimeTypeRegex) !== null;
-  }
-
-  function validateParams(mimetype, size, width, height, featureImage, userIsAdmin) {
+  function validateParams(featureImage, userIsAdmin) {
     /*
      * TODO make isomorphic.
      * Add validations for image width/height.
      */
     let validationErrors = [];
-
-    if (!fileTypeIsValid(mimetype)) {
-      validationErrors.push("File is not an image.");
-    }
-
-    const eightMegabytes = 8 * 1000 * 1000;
-    if (size >= eightMegabytes) {
-      validationErrors.push("Image must smaller than eight megabytes.");
-    }
-
-    if (typeof(width) !== "number") {
-      validationErrors.push("Image width must be a number.");
-    }
-
-    if (width < 200) {
-      validationErrors.push("Image width must be at least 200 pixel.");
-    }
-
-    if (typeof(height) !== "number") {
-      validationErrors.push("Image height must be a number.");
-    }
-
-    if (height < 200) {
-      validationErrors.push("Image height must be at least 200 pixel.");
-    }
 
     if (featureImage !== true && featureImage !== false) {
       validationErrors.push("featureImage invalid.");
@@ -70,12 +41,6 @@ function getRouteFunction(db) {
       validationErrors.push("Trying to feature image, but user isn't an admin or isn't logged in.");
     }
 
-    if (validationErrors.length) {
-      validationErrors = new Error(JSON.stringify(validationErrors));
-      validationErrors.clientError = true;
-    } else {
-      validationErrors = null;
-    }
     return validationErrors;
   }
 
@@ -141,16 +106,28 @@ function getRouteFunction(db) {
     }
     const sess = req.session;
     const userIsAdmin = !!(req.user && req.user.userType === "admin");
-    const dimensions = getDimensions(file.buffer);
+
+    let dimensions;
+
+    try {
+      dimensions = getDimensions(file.buffer);
+    } catch (err) {
+      res.status(400).send("Unable to parse image. Likely invalid image type.");
+      return;
+    }
     const imageWidth = dimensions.width;
     const imageHeight = dimensions.height;
     let imageId;
     let imageSlug;
 
 
-    let validationErrors = validateParams(file.mimetype, file.size, imageWidth, imageHeight, featureImage, userIsAdmin);
-    if (validationErrors !== null) {
-      res.status(400).send(validationErrors.message);
+    let isomorphicValidationErrors = isomorphicValidations(imageWidth, imageHeight, file.size);
+    let otherValidationErrors = validateParams(featureImage, userIsAdmin);
+
+    const validationErrors = isomorphicValidationErrors.concat(otherValidationErrors);
+
+    if (validationErrors.length) {
+      res.status(400).send(validationErrors.join(' '));
     } else {
       getNextId(db, "imageId"
       ).then(function(id) {
