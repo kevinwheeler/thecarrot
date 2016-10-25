@@ -103,9 +103,13 @@
       <div class="kmw-headline-instructions">
         Facebook may not display the full headline if it is too long. We suggest keeping headlines under 100 letters.
       </div>
-      <label class="kmw-headline-label" for="kmw-headline-input">Headline:</label>
-      <textarea id="kmw-headline-input" class="form-control kmw-headline-input" name="headline" placeholder="Please enter a headline."></textarea>
-      <br>
+      <div class="left-text">
+        <label class="kmw-headline-label" for="kmw-headline-input">Headline:</label>
+        <textarea id="kmw-headline-input" class="form-control kmw-headline-input" name="headline" placeholder="Please enter a headline."></textarea>
+        <div class="headline-num-letters-wrapper2">
+          <span class="headline-num-letters-wrapper">Number of letters: <span class="headline-num-letters">0</span></span>
+        </div>
+      </div>
       <button type="button" id="kmw-headline-next" class="btn btn-primary upload-next-button">Next</button>
     </div>
     <h3 id="kmw-subline-tab">3. <span class="kmw-accordion-header">Choose a subline (optional).</span></h3>
@@ -124,8 +128,13 @@
         Facebook may not display the full subline if it is too long. The subline may not be displayed at all on mobile.
         We suggest keeping sublines under 150 letters.
       </div>
-      <label class="kmw-subline-label" for="kmw-subline-input">Subline:</label>
-      <textarea class="form-control " id="kmw-subline-input" name="subline" placeholder="Please enter a subline."></textarea>
+      <div class="left-text">
+        <label class="kmw-subline-label" for="kmw-subline-input">Subline:</label>
+        <textarea class="form-control " id="kmw-subline-input" name="subline" placeholder="Please enter a subline."></textarea>
+        <div class="subline-num-letters-wrapper2">
+          <span class="subline-num-letters-wrapper">Number of letters: <span class="subline-num-letters">0</span></span>
+        </div>
+      </div>
       <button type="button" id="kmw-subline-next" class="btn btn-primary upload-next-button">Next</button>
     </div>
     <h3 id="kmw-category-tab">4. <span class="kmw-accordion-header">Choose a category.</span></h3>

@@ -59,7 +59,7 @@ export default Backbone.View.extend({
       sublineSrc: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
     }));
     this.setupDragEvents();
-
+    _.bindAll(this, ["headlineChanged", "sublineChanged"]);
     $("#kmw-headline-input").on("change keyup paste", this.headlineChanged);
     $("#kmw-subline-input").on("change keyup paste", this.sublineChanged);
 
@@ -195,9 +195,22 @@ export default Backbone.View.extend({
   },
 
   headlineChanged() {
-    const $headline = $("#kmw-headline-input");
-    $headline.val($headline.val().replace(/\n/g, '')); // Remove and newlines.
+    const $headline = this.$("#kmw-headline-input");
+    $headline.val($headline.val().replace(/\n/g, '')); // Remove any newlines.
     const headlineLength = $headline.val().length;
+    const $numLettersWrapper = this.$(".headline-num-letters-wrapper");
+    $numLettersWrapper.find(".headline-num-letters").html(headlineLength);
+    if (headlineLength < 100) {
+      $numLettersWrapper.removeClass("kmw-medium-length");
+      $numLettersWrapper.removeClass("kmw-long-length");
+    } else if (headlineLength < 150) {
+      $numLettersWrapper.addClass("kmw-medium-length");
+      $numLettersWrapper.removeClass("kmw-long-length");
+    } else {
+      $numLettersWrapper.removeClass("kmw-medium-length");
+      $numLettersWrapper.addClass("kmw-long-length");
+    }
+
   },
 
   imageIdChanged: function() {
@@ -285,8 +298,20 @@ export default Backbone.View.extend({
 
   sublineChanged() {
     const $subline = $("#kmw-subline-input");
-    $subline.val($subline.val().replace(/\n/g, '')); // Remove and newlines.
+    $subline.val($subline.val().replace(/\n/g, '')); // Remove any newlines.
     const sublineLength = $subline.val().length;
+    const $numLettersWrapper = this.$(".subline-num-letters-wrapper");
+    $numLettersWrapper.find(".subline-num-letters").html(sublineLength);
+    if (sublineLength < 100) {
+      $numLettersWrapper.removeClass("kmw-medium-length");
+      $numLettersWrapper.removeClass("kmw-long-length");
+    } else if (sublineLength < 150) {
+      $numLettersWrapper.addClass("kmw-medium-length");
+      $numLettersWrapper.removeClass("kmw-long-length");
+    } else {
+      $numLettersWrapper.removeClass("kmw-medium-length");
+      $numLettersWrapper.addClass("kmw-long-length");
+    }
   },
 
   // Display an image preview for the image they just selected.
