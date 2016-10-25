@@ -127,30 +127,29 @@ const logError = function(err) {
 // Dont send articles to client without projecting first. We don't want people to know the SID of the author, for example.
 const publicArticleFieldsProjection = {
   _id: true,
+  all_time_views: true,
   approval: true,
   articleURLSlug: true,
   category: true,
+  daily_views: true,
   dateCreated: true,
   headline: true,
   imageHeight: true,
   imageId: true,
   imageSlug: true,
   imageWidth: true,
+  monthly_views: true,
   numDownvotes: true,
   numUpvotes: true,
   numTotalVotes: true,
   staffPick: true,
   subline: true,
-  daily_views: true,
+  viewerIsAuthor: true,
   weekly_views: true,
-  monthly_views: true,
   yearly_views: true,
-  all_time_views: true,
 };
 
 const publicArticleFields = _.keys(publicArticleFieldsProjection);
-
-const privateArticleFields = ["sidOfAuthor"];
 
 const send404 = function(res) {
   res.status(404).send('Error 404. Page not found.');
@@ -165,7 +164,6 @@ module.exports = {
   logError: logError,
   publicArticleFields: publicArticleFields,
   publicArticleFieldsProjection: publicArticleFieldsProjection,
-  privateArticleFields: privateArticleFields,
   send404: send404,
   wtimeout: wtimeout
 };

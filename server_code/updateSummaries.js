@@ -49,7 +49,7 @@ function updateTimeBuckets(db, articleId, attributeName, timeInterval) {
         {
           upsert: true
         }
-      ).then(function(){}, function(err) {
+      ).catch(function(err) {
         if (err.code !== duplicateKeyErrorCode) { //https://jira.mongodb.org/browse/SERVER-14322
           handleError(err);
         }
@@ -95,7 +95,6 @@ function getInitialSummaryAttributes() {
   retVal.all_time_views = 1;
   return retVal
 }
-
 
 function validateMostViewedArticlesParams(dontInclude, howMany, timeInterval, skipAheadAmount, category, staffPicksOnly) {
   const MAX_ARTICLES_PER_REQUEST = 50;

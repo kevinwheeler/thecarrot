@@ -37,8 +37,7 @@ export default Backbone.Model.extend({
   fetchArticle: function() {
       this.fetch({
         data: $.param({
-          articleId: this._id,
-          incrementViews: true
+          articleId: this._id
         }),
       });
   },
