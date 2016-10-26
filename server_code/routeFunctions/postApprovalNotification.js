@@ -39,41 +39,40 @@ function validateParams(articleId, emailAddress) {
 
 function getRouteFunction(db) {
 
+  let notificationsColl;
+  function getApprovalNotificationSubscribersColl() {
+    const prom = new Promise(function(resolve,reject) {
+      db.collection('approval_notification_subscribers', (err, coll) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          notificationsColl = coll;
+          resolve();
+        }
+      });
+    });
+    return prom;
+  }
 
   function setupNotifications(articleId, emailAddress) {
 
-    let notificationsColl;
-    function getApprovalNotificationSubscribersColl() {
-      const prom = new Promise(function(resolve,reject) {
-        db.collection('approval_notification_subscribers', (err, coll) => {
-          if (err !== null) {
-            reject(err);
-          } else {
-            notificationsColl = coll;
-            resolve();
-          }
-        });
-      })
-      return prom;
-    }
-
     return getApprovalNotificationSubscribersColl(
     ).then(function insertNotificationEntry() {
-        return notificationsColl.updateOne(
-          {
-            _id: articleId,
-            emailAddresses: {$nin: [emailAddress]},
-          },
-          {
-            $push: {emailAddresses: emailAddress},
-          },
-          {
-            upsert: true,
-            w: 'majority'
-          }
-        )
-      }
-    );
+      return notificationsColl.updateOne(
+        {
+          _id: articleId,
+          emailAddresses: {$nin: [emailAddress]},
+          $where: "this.emailAddresses.length < 10"
+        },
+        {
+          $push: {emailAddresses: emailAddress},
+        },
+        {
+          upsert: true,
+          w: 'majority'
+        }
+      )
+    });
 
     return prom;
   };
@@ -90,7 +89,7 @@ function getRouteFunction(db) {
         res.status(200).send("OK");
       }).catch(function(err) {
         const duplicateKeyErrorCode = 11000;
-        if (err.code === duplicateKeyErrorCode) { //https://jira.mongodb.org/browse/SERVER-14322
+        if (err.code === duplicateKeyErrorCode) {
           res.status(200).send("OK");
         } else {
           logError(err);
