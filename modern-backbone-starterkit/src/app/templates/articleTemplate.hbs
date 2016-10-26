@@ -26,21 +26,29 @@
   {{#if approvalPending}}
     <form action="/article-approval-notification" id="kmw-article-upload-form" class="approval-notification-form kmw-font-stuff" method="post">
       <label for="article-notification-email">Email address for notification</label>
-      <input type="text" id="article-notification-email" class="form-control" name="email_address" placeholder="yoloswag420@aol.com">
+      <div id="notification-email-form-group" class="form-group">
+        <input type="text" id="article-notification-email" class="form-control" name="email_address" placeholder="yoloswag420@aol.com">
+      </div>
       <input type="hidden" id="article-id" name="article_id">
 
       <input type="submit" class="approval-notification-submit btn btn-primary form-control" value="Submit" id="approval-notification-submit">
     </form>
 
-    <div id="approval-notfication-loading-wheel" class="approval-notfication-loading-wheel kmw-hidden"></div>
+    <div id="approval-notification-loading-wheel" class="approval-notification-loading-wheel kmw-hidden"></div>
+
+    <div class="article-invalid-email kmw-hidden alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Invalid Email Address.
+    </div>
 
     <div class="approval-notification-error kmw-hidden alert alert-danger" role="alert">
       <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-      <span class="sr-only">Error:</span>
+      <span class="sr-only">Success:</span>
       Something went wrong. Please try again.
     </div>
 
-    <div class="approval-notification-success kmw-hidden alert alert-danger" role="alert">
+    <div class="approval-notification-success kmw-hidden alert alert-success" role="alert">
       <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
       <span class="sr-only">Error:</span>
       Success
@@ -57,7 +65,7 @@
     Approval Status: {{approvalStatus}} <br>
 
     {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}
-    <form action="/approve-articles" method="post">
+    <form action="/approve-articles" class="article-approve-articles-form" method="post">
       <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
       <input type="hidden" name="article_ids[]" value="{{article._id}}">
 

@@ -23,6 +23,7 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options) {
+    _.bindAll(this, ['onSocialPluginsParsed', 'emailNotificationRegistrationSuccess','emailNotificationRegistrationError']);
     this.articleGridView = options.articleGridView;
     this.articleModel = options.articleModel;
     this.currentUserModel = options.currentUserModel;
@@ -111,7 +112,6 @@ export default Backbone.View.extend({
     this.fbLikeEl = this.$('.fb-like').get(0);
     this.fbShareEl = this.$('.fb-share-button').get(0);
     this.fbCommentsEl= this.$('.fb-comments').get(0);
-    _.bindAll(this, 'onSocialPluginsParsed');
     parseFbElement(this.el, this.onSocialPluginsParsed);
     this.socialPluginsCached = true;
   },
@@ -152,7 +152,9 @@ export default Backbone.View.extend({
     const isValidEmailAddr = isEmail(emailAddress);
 
     if (isValidEmailAddr) {
-      const $loadingWheel = this.$("#approval-notfication-loading-wheel");
+      this.$(".article-invalid-email").addClass("kmw-hidden");
+      this.$(".notification-email-form-group").removeClass("has-error");
+      const $loadingWheel = this.$("#approval-notification-loading-wheel");
       $loadingWheel.removeClass("kmw-hidden");
       const spinner = new Spinner(opts).spin($loadingWheel.get(0));
 
@@ -167,17 +169,24 @@ export default Backbone.View.extend({
         type: method,
         url: url,
       });
+    } else {
+      this.$(".article-invalid-email").removeClass("kmw-hidden");
+      this.$(".notification-email-form-group").addClass("has-error");
     }
 
     e.preventDefault();
   },
 
   emailNotificationRegistrationSuccess: function(response) {
-    alert("notification reg success.");
+    this.$("#approval-notification-loading-wheel").addClass("kmw-hidden");
+    this.$(".approval-notification-success").removeClass("kmw-hidden");
+    this.$(".approval-notification-error").addClass("kmw-hidden");
   },
 
   emailNotificationRegistrationError: function(xhr, ajaxOptions, thrownError) {
-    alert("notification reg fail.");
+    this.$("#approval-notification-loading-wheel").addClass("kmw-hidden");
+    this.$(".approval-notification-success").addClass("kmw-hidden");
+    this.$(".approval-notification-error").removeClass("kmw-hidden");
   },
 
   onSocialPluginsParsed: function() {
