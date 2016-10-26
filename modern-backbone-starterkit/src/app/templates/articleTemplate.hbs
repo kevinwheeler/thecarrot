@@ -1,22 +1,51 @@
 <nav class='NAV-STUB'></nav>
 <div class='FLAG-ARTICLE-MODAL-STUB'></div>
   {{!-- Headline, subline, and imageURL already escaped in EJS --}}
+<div class="kmw-article-image-and-widgets-wrapper">
   {{#if authorOrApprovedOrAdmin}}
-    <div class="kmw-article-image-and-widgets-wrapper">
       <img class="kmw-article-image" src="{{imageURL}}">
-    </div>
     <h1 class="kmw-article-headline kmw-align-with-comments">{{article.headline}}</h1>
     <h2 class="kmw-article-subline kmw-align-with-comments">{{article.subline}}</h2>
   {{/if}}
 
   {{#if approvalPendingAndAuthor}}
-    This headline is awaiting review to make sure that it complies with facebook's guidelines. No one else can see it yet.
-    To be notified after it has been reviewed, you may enter your email address. Otherwise, please check back later. <br>
+    <div class="kmw-font-stuff">
+      This headline is awaiting approval to make sure that it complies with facebook's guidelines. No one else can see it yet.
+      It will be visible and shareable after being approved. To be notified after it has been approved, you may enter your
+      email address. Otherwise, please check back soon. <br>
+    </div>
   {{/if}}
 
   {{#if approvalPendingAndNotAuthor}}
-    This headline is awaiting review to make sure that it complies with facebook's guidelines. It will be visible after
-    approval. To be notified after it has been reviewed, you may enter your email address. Otherwise, please check back later.<br>
+    <div class="kmw-font-stuff">
+      This headline is awaiting approval to make sure that it complies with facebook's guidelines. It will be visible and shareable after
+      approval. To be notified after it has been approved, you may enter your email address. Otherwise, please check back soon.<br>
+    </div>
+  {{/if}}
+
+  {{#if approvalPending}}
+    <form action="/article-approval-notification" id="kmw-article-upload-form" class="approval-notification-form kmw-font-stuff" method="post">
+      <label for="article-notification-email">Email address for notification</label>
+      <input type="text" id="article-notification-email" class="form-control" name="email_address" placeholder="yoloswag420@aol.com">
+      <input type="hidden" id="article-id" name="article_id">
+
+      <input type="submit" class="approval-notification-submit btn btn-primary form-control" value="Submit" id="approval-notification-submit">
+    </form>
+
+    <div id="approval-notfication-loading-wheel" class="approval-notfication-loading-wheel kmw-hidden"></div>
+
+    <div class="approval-notification-error kmw-hidden alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Something went wrong. Please try again.
+    </div>
+
+    <div class="approval-notification-success kmw-hidden alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Success
+    </div>
+
   {{/if}}
 
   {{! TODO post a link to facebook's community guidelines }}
@@ -24,7 +53,7 @@
     Sorry, this article was NOT approved. Please make sure that any headlines you create comply with Facebook's guidelines.<br>
   {{/if}}
 
-  {{#if isAdminAndIsAdminRoute}}
+  {{#if isAdmin}}
     Approval Status: {{approvalStatus}} <br>
 
     {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}
@@ -44,7 +73,7 @@
   {{/if}}
 
   {{#if approved}}
-    <div class="kmw-article-image-and-widgets-wrapper">
+    <!--<div class="kmw-article-image-and-widgets-wrapper">-->
       <img class="kmw-js-spam-flag kmw-spam-flag kmw-align-with-comments" src="/images/flag.svg">
       <img class="kmw-js-upvote kmw-upvote {{#if isUpVoted}}kmw-selected{{/if}}" src="/images/thumbs-up.svg">
       <img class="kmw-js-downvote kmw-downvote {{#if isDownVoted}}kmw-selected{{/if}}" src="/images/thumbs-down.svg">
@@ -53,7 +82,7 @@
         Like <a target="_blank" class="kmw-our-page" href="https://www.facebook.com/nothingbutheadlines">our Facebook page</a> for much hilarity.
       </div>
       {{#unless socialPluginsCached}}
-        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-width="320px" data-show-faces="true" data-share="false"></div>
+        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-width="320" data-show-faces="true" data-share="false"></div>
       {{else}}
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
@@ -90,5 +119,6 @@
         <div class='ARTICLE-GRID-STUB'></div>
       </div>
       <!--</div>-->
-    </div>
+    <!--</div>-->
   {{/if}}
+</div>

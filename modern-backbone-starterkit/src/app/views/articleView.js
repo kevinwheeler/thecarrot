@@ -2,7 +2,9 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
 
+import isEmail from 'validator/lib/isEmail';
 import serviceProvider from 'UTILSDIR/serviceProvider';
+import Spinner from 'UTILSDIR/spin';
 import template from 'TEMPLATESDIR/articleTemplate.hbs';
 import 'STYLESDIR/stylus/article.css';
 import {parseFbElement} from 'UTILSDIR/facebooksdk';
@@ -16,6 +18,8 @@ export default Backbone.View.extend({
     'click .kmw-js-spam-flag': 'spamFlagClicked',
     'click .kmw-js-upvote': 'upvoteClicked',
     'click .kmw-js-downvote': 'downvoteClicked',
+
+    'submit .approval-notification-form': 'notificationFormSubmitted',
   },
 
   initialize: function(options) {
@@ -44,13 +48,8 @@ export default Backbone.View.extend({
       const approvalPendingAndNotAuthor = approvalPending && !viewerIsAuthor;
       const approvalStatus = this.articleModel.get('approval');
       const articleDoneFetching = this.articleModel.get('doneFetching') === true;
-      const isAdminRoute = serviceProvider.getRouter().currentRouteIsAdminArticleRoute();
       const isAdmin = this.currentUserModel.get('userType') === 'admin';
-      const isAdminAndIsAdminRoute = isAdmin && isAdminRoute;
-
       const authorOrApprovedOrAdmin = viewerIsAuthor || approved || isAdmin;
-      const isAdminRouteAndNotDoneFetching = isAdminRoute && !currentUserDoneFetching;
-      const isAdminRouteAndNotAdmin = isAdminRoute && currentUserDoneFetching && !isAdmin;
 
       const articleURL = [location.protocol, '//', location.host, location.pathname].join('');
       const urlEncodedArticleURL = encodeURIComponent(articleURL);
@@ -70,16 +69,13 @@ export default Backbone.View.extend({
         citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,
-        isAdminAndIsAdminRoute: isAdminAndIsAdminRoute,
-        isAdminRoute: isAdminRoute,
-        isAdminRouteAndNotAdmin: isAdminRouteAndNotAdmin,
-        isAdminRouteAndNotDoneFetching: isAdminRouteAndNotDoneFetching,
         isDownVoted: this.voteModel.isDownVoted(),
         isUpVoted: this.voteModel.isUpVoted(),
         socialPluginsCached: this.socialPluginsCached,
         socialPluginsParsed: this.socialPluginsParsed,
         urlEncodedArticleURL: urlEncodedArticleURL,
       }));
+      this.$("#article-id").val(serviceProvider.getRouter().getArticleIdOfCurrentRoute());
       this.attachSubViews();
       if (approved && !this.socialPluginsCached) {
         this.cacheSocialPlugins();
@@ -126,6 +122,62 @@ export default Backbone.View.extend({
 
   getArticleGridView: function() {
     return this.articleGridView;
+  },
+
+  notificationFormSubmitted: function(e) {
+    const opts = {
+      lines: 12             // The number of lines to draw
+      , length: 7             // The length of each line
+      , width: 5              // The line thickness
+      , radius: 10            // The radius of the inner circle
+      , scale: 1.0            // Scales overall size of the spinner
+      , corners: 1            // Roundness (0..1)
+      , color: '#000'         // #rgb or #rrggbb
+      , opacity: 1/4          // Opacity of the lines
+      , rotate: 0             // Rotation offset
+      , direction: 1          // 1: clockwise, -1: counterclockwise
+      , speed: 1              // Rounds per second
+      , trail: 100            // Afterglow percentage
+      , fps: 20               // Frames per second when using setTimeout()
+      , zIndex: 2e9           // Use a high z-index by default
+      , className: 'spinner'  // CSS class to assign to the element
+      , top: '50%'            // center vertically
+      , left: '50%'           // center horizontally
+      , shadow: false         // Whether to render a shadow
+      , hwaccel: false        // Whether to use hardware acceleration (might be buggy)
+      , position: 'absolute'  // Element positioning
+    }
+
+    const emailAddress = this.$("#article-notification-email").val();
+    const isValidEmailAddr = isEmail(emailAddress);
+
+    if (isValidEmailAddr) {
+      const $loadingWheel = this.$("#approval-notfication-loading-wheel");
+      $loadingWheel.removeClass("kmw-hidden");
+      const spinner = new Spinner(opts).spin($loadingWheel.get(0));
+
+      const self = this;
+      const $form = $(e.target);
+      const url = $form.attr('action');
+      const method = $form.attr('method');
+      $.ajax({
+        data: $form.serialize(),
+        error: self.emailNotificationRegistrationError,
+        success: self.emailNotificationRegistrationSuccess,
+        type: method,
+        url: url,
+      });
+    }
+
+    e.preventDefault();
+  },
+
+  emailNotificationRegistrationSuccess: function(response) {
+    alert("notification reg success.");
+  },
+
+  emailNotificationRegistrationError: function(xhr, ajaxOptions, thrownError) {
+    alert("notification reg fail.");
   },
 
   onSocialPluginsParsed: function() {

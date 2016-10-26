@@ -71,6 +71,22 @@ export default Backbone.Router.extend({
     }
   },
 
+  getArticleIdOfCurrentRoute() {
+    let url = window.location.pathname;
+    if ((url.indexOf('/' + articleRoute.routePrefix) !== 0)) {
+      throw "Called getArticleIdOfCurrentRoute() when not in an article route";
+    }
+
+    if (url.charAt(url.length - 1) === '/') { // Cut off trailing slash if there is one.
+      url = url.substr(0, url.length - 1);
+    }
+
+    let articleSlug = url.substring(url.lastIndexOf('/') + 1);
+    const id = parseInt(articleSlug, 10);
+    return id;
+  },
+
+
   // returns the category of the current route. Returns 'home' if we are on the homepage, and returns 'N/A' if we
   // aren't on a category route.
   getCategory() {

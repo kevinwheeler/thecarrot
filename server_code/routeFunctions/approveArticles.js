@@ -75,6 +75,8 @@ function getRouteFunction(db) {
         } else {
           return Promise.resolve();
         }
+      }).then(function emailApprovalStatus() { //TODO
+
       }).then(function updateArticleApproval() {
         return articleColl.updateOne(
           {

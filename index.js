@@ -102,12 +102,14 @@ MongoClient.connect(MONGO_URI,
       const getTextSearchImages = require('./server_code/routeFunctions/getTextSearchImages')(db);
       //const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
+      const postApprovalNotification = require('./server_code/routeFunctions/postApprovalNotification')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
       const getArticleFlags = require('./server_code/routeFunctions/getArticleFlags')(db);
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
       const postImage = require('./server_code/routeFunctions/postImage')(db);
       const postVote = require('./server_code/routeFunctions/postVote')(db);
+
 
       app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
       app.post('/approve-images', bodyParser.urlencoded({extended: true}), approveImages);
@@ -125,6 +127,7 @@ MongoClient.connect(MONGO_URI,
       //app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
+      app.post('/article-approval-notification', bodyParser.urlencoded({extended: false}), postApprovalNotification);
       app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);
       app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
       app.post('/flagged-articles', bodyParser.json(), postFlaggedArticles);

@@ -27,6 +27,7 @@
     "sendgrid": "2.0.0",
     "speakingurl": "9.0.0",
     "timebucket": "0.3.4",
+    "validator": "^6.1.0",
     "wilson-score": "^1.0.0"
   },
   "engines": {
