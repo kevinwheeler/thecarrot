@@ -61,8 +61,8 @@ export default Backbone.View.extend({
   },
 
   isMobile: function() {
-    // breakpoint duplicated in nav.css (not .styl)
-    return window.matchMedia("(max-width: 1100px)").matches
+    // breakpoint duplicated in nav.styl
+    return window.matchMedia("(max-width: 1199px)").matches
   },
 
   setActiveElement: function() {

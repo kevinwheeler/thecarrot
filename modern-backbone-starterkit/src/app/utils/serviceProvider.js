@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 
+import AboutView from 'VIEWSDIR/aboutView';
 import AdminView from 'VIEWSDIR/adminView';
 import ApprovalHistoryArticleGridView from 'VIEWSDIR/approvalHistoryArticleGridView';
 import ArticleGridView from 'VIEWSDIR/articleGridView';
@@ -47,10 +48,10 @@ var serviceProvider = {
     this.router = new Router();
   },
 
-  //getAboutView() {
-  //  let aboutViewInst = new AboutView({navView: this.getNavView()});
-  //  return aboutViewInst;
-  //},
+  getAboutView() {
+    let aboutViewInst = new AboutView({navView: this.getNavView()});
+    return aboutViewInst;
+  },
 
   getAdminView(route) {
 

@@ -74,6 +74,7 @@ MongoClient.connect(MONGO_URI,
       // IMPORTANT: Routes are duplicated in client side code.
       // Namely the router and the nav template.
       app.get('/', sendIndex);
+      app.get('/about', sendIndex);
       app.get('/admin/flagged-articles', sendIndex);
       app.get('/admin/my-approval-history', sendIndex);
       app.get('/admin/need-approval-articles', sendIndex);

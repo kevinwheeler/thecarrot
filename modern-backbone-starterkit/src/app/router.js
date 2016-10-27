@@ -15,9 +15,8 @@ export default Backbone.Router.extend({
   routes: {
     '': 'categoryRoute',
     '(:admin/)upload': 'uploadRoute',
+    'about': 'aboutRoute',
     'admin/:subroute': 'adminRoute',
-    //'article/:articleSlug'       : 'articleRoute',
-    //'admin/article/:articleSlug'       : 'articleRoute',
     'flags/:articleId': 'flagsRoute',
     'login'       : 'loginRoute',
     'user/:userId'       : 'userRoute',
@@ -132,6 +131,12 @@ export default Backbone.Router.extend({
         throw "'dont-pageload' links that aren't root relative aren't implemented right now.";
       }
     });
+  },
+
+  aboutRoute() {
+    let aboutViewInst = serviceProvider.getAboutView();
+    this.$app.children().detach();
+    this.$app.empty().append(aboutViewInst.$el);
   },
 
   articleRoute(articleSlug) {
