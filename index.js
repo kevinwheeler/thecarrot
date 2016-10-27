@@ -67,6 +67,10 @@ MongoClient.connect(MONGO_URI,
         res.render('pages/termsAndConditions', {});
       });
 
+      app.get('/privacy-policy', function(req, res) {
+        res.render('pages/privacyPolicy', {});
+      });
+
       // IMPORTANT: Routes are duplicated in client side code.
       // Namely the router and the nav template.
       app.get('/', sendIndex);
@@ -135,7 +139,7 @@ MongoClient.connect(MONGO_URI,
         windowMs: 1000*60, // 1 minute
         max: 5, // limit each IP to 5 requests per windowMs
       });
-      app.post('/image', imageLimiter, upload.single('image'), postImage);
+      //app.post('/image', imageLimiter, upload.single('image'), postImage);
       const voteLimiter = new RateLimit({
         delayAfter: 1, // begin slowing down responses after the first request
         delayMs: 5000, // slow down subsequent responses by 5 second per request

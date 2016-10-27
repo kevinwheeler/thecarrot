@@ -55,8 +55,12 @@ export default Backbone.Model.extend({
         } else {
         }
       },
-      error : function(request, status, error) {
-        alert("An error has occurred while uploading image. Please refresh.");
+      error : function(xhr, status, error) {
+        if (xhr.status === 429) {
+          alert("Error uploading image. Too many requests from this IP address. Please refresh the page.");
+        } else {
+          alert("An error has occurred while uploading image. Please refresh the page.");
+        }
       }
     });
   },

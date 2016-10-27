@@ -32,7 +32,7 @@ function getImageColl(db) {
         resolve();
       }
     });
-  })
+  });
   return prom;
 }
 
