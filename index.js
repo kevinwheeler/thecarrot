@@ -66,9 +66,11 @@ MongoClient.connect(MONGO_URI,
       app.get('/terms-and-conditions', function(req, res) {
         res.render('pages/termsAndConditions', {});
       });
-
       app.get('/privacy-policy', function(req, res) {
         res.render('pages/privacyPolicy', {});
+      });
+      app.get('/dmca-instructions', function(req, res) {
+        res.render('pages/dmcaInstructions', {});
       });
 
       // IMPORTANT: Routes are duplicated in client side code.

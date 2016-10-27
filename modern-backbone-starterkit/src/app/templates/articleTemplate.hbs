@@ -10,16 +10,16 @@
 
   {{#if approvalPendingAndAuthor}}
     <div class="kmw-font-stuff">
-      This headline is awaiting approval to make sure that it complies with facebook's guidelines. No one else can see it yet.
+      This headline is awaiting approval to make sure that it complies with <a href="https://www.facebook.com/communitystandards">Facebook's guidelines.</a> No one else can see it yet.
       It will be visible and shareable after being approved. To be notified after it has been approved, you may enter your
-      email address. Otherwise, please check back soon. <br>
+      email address. Otherwise, please check back at this same URL soon. <br>
     </div>
   {{/if}}
 
   {{#if approvalPendingAndNotAuthor}}
     <div class="kmw-font-stuff">
-      This headline is awaiting approval to make sure that it complies with facebook's guidelines. It will be visible and shareable after
-      approval. To be notified after it has been approved, you may enter your email address. Otherwise, please check back soon.<br>
+      This headline is awaiting approval to make sure that it complies with <a href="https://www.facebook.com/communitystandards">Facebook's guidelines.</a> It will be visible and shareable after
+      approval. To be notified after it has been approved, you may enter your email address. Otherwise, please check back at this same URL soon.<br>
     </div>
   {{/if}}
 
@@ -107,6 +107,7 @@
       {{#unless socialPluginsParsed}}
         <div class="kmw-loading-comments kmw-font-stuff kmw-align-with-comments">
           Loading facebook comments...
+          <div id="article-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
         </div>
       {{/unless}}
       {{#unless socialPluginsCached}}
@@ -119,6 +120,7 @@
           Since data shows that 60% of the time when people share articles, they never even clicked on the article before sharing
           it<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
           website to only headlines (there are no actual articles here). You can easily <a class="create-and-share" href="/upload">create your own headline and share it on Facebook.</a>
+          Just choose a picture and a headline, and you are ready to go.
         </div>
         <div class="article-other-headlines">
           Other Headlines You May Like:
