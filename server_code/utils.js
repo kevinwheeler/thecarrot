@@ -1,23 +1,71 @@
 const _ = require('lodash');
 
+
+let countersColl;
+function getCountersColl(db) {
+  const prom = new Promise(function(resolve,reject) {
+    db.collection('counters', {}, (err, coll) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        countersColl = coll;
+        resolve();
+      }
+    });
+  });
+  return prom;
+}
+
+/*
+ *  Returns an incrementing number. Starts the number at 1000 the first time, and then returns 1001, 1002,
+ *  during subsequent calls.  Starts at 1000 because it is nice to have some numbers that we know won't be in our database
+ *  that we can use as the IDs for sample data, etc.
+ */
 function getNextId(db, counterName) {
   var nextIdPromise = new Promise(function(resolve, reject) {
-    db.collection('counters').findOneAndUpdate(
-      {_id: counterName},
-      {$inc: {seq:1}},
-      {
-        upsert: true,
-        returnOriginal: false
-      },
-      function(err, result) {
-        if (err !== null) {
-          reject(err);
-        } else {
-          resolve(result.value.seq);
+    getCountersColl(db).then(function() {
+      return countersColl.findOneAndUpdate(
+        {_id: counterName},
+        {$inc: {seq: 1}},
+        {
+          returnOriginal: false
         }
+      )
+    }).then(function(result) {
+      if (result.value !== null) {
+        resolve(result.value.seq)
+      } else {
+        countersColl.insertOne(
+          {
+            _id: counterName,
+            seq: 1000
+          }
+        ).then(function() {
+          resolve(1000);
+        }).catch(function(err) {
+          const duplicateKeyErrorCode = 11000;
+          if (err.code === duplicateKeyErrorCode) {
+            countersColl.findOneAndUpdate(
+              {_id: counterName},
+              {$inc: {seq: 1}},
+              {
+                returnOriginal: false
+              }
+            ).then(function(result) {
+              resolve(result.value.seq);
+            }).catch(function(err) {
+              reject(err)
+            })
+          } else {
+            reject(err);
+          }
+        });
       }
-    );
+    }).catch(function(err) {
+      reject(err);
+    });
   });
+
   return nextIdPromise;
 }
 

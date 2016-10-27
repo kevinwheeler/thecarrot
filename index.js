@@ -29,7 +29,10 @@ const MONGO_URI = process.env.MONGODB_URI;
 MongoClient.connect(MONGO_URI,
   {
     db: {
-      wtimeout: wtimeout
+      j: true,
+      //readConcern:'majority',
+      wtimeout: wtimeout,
+      w:'majority',
     }
   },
   (err, db) => {
@@ -142,7 +145,7 @@ MongoClient.connect(MONGO_URI,
         windowMs: 1000*60, // 1 minute
         max: 5, // limit each IP to 5 requests per windowMs
       });
-      //app.post('/image', imageLimiter, upload.single('image'), postImage);
+      app.post('/image', imageLimiter, upload.single('image'), postImage);
       const voteLimiter = new RateLimit({
         delayAfter: 1, // begin slowing down responses after the first request
         delayMs: 5000, // slow down subsequent responses by 5 second per request
