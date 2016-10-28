@@ -57,7 +57,7 @@
         </div>
         <div class="upload-image-step-2">
           <h2>Step 2: Upload Your Image.</h2>
-          <label class="btn btn-default btn-file kmw-choose-image">
+          <label id="kmw-choose-image" class="btn btn-default btn-file kmw-choose-image">
             Choose Image <input accept="image/*" id="kmw-picture-input" style="display:none" type="file">
           </label>
           <div class="choose-image-or">
@@ -78,7 +78,7 @@
         </div>
 
         <input type="checkbox" id="kmw-image-reusable" name="user_allows_image_reuse" checked>
-        <label for="kmw-image-reusable">Allow other people to use this image for their headlines too.</label>
+        <label class="kmw-image-reusable-label" for="kmw-image-reusable">Allow other people to use this image for their headlines too.</label>
         <br>
         <button type="button" class="btn btn-primary upload-next-button kmw-picture-next">Done</button>
       </div>

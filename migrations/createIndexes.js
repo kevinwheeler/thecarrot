@@ -6,7 +6,8 @@ function handleError(err) {
   process.exit(1);
 };
 
-const MONGO_URI = 'mongodb://development:localdev2@ds011495.mlab.com:11495/heroku_z84wknmq'
+//const MONGO_URI = 'mongodb://development:localdev2@ds011495.mlab.com:11495/heroku_z84wknmq'
+const MONGO_URI = 'mongodb://heroku_blswcjx4:4bv9f1q0a0l28raothj29lb7n2@ds137127-a0.mlab.com:37127,ds137127-a1.mlab.com:37127/heroku_blswcjx4?replicaSet=rs-ds137127'
 
 const MONGO_OPTIONS = {
   j: true,

@@ -59,9 +59,9 @@ const driver = new webdriver.Builder()
   .build();
   
 //const uploadUrl = 'https://www.nothingbutheadlines.lol/upload';
-//const uploadUrl = 'http://localhost:5000/upload';
+const uploadUrl = 'http://localhost:5000/upload';
 
-const uploadUrl = 'http://localhost:5000/admin/upload';
+//const uploadUrl = 'http://localhost:5000/admin/upload';
 driver.get('http://localhost:5000/login');
 driver.wait(function () {
     return driver.isElementPresent(By.id("js-app"));
@@ -82,7 +82,7 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
   driver.get(uploadUrl);
   driver.findElement(By.id('kmw-choose-upload')).click();
   driver.wait(function () {
-      return driver.findElement(By.id('kmw-picture-input')).isDisplayed();
+      return driver.findElement(By.id('kmw-choose-image')).isDisplayed();
     }, 10*1000
   );
   //driver.findElement(By.id('kmw-picture-input')).sendKeys(IMAGE_DIR + i + '.png');
@@ -118,6 +118,7 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
       process.exit(1);
     }
   ).then(function() {
+      driver.sleep(500);
       driver.findElement(By.id('kmw-terms-tab')).click();
       driver.wait(function () {
           //var elementPresent = until.elementLocated(By.id("kmw-agree"));
@@ -127,9 +128,10 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
           //return elementPresent;
         }, 10*1000
       );
+      driver.sleep(500);
       driver.findElement(By.id('kmw-agree')).click();
       const script = `
-      
+
         var kmwRecaptcha = document.getElementById("kmw-bypass-recaptcha-secret");
         kmwRecaptcha.value= "${process.env.BYPASS_RECAPTCHA_SECRET}";
         var $recaptcha = jQuery(kmwRecaptcha);
