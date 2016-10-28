@@ -11,18 +11,19 @@ const articleRoute = require('../../modern-backbone-starterkit/src/isomorphic/ro
 function getRouteFunction(db) {
 
   const notifyAdminViaEmail = function(articleURLSlug) {
-    // TODO enable this for production
-    //sendgrid.send({
-    //    to: "kevinwheeler2@yahoo.com",
-    //    from: 'noreply@' + process.env.PRODUCTION_DOMAIN_NAME,
-    //    subject: process.env.DOMAIN_NAME + ' article in need of approval',
-    //    html: `article needs approval. <a href="${process.env.DOMAIN}/admin/article/${articleURLSlug}">view here.</a>` //TODO change prefix from article to headline.
-    //  }, function (err, json) {
-    //    if (err) {
-    //      logError(err);
-    //    }
-    //  }
-    //);
+    if (process.env.NODE_ENV !== "development") {
+      sendgrid.send({
+          to: "kevinwheeler2@yahoo.com",
+          from: 'noreply@' + process.env.DOMAIN_NAME,
+          subject: process.env.DOMAIN_NAME + ' article in need of approval',
+          html: `article needs approval. <a href="${process.env.DOMAIN}/headline/${articleURLSlug}">view here.</a>`
+        }, function (err, json) {
+          if (err) {
+            logError(err);
+          }
+        }
+      );
+    }
   }
 
   let imageColl;
