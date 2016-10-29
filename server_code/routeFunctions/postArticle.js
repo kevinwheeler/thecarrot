@@ -12,17 +12,20 @@ function getRouteFunction(db) {
 
   const notifyAdminViaEmail = function(articleURLSlug) {
     if (process.env.NODE_ENV !== "development") {
-      sendgrid.send({
-          to: "kevinwheeler2@yahoo.com",
-          from: 'noreply@' + process.env.DOMAIN_NAME,
-          subject: process.env.DOMAIN_NAME + ' article in need of approval',
-          html: `article needs approval. <a href="${process.env.DOMAIN}/headline/${articleURLSlug}">view here.</a>`
-        }, function (err, json) {
-          if (err) {
-            logError(err);
+      const emailAddresses = ["kevinwheeler2@yahoo.com", "kevinwheeler90@gmail.com"];
+      for (let i = 0; i < emailAddresses.length; i++) {
+        sendgrid.send({
+            to: emailAddresses[i],
+            from: 'noreply@' + process.env.DOMAIN_NAME,
+            subject: process.env.DOMAIN_NAME + ' article in need of approval',
+            html: `article needs approval. <a href="${process.env.DOMAIN}/headline/${articleURLSlug}">view here.</a>`
+          }, function (err, json) {
+            if (err) {
+              logError(err);
+            }
           }
-        }
-      );
+        );
+      }
     }
   }
 
