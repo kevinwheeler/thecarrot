@@ -343,7 +343,7 @@ MongoClient.connect(MONGO_URI,
           for (let i = 0; i < 10; i++) {
             processAll(db);
           }
-        }, 1000
+        }, 10000
       );
     }
 });
