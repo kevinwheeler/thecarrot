@@ -135,6 +135,7 @@ function getRouteFunction(db) {
               flaginess: 0,
               headline: headline,
               imageId: imageId,
+              listed: true,
               numAuthenticatedFlags: 0,
               numUnauthenticatedFlags: 0,
               numDownvotes: 0,

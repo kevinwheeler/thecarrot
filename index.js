@@ -118,6 +118,7 @@ MongoClient.connect(MONGO_URI,
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
       const postImage = require('./server_code/routeFunctions/postImage')(db);
+      const postListArticles = require('./server_code/routeFunctions/postListArticles')(db);
       const postVote = require('./server_code/routeFunctions/postVote')(db);
 
 
@@ -146,6 +147,7 @@ MongoClient.connect(MONGO_URI,
         max: 5, // limit each IP to 5 requests per windowMs
       });
       app.post('/image', imageLimiter, upload.single('image'), postImage);
+      app.post('/list-articles', bodyParser.urlencoded({extended: true}), postListArticles);
       const voteLimiter = new RateLimit({
         delayAfter: 1, // begin slowing down responses after the first request
         delayMs: 5000, // slow down subsequent responses by 5 second per request

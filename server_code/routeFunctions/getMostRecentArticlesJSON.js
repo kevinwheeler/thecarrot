@@ -75,7 +75,8 @@ function getRouteFunction(db) {
             //TODO consider a compound index on approval, id.
             const filter = {
               _id: {$lte: maxId},
-              approval: 'approved'
+              approval: 'approved',
+              listed: true
             };
             if (category !== 'all') {
               filter.category = category;

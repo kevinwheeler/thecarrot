@@ -174,7 +174,8 @@ function getMostViewedArticlesJSON(db, dontInclude, howMany, timeInterval, skipA
             _id: {
               $nin: dontInclude
             },
-            approval: 'approved'
+            approval: 'approved',
+            listed: true
           };
           if (category !== 'all') {
             filter.category = category;

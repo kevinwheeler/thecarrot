@@ -69,7 +69,7 @@
       <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
       <input type="hidden" name="article_ids[]" value="{{article._id}}">
 
-      <label for="kmw-approval">Change approval status.</label>
+      <label for="kmw-article-view-approval">Change approval status.</label>
       <select id="kmw-article-view-approval" name="approval_verdict">
         <option value="approved">Approve</option>
         <option value="denied">Deny</option>
@@ -78,6 +78,23 @@
       <input type="hidden" id="kmw-need-approval-redirect-url" name="redirect_url" value="{{articleURL}}">
       <input type="submit">
     </form>
+
+
+    Listed Status: {{listedStatus}} <br>
+    <form action="/list-articles" class="article-list-articles-form" method="post">
+      <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
+      <input type="hidden" name="article_ids[]" value="{{article._id}}">
+
+      <label for="">Change listed status.</label>
+      <select id="article-listed-select" name="listed">
+        <option value="true">Listed</option>
+        <option value="false">Unlisted</option>
+      </select>
+
+      <input type="hidden" id="" name="redirect_url" value="{{articleURL}}">
+      <input type="submit">
+    </form>
+
   {{/if}}
 
   {{#if approved}}
@@ -106,7 +123,7 @@
       <br/>
       {{#unless socialPluginsParsed}}
         <div class="kmw-loading-comments kmw-font-stuff kmw-align-with-comments">
-          Loading facebook comments
+          Loading facebook commentfs
           <div id="article-loading-wheel" class="kmw-loading-wheel kmw-hidden"></div>
         </div>
       {{/unless}}
