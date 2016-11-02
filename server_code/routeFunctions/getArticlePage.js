@@ -43,12 +43,7 @@ function getRouteFunction(db) {
            };
 
            if (article.approval === 'approved') {
-             let description;
-             if (article.subline.length) {
-               description = article.subline;
-             } else {
-               description = article.headline;
-             }
+             const description = article.subline;
 
              renderDoc.article = article;
              renderDoc.description = description;
