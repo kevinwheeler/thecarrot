@@ -149,9 +149,10 @@ function getRouteFunction(db) {
             const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
             _.merge(doc, initialSummaryAttributes);
 
-            if (req.user) { // TODO make sure not posting anonymously
-              doc.authorId = req.user.fbId;
-            }
+            // TODO make note about how author id is considered a public field.
+            //if (req.user) { // TODO make sure not posting anonymously
+            //  doc.authorId = req.user.fbId;
+            //}
             articleColl.insert(doc, {
                 w: "majority",
               },

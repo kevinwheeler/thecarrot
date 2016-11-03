@@ -178,6 +178,7 @@ const publicArticleFieldsProjection = {
   all_time_views: true,
   approval: true,
   articleURLSlug: true,
+  authorId: true,
   category: true,
   daily_views: true,
   dateCreated: true,
