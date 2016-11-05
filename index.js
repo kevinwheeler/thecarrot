@@ -47,7 +47,7 @@ MongoClient.connect(MONGO_URI,
       const sendIndex = function(req, res) {
         let currentUserPromise;
         if (req.user) {
-          currentUserPromise = userInfo.getUserInfoJSON(db, req.user.fbId);
+          currentUserPromise = userInfo.getUserInfoJSON(db, req.user.fbId, true);
         } else {
           currentUserPromise = Promise.resolve(userInfo.notLoggedInUserInfoJSON());
         }

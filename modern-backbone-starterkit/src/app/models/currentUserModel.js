@@ -19,6 +19,8 @@ export default Backbone.Model.extend({
   //},
 
   parse: function(response, options) {
+    console.log("current user = ");
+    console.log(response);
     if (Object.keys(response).length) {
       response.loggedIn = true;
     } else {

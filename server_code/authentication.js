@@ -67,9 +67,11 @@ function exportVal(app, db) {
     });
   });
 
+
+
 // we will call this to start the GitHub Login process
-  app.get('/auth/facebook', passport.authenticate('facebook'));
-  app.get('/login', passport.authenticate('facebook'));
+//  app.get('/auth/facebook', passport.authenticate('facebook'));
+  app.get('/login', passport.authenticate('facebook', { scope: ['pages_show_list'] }));
 
   app.get('/auth/facebook/callback', passport.authenticate('facebook', {failureRedirect: '/auth-failure'}), //TODO
     function (req, res) {

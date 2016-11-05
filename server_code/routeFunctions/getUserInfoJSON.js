@@ -35,19 +35,23 @@ const notLoggedInUserInfoJSON = function() {
   return {};
 };
 
-const getUserInfoJSON = function(db, userId) {
+const getUserInfoJSON = function(db, userId, includeAccessToken) {
   const prom = new Promise(function(resolve, reject) {
     getUserColl(db).then(function() {
       let validationErrors = validateParams(userId);
       if (validationErrors !== null) {
         return Promise.reject(validationErrors);
       } else {
-        return userColl.find({fbId: userId}).project({
+        const projection = {
           _id: false,
           displayName: true,
           fbId: true,
           userType: true
-        }).next();
+        };
+        if (includeAccessToken) {
+          projection.fbAccessToken = true;
+        }
+        return userColl.find({fbId: userId}).project(projection).next();
       }
     }).then(
       function (user) {
@@ -65,8 +69,10 @@ function getRouteFunction(db) {
       //req.user, get parameters userId
       let userToGet = req.query.user_id;
       let userIdToGet;
+      let includeAccessToken = false;
       if (userToGet === 'currentUser') {
         if (req.user) {
+          includeAccessToken = true;
           userIdToGet = req.user.fbId;
         } else {
           res.json(notLoggedInUserInfoJSON());
@@ -75,7 +81,7 @@ function getRouteFunction(db) {
       } else {
         userIdToGet = userToGet;
       }
-      getUserInfoJSON(db, userIdToGet).then(function(user) {
+      getUserInfoJSON(db, userIdToGet, includeAccessToken).then(function(user) {
         res.json(user);
       }).catch(function(err) {
         if (err.clientError) {

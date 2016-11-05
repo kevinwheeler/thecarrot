@@ -24,6 +24,7 @@ import NavView from 'VIEWSDIR/navView';
 import NeedApprovalArticleGridView from 'VIEWSDIR/needApprovalArticleGridView';
 import NeedApprovalImageGridView from 'VIEWSDIR/needApprovalImageGridView';
 import PictureSelectView from 'VIEWSDIR/pictureSelectView';
+import PostAnonymouslyView from 'VIEWSDIR/postAnonymouslyView';
 import Router from '../router';
 import UploadModel from 'MODELSDIR/uploadModel';
 import UploadView from 'VIEWSDIR/uploadView';
@@ -191,12 +192,18 @@ var serviceProvider = {
   },
 
   getUploadView(el, isAdminRoute) {
-    let uploadViewInst = new UploadView({
+    const currentUserModel = this.getCurrentUserModel();
+    const postAnonymouslyView = new PostAnonymouslyView({
+      currentUserModel: currentUserModel,
+    });
+
+    const uploadViewInst = new UploadView({
       el: el,
       isAdminRoute: isAdminRoute,
       model: this.getUploadModel(),
       navView: this.getNavView(),
-      pictureSelectView: this.getPictureSelectView()
+      pictureSelectView: this.getPictureSelectView(),
+      postAnonymouslyView: postAnonymouslyView
     });
     return uploadViewInst;
   },

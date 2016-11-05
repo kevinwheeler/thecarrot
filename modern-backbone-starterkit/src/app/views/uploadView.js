@@ -47,8 +47,10 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options = {}) {
+    _.bindAll(this, ['headlineChanged', 'sublineChanged', 'onGrecaptchaSuccessful', 'onGrecaptchaRendered']);
     this.navView = options.navView;
     this.pictureSelectView = options.pictureSelectView;
+    this.postAnonymouslyView = options.postAnonymouslyView;
     this.isAdminRoute = options.isAdminRoute;
     this.$el.children().detach();
     this.$el.html(template({
@@ -59,16 +61,16 @@ export default Backbone.View.extend({
       sublineSrc: window.kmw.imageBaseUrl + 'static/article-subline.jpg',
     }));
     this.setupDragEvents();
-    _.bindAll(this, ["headlineChanged", "sublineChanged"]);
     $("#kmw-headline-input").on("change keyup paste", this.headlineChanged);
     $("#kmw-subline-input").on("change keyup paste", this.sublineChanged);
+
+    this.attachSubViews();
 
     this.$('#accordion').accordion({
       heightStyle: "content"
     });
-    this.attachSubViews();
+
     const recaptchaEl = this.$('.kmw-recaptcha').get(0);
-    _.bindAll(this, 'onGrecaptchaSuccessful', 'onGrecaptchaRendered');
     renderElementAsync(recaptchaEl, this.onGrecaptchaSuccessful, this.onGrecaptchaRendered);
     this.bindToModel();
 
@@ -95,6 +97,9 @@ export default Backbone.View.extend({
 
     let $pictureSelect = this.$('.PICTURE-SELECT-STUB');
     $pictureSelect.replaceWith(this.pictureSelectView.$el);
+
+    let $postAnonymously = this.$('.POST-ANONYMOUSLY-STUB');
+    $postAnonymously.replaceWith(this.postAnonymouslyView.$el);
   },
 
   bindToModel: function() {

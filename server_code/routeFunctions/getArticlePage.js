@@ -1,10 +1,8 @@
 const escapeArticle = require('../../modern-backbone-starterkit/src/isomorphic/utils').escapeArticle;
 const escapeUserInfo = require('../../modern-backbone-starterkit/src/isomorphic/utils').escapeUserInfo;
 const getArticle = require("../getArticle");
-const joinArticleWithImage = require('../utils').joinArticleWithImage;
 const userInfo = require('./getUserInfoJSON');
 const logError = require('../utils').logError;
-const publicArticleFieldsProjection = require('../utils').publicArticleFieldsProjection;
 const send404 = require('../utils').send404;
 const updateSummaries = require('../updateSummaries');
 
@@ -15,9 +13,8 @@ function getRouteFunction(db) {
     let articleId = parseInt(articleSlug, 10); // extract leading integers
      let currentUserPromise;
      let userFbId ;
-     let userSid;
      if (req.user) {
-       currentUserPromise = userInfo.getUserInfoJSON(db, req.user.fbId);
+       currentUserPromise = userInfo.getUserInfoJSON(db, req.user.fbId, true);
        userFbId = req.user.fbId;
      } else {
        currentUserPromise = Promise.resolve(userInfo.notLoggedInUserInfoJSON());
