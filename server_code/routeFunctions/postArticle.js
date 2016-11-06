@@ -127,14 +127,12 @@ function getRouteFunction(db) {
             const articleURLSlug = getURLSlug(articleId, headline);
             const doc = {
               _id: articleId,
-              approval: 'pending',
               articleURLSlug: articleURLSlug,
               category: 'other',
               dateCreated: new Date(),
               flaginess: 0,
               headline: headline,
               imageId: imageId,
-              listed: true,
               numAuthenticatedFlags: 0,
               numUnauthenticatedFlags: 0,
               numDownvotes: 0,
@@ -145,6 +143,15 @@ function getRouteFunction(db) {
               subline: subline,
               upvoteScore: 0
             };
+            const AUTO_APPROVE_ARTICLES = true;
+            //const AUTO_APPROVE_ARTICLES = false;
+            if (AUTO_APPROVE_ARTICLES) {
+              doc.approval = "autoApproved";
+              doc.listed = false;
+            } else {
+              doc.approval = "pending";
+              doc.listed = true;
+            }
             const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
             _.merge(doc, initialSummaryAttributes);
 

@@ -1,6 +1,5 @@
 import Backbone from 'backbone';
 import ArticleModel from 'MODELSDIR/articleModel';
-import serviceProvider from 'UTILSDIR/serviceProvider';
 
 export default Backbone.Collection.extend({
   //These first few attributes are standard backbone attrbibutes that can be read about in the docs.
@@ -13,7 +12,6 @@ export default Backbone.Collection.extend({
   parse: function(response, options) {
     for (let i = 0; i < response.length; i++) {
       let articleJSON = response[i];
-      articleJSON.adminArticleURL = '/' + serviceProvider.getRouter().exports.adminArticleRoutePrefix + '/' + articleJSON.articleURLSlug;
       const articleId = articleJSON._id;
       if (articleId > this.maxId) {
         this.maxId = articleId;

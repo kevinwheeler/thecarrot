@@ -44,7 +44,7 @@ export default Backbone.View.extend({
 
   render: _.throttle(function() {
       const viewerIsAuthor = this.articleModel.get('viewerIsAuthor');
-      const approved = this.articleModel.get('approval') === 'approved';
+      const approved = this.articleModel.get('approval') === 'approved' || this.articleModel.get('approval') === 'autoApproved' ;
       const approvalDenied = this.articleModel.get('approval') === 'denied';
       const approvalPending = this.articleModel.get('approval') === 'pending';
       const approvalPendingAndAuthor = approvalPending && viewerIsAuthor;
