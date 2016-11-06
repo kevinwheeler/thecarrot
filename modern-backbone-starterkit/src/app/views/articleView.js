@@ -20,6 +20,7 @@ export default Backbone.View.extend({
     'click .kmw-js-downvote': 'downvoteClicked',
 
     'submit .approval-notification-form': 'notificationFormSubmitted',
+    'submit #patch-article': 'patchArticle',
   },
 
   initialize: function(options) {
@@ -72,6 +73,7 @@ export default Backbone.View.extend({
         isAdmin: isAdmin,
         isDownVoted: this.voteModel.isDownVoted(),
         isUpVoted: this.voteModel.isUpVoted(),
+        listedStatus: this.articleModel.get('listed'),
         socialPluginsCached: this.socialPluginsCached,
         socialPluginsParsed: this.socialPluginsParsed,
         urlEncodedArticleURL: urlEncodedArticleURL,
@@ -193,6 +195,22 @@ export default Backbone.View.extend({
     this.socialPluginsParsed = true;
     console.log("asdfasdf");
     this.$(".kmw-loading-comments").css('display', 'none');
+  },
+
+  patchArticle: function(e) {
+    console.log("in patch article");
+      const $form = $(e.target);
+      const url = $form.attr('action');
+      const method = "PATCH";
+      $.ajax({
+        data: $form.serialize(),
+        error: function() {alert("Error updating article.")},
+        success: function() {window.location.reload();},
+        type: method,
+        url: url,
+      });
+
+    e.preventDefault();
   },
 
   spamFlagClicked: function() {

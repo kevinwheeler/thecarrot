@@ -62,39 +62,28 @@
   {{/if}}
 
   {{#if isAdmin}}
-    Approval Status: {{approvalStatus}} <br>
-
-    {{! THIS FORM IS DUPLICATED IN selectableArticleGridTemplate.hbs }}
-    <form action="/approve-articles" class="article-approve-articles-form" method="post">
+    {{! will use method=PATCH }}
+    <form id="patch-article" action="/article" class="article-approve-articles-form" {{!method="PATCH"}}>
       <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
-      <input type="hidden" name="article_ids[]" value="{{article._id}}">
+      <input type="hidden" name="article_id" value="{{article._id}}">
 
+      Current Approval Status: {{approvalStatus}} <br>
       <label for="kmw-article-view-approval">Change approval status.</label>
       <select id="kmw-article-view-approval" name="approval_verdict">
         <option value="approved">Approve</option>
         <option value="denied">Deny</option>
-      </select>
+      </select><br>
+
+      Current Listed Status: {{listedStatus}} <br>
+      <label for="article-listed-status">Change listed status.</label>
+      <select id="article-listed-select" name="listed">
+        <option value="true">Listed</option>
+        <option value="false">Unlisted</option>
+      </select><br>
 
       <input type="hidden" id="kmw-need-approval-redirect-url" name="redirect_url" value="{{articleURL}}">
       <input type="submit">
     </form>
-
-
-    Listed Status: {{listedStatus}} <br>
-    <form action="/list-articles" class="article-list-articles-form" method="post">
-      <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
-      <input type="hidden" name="article_ids[]" value="{{article._id}}">
-
-      <label for="">Change listed status.</label>
-      <select id="article-listed-select" name="listed">
-        <option value="true">Listed</option>
-        <option value="false">Unlisted</option>
-      </select>
-
-      <input type="hidden" id="" name="redirect_url" value="{{articleURL}}">
-      <input type="submit">
-    </form>
-
   {{/if}}
 
   {{#if approved}}
