@@ -1,5 +1,3 @@
-const categories = require('./categories').categories;
-
 let exportVal = {
   validateCategory: function(category) {
     if (typeof(category) !== "string") {
@@ -44,15 +42,11 @@ let exportVal = {
     const validationErrors = [];
     const headlineError = exportVal.validateHeadline(headline);
     const sublineError = exportVal.validateSubline(subline);
-    const categoryError = exportVal.validateCategory(category);
     if (headlineError) {
       validationErrors.push(headlineError); 
     }
     if (sublineError) {
       validationErrors.push(sublineError); 
-    }
-    if (categoryError) {
-      validationErrors.push(categoryError);
     }
     if (validationErrors.length) {
       return validationErrors;

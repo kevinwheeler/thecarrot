@@ -1,4 +1,5 @@
 const articleRoute = require('../../modern-backbone-starterkit/src/isomorphic/routes').articleRoute;
+const categories = require('../../modern-backbone-starterkit/src/isomorphic/categories').categories;
 const logError = require('../utils').logError;
 const sendgrid  = require('sendgrid')(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
 
@@ -54,7 +55,7 @@ function getRouteFunction(db) {
   const approvalCollPromise = getApprovalLogColl();
   const notificationsCollPromise = getApprovalNotificationSubscribersColl();
 
-  function updateArticle (articleId, approvalVerdict, listed, approverFbId) {
+  function updateArticle (articleId, approvalVerdict, listed, category, approverFbId) {
 
     let article;
     function getArticle() {
@@ -152,6 +153,7 @@ function getRouteFunction(db) {
           {
             $set: {
               approval: approvalVerdict,
+              category: category,
               listed: listed
             },
           },
@@ -168,7 +170,7 @@ function getRouteFunction(db) {
     return prom;
   };
 
-  function validateParams(articleID, approvalVerdict, listed) {
+  function validateParams(articleID, approvalVerdict, listed, category) {
     let validationErrors = [];
 
     if (typeof(articleID) !== "number" || isNaN(articleID) || articleID <= 0 ) {
@@ -181,6 +183,22 @@ function getRouteFunction(db) {
 
     if (listed !== true && listed !== false) {
       validationErrors.push("listed invalid.");
+    }
+
+    if (typeof(category) === "string") {
+      let categoryFound = false;
+      for (let i=0; i < categories.length; i++) {
+        if (category === categories[i].otherSlug) {
+          categoryFound = true;
+          break;
+        }
+      }
+
+      if (!categoryFound) {
+        validationErrors.push("category not found.");
+      }
+    } else {
+      validationErrors.push("category invalid.");
     }
 
     if (validationErrors.length) {
@@ -196,6 +214,7 @@ function getRouteFunction(db) {
       const articleID = parseInt(req.body['article_id'], 10);
       const approverFbId = req.user.fbId
       const approvalVerdict = req.body['approval_verdict'];
+      const category = req.body['category'];
       let listed = req.body['listed'];
       if (listed === "true") {
         listed = true;
@@ -203,13 +222,13 @@ function getRouteFunction(db) {
         listed = false;
       }
 
-      const validationErrors = validateParams(articleID, approvalVerdict, listed);
+      const validationErrors = validateParams(articleID, approvalVerdict, listed, category);
       if (validationErrors !== null) {
         res.status(400).send("Invalid parameters.");
       } else {
 
       }
-        updateArticle(articleID, approvalVerdict, listed, approverFbId, res, next).then(
+        updateArticle(articleID, approvalVerdict, listed, category, approverFbId, res, next).then(
         function(result) {
           res.send();
         },

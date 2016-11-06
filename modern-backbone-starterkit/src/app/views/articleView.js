@@ -2,6 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
 
+import {categories} from 'ISOMORPHICDIR/categories';
 import isEmail from 'validator/lib/isEmail';
 import serviceProvider from 'UTILSDIR/serviceProvider';
 import Spinner from 'UTILSDIR/spin';
@@ -68,6 +69,8 @@ export default Backbone.View.extend({
         articleDoneFetching: articleDoneFetching,
         //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
         articleURL: articleURL,
+        categoryStatus: this.articleModel.get('category'),
+        categories: categories,
         citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,

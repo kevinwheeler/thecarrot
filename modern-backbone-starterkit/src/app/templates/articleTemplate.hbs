@@ -63,6 +63,7 @@
 
   {{#if isAdmin}}
     {{! will use method=PATCH }}
+    NOTE: YOU NEED TO SET FIELDS TO THEIR CURRENT VALUES IF YOU DON'T WANT THEM TO CHANGE.
     <form id="patch-article" action="/article" class="article-approve-articles-form" {{!method="PATCH"}}>
       <!--<input type="hidden" id="kmw-article-view-article-id" name="article_url_slug" value="{{article.articleURLSlug}}">-->
       <input type="hidden" name="article_id" value="{{article._id}}">
@@ -79,6 +80,16 @@
       <select id="article-listed-select" name="listed">
         <option value="true">Listed</option>
         <option value="false">Unlisted</option>
+      </select><br>
+
+      Current Category Status: {{categoryStatus}} <br>
+      <label for="kmw-category-select">Category</label>
+      <select id="kmw-category-select" name="category">
+        {{#each categories}}
+          <li>
+            <option value="{{this.otherSlug}}"{{#if this.selected}} selected{{/if}}>{{this.prettyName}}</option>
+          </li>
+        {{/each}}
       </select><br>
 
       <input type="hidden" id="kmw-need-approval-redirect-url" name="redirect_url" value="{{articleURL}}">

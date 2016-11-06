@@ -137,27 +137,7 @@
       </div>
       <button type="button" id="kmw-subline-next" class="btn btn-primary upload-next-button">Done</button>
     </div>
-    <h3 id="kmw-category-tab">4. <span class="kmw-accordion-header">Choose a category.</span></h3>
-    <div class="center-text">
-      <div class="container-fluid">
-        <div class="row kmw-field-description">
-          Please select a category.
-        </div>
-        <div class="row">
-          <label for="kmw-category-select">Category</label>
-          <select id="kmw-category-select" name="category">
-            {{#each categories}}
-              <li>
-                <option value="{{this.otherSlug}}"{{#if this.selected}} selected{{/if}}>{{this.prettyName}}</option>
-              </li>
-            {{/each}}
-          </select>
-        </div>
-      </div>
-      <br>
-      <button type="button" id="kmw-category-next" class="btn btn-primary upload-next-button">Done</button>
-    </div>
-    <h3 id="kmw-terms-tab">5. <span class="kmw-accordion-header">Captcha + Terms and Conditions</span></h3>
+    <h3 id="kmw-terms-tab">4. <span class="kmw-accordion-header">Captcha + Terms and Conditions</span></h3>
     <div class="center-text">
       <div class="kmw-terms-container">
         <div class="kmw-image-uploading kmw-hidden">
