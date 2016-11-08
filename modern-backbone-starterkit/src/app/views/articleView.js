@@ -191,7 +191,12 @@ export default Backbone.View.extend({
   emailNotificationRegistrationError: function(xhr, ajaxOptions, thrownError) {
     this.$("#approval-notification-loading-wheel").addClass("kmw-hidden");
     this.$(".approval-notification-success").addClass("kmw-hidden");
-    this.$(".approval-notification-error").removeClass("kmw-hidden");
+    if (xhr.status === 418) {
+      this.$(".approval-notification-error").addClass("kmw-hidden");
+      alert("This article has already been reviewed for approval. Please refresh the page.");
+    } else {
+      this.$(".approval-notification-error").removeClass("kmw-hidden");
+    }
   },
 
   onSocialPluginsParsed: function() {
