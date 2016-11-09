@@ -64,8 +64,6 @@ MongoClient.connect(MONGO_URI,
         });
       }
 
-
-
       app.get('/terms-and-conditions', function(req, res) {
         res.render('pages/termsAndConditions', {});
       });

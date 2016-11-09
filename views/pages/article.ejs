@@ -18,7 +18,7 @@
 
     <meta property="og:url"           content="<%= url %>" />
     <meta property="og:type"          content="article" />
-    <%if (articleApproval === 'approved') { %>
+    <%if (articleApproval === 'approved' || articleApproval === 'autoApproved') { %>
       <meta property='article:author' content="https://www.facebook.com/nothingbutheadlines" />
     <% } %>
     <meta property="og:title"         content="<%- article.headline %>" />

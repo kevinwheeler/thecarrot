@@ -1,5 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
 
+//TODO create index on fbId as noted in a TODO in authentication.js
+
 function handleError(err) {
   console.error(err);
   console.trace("Caught from:");
