@@ -36,7 +36,7 @@ export default Backbone.View.extend({
     this.listenTo(this.voteModel, 'change', this.render);
     this.listenTo(this.articleModel, 'change', this.render);
     this.listenTo(this.router, 'beforeRoute', this.remove);
-    this.socialPluginsCached = false;
+    //this.socialPluginsCached = false;
     this.socialPluginsParsed = false;
     this.render();
     this.articleGridView.infiniteScroll();
@@ -77,15 +77,16 @@ export default Backbone.View.extend({
         isDownVoted: this.voteModel.isDownVoted(),
         isUpVoted: this.voteModel.isUpVoted(),
         listedStatus: this.articleModel.get('listed'),
-        socialPluginsCached: this.socialPluginsCached,
+        //socialPluginsCached: this.socialPluginsCached,
         socialPluginsParsed: this.socialPluginsParsed,
         urlEncodedArticleURL: urlEncodedArticleURL,
       }));
+      parseFbElement(this.el, this.onSocialPluginsParsed);
       this.$("#article-id").val(serviceProvider.getRouter().getArticleIdOfCurrentRoute());
       this.attachSubViews();
-      if (approved && !this.socialPluginsCached) {
-        this.cacheSocialPlugins();
-      }
+      //if (approved && !this.socialPluginsCached) {
+      //  this.cacheSocialPlugins();
+      //}
 
       return this;
     }, 16
@@ -103,23 +104,22 @@ export default Backbone.View.extend({
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');
     $articleGrid.replaceWith(this.articleGridView.$el);
 
-    if (this.socialPluginsCached) {
-      let $fbLikeStub = this.$('.FB-LIKE-STUB');
-      $fbLikeStub.replaceWith(this.fbLikeEl);
-      let $fbShareStub= this.$('.FB-SHARE-STUB');
-      $fbShareStub.replaceWith(this.fbShareEl);
-      let $fbCommentsStub = this.$('.FB-COMMENTS-STUB');
-      $fbCommentsStub.replaceWith(this.fbCommentsEl);
-    }
+    //if (this.socialPluginsCached) {
+    //  let $fbLikeStub = this.$('.FB-LIKE-STUB');
+    //  $fbLikeStub.replaceWith(this.fbLikeEl);
+    //  let $fbShareStub= this.$('.FB-SHARE-STUB');
+    //  $fbShareStub.replaceWith(this.fbShareEl);
+    //  let $fbCommentsStub = this.$('.FB-COMMENTS-STUB');
+    //  $fbCommentsStub.replaceWith(this.fbCommentsEl);
+    //}
   },
 
-  cacheSocialPlugins: function() {
-    this.fbLikeEl = this.$('.fb-like').get(0);
-    this.fbShareEl = this.$('.fb-share-button').get(0);
-    this.fbCommentsEl= this.$('.fb-comments').get(0);
-    parseFbElement(this.el, this.onSocialPluginsParsed);
-    this.socialPluginsCached = true;
-  },
+  //cacheSocialPlugins: function() {
+  //  this.fbLikeEl = this.$('.fb-like').get(0);
+  //  this.fbShareEl = this.$('.fb-share-button').get(0);
+  //  this.fbCommentsEl= this.$('.fb-comments').get(0);
+  //  this.socialPluginsCached = true;
+  //},
 
   downvoteClicked: function() {
     this.voteModel.doVote("down");
@@ -201,7 +201,6 @@ export default Backbone.View.extend({
 
   onSocialPluginsParsed: function() {
     this.socialPluginsParsed = true;
-    console.log("asdfasdf");
     this.$(".kmw-loading-comments").css('display', 'none');
   },
 

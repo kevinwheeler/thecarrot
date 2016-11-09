@@ -103,15 +103,6 @@
       <img class="kmw-js-upvote kmw-upvote {{#if isUpVoted}}kmw-selected{{/if}}" src="/images/thumbs-up.svg">
       <img class="kmw-js-downvote kmw-downvote {{#if isDownVoted}}kmw-selected{{/if}}" src="/images/thumbs-down.svg">
       <br>
-      <div class="kmw-like-page kmw-font-stuff kmw-align-with-comments">
-        Like <a target="_blank" class="kmw-our-page" href="https://www.facebook.com/nothingbutheadlines">our Facebook page</a> for much hilarity.
-      </div>
-      {{#unless socialPluginsCached}}
-        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-width="320" data-show-faces="true" data-share="false"></div>
-      {{else}}
-        <div class='FB-LIKE-STUB'></div>
-      {{/unless}}
-      <br/>
       <div class="kmw-share-headline kmw-font-stuff kmw-align-with-comments">
         Share this headline on Facebook.
       </div>
@@ -133,15 +124,24 @@
         <div class='FB-COMMENTS-STUB'></div>
       {{/unless}}
       <!--<div class="row">-->
-        <div class="{{!col-xs-12 }}kmw-landing-copywriting">
-          Since data shows that 60% of the time when people share articles, they never even clicked on the article before sharing
-          it<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
-          website to only headlines (there are no actual articles here). You can easily <a class="create-and-share" href="/upload">create your own headline and share it on Facebook.</a>
-          Create whatever you want.
-        </div>
-        <div class="article-other-headlines">
-          Other Headlines You May Like:
-        </div>
+      <div class="{{!col-xs-12 }}kmw-landing-copywriting">
+        Since data shows that 60% of the time when people share articles, they never even clicked on the article before sharing
+        it<sup><a href="{{{citationURL}}}" class="kmw-citation" target="_blank">[1]</a></sup>, we have dedicated this
+        website to only headlines (there are no actual articles here). You can easily <a class="create-and-share" href="/upload">create your own headline and share it on Facebook.</a>
+        Create whatever you want.
+      </div>
+      <div class="kmw-like-page kmw-font-stuff kmw-align-with-comments">
+        Like <a target="_blank" class="kmw-our-page" href="https://www.facebook.com/nothingbutheadlines">our Facebook page</a> for much hilarity.
+      </div>
+      {{#unless socialPluginsCached}}
+        <div class="fb-like kmw-fb-like kmw-align-with-comments" data-href="https://www.facebook.com/nothingbutheadlines" data-layout="standard" data-action="like" data-width="320" data-show-faces="true" data-share="false"></div>
+      {{else}}
+        <div class='FB-LIKE-STUB'></div>
+      {{/unless}}
+      <br/>
+      <div class="article-other-headlines">
+        Other Headlines You May Like:
+      </div>
       <div class="article-view-article-grid-container">
         <div class='ARTICLE-GRID-STUB'></div>
       </div>
