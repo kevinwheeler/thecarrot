@@ -201,6 +201,7 @@ export default Backbone.View.extend({
 
   onSocialPluginsParsed: function() {
     this.socialPluginsParsed = true;
+    this.$(".fb-comments > :first-child").css('background-color', 'rgba(255,255,255,0.9)');
     this.$(".kmw-loading-comments").css('display', 'none');
   },
 
