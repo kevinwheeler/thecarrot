@@ -38,8 +38,8 @@ export default Backbone.View.extend({
 
     "click .kmw-picture-next": "openHeadlineTab",
     "click #kmw-headline-next": "openSublineTab",
-    "click #kmw-subline-next": "openCategoryTab",
-    "click #kmw-category-next": "openTermsTab",
+    "click #kmw-subline-next": "openTermsTab",
+    //"click #kmw-category-next": "openTermsTab",
 
     "change #kmw-picture-input": "pictureInputChanged",
 
