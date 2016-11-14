@@ -1,24 +1,22 @@
-<div class="article-card">
-  {{#if displayCategory}}
-    <div class="article-card-category">
-      <a href="{{article.categoryURL}}">
-        {{article.categoryPrettyName}}
-      </a>
-    </div>
-  {{/if}}
-  <div class="article-card-main">
-    <div class="article-card-image" style="background-image: url('{{article.imageURL}}');">
-      <img src="{{article.imageURL}}" class="article-card-image-ghost">
-    </div>
-    <h2 class="article-card-headline">{{article.headline}}</h2>
-    <h3 class="article-card-subline">{{article.subline}}</h3>
-    <div class="fb-like article-card-share" data-href="{{article.articleURL}}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
-    {{! Spacer makes sure other text doesn't overlap with absolutely positioned article-card-more-container}}
-    <span class="article-card-more-spacer">          </span>
-    <div class="article-card-more-container">
-      <a class="kmw-dont-pageload article-card-more" href="{{article.articleURL}}">
-        More...
-      </a>
-    </div>
+{{#if displayCategory}}
+  <div class="article-card-category">
+    <a href="{{article.categoryURL}}">
+      {{article.categoryPrettyName}}
+    </a>
+  </div>
+{{/if}}
+<div class="article-card-main">
+  <div class="article-card-image" style="background-image: url('{{article.imageURL}}');">
+    <img src="{{article.imageURL}}" class="article-card-image-ghost">
+  </div>
+  <h2 class="article-card-headline">{{article.headline}}</h2>
+  <h3 class="article-card-subline">{{article.subline}}</h3>
+  <div class="fb-like article-card-share" data-href="{{article.articleURL}}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+  {{! Spacer makes sure other text doesn't overlap with absolutely positioned article-card-more-container}}
+  <span class="article-card-more-spacer">          </span>
+  <div class="article-card-more-container">
+    <a class="kmw-dont-pageload article-card-more" href="{{article.articleURL}}">
+      More...
+    </a>
   </div>
 </div>

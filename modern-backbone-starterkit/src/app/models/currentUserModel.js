@@ -1,6 +1,5 @@
-// consider this an abstract class. AKA don't initialize instances of this class.
-// initialize instances of the subclasses instead.
 import Backbone from 'backbone';
+import _ from 'lodash';
 import serviceProvider from 'UTILSDIR/serviceProvider';
 
 export default Backbone.Model.extend({
@@ -19,10 +18,10 @@ export default Backbone.Model.extend({
   //},
 
   parse: function(response, options) {
-    if (Object.keys(response).length) {
-      response.loggedIn = true;
-    } else {
+    if (_.isEmpty(response)) {
       response.loggedIn = false;
+    } else {
+      response.loggedIn = true;
     }
     response.doneFetching = true;
     return response;

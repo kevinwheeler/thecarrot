@@ -39,7 +39,7 @@ export default Backbone.View.extend({
     //this.socialPluginsCached = false;
     this.socialPluginsParsed = false;
     this.render();
-    this.articleGridView.infiniteScroll();
+    //this.articleGridView.infiniteScroll();
   },
 
   render: _.throttle(function() {
@@ -93,7 +93,7 @@ export default Backbone.View.extend({
   ),
 
   remove: function() {
-    this.articleGridView.unbindInfiniteScroll();
+    //this.articleGridView.unbindInfiniteScroll();
     this.stopListening();
   },
 
