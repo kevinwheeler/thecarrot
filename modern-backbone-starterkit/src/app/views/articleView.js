@@ -71,7 +71,6 @@ export default Backbone.View.extend({
         articleURL: articleURL,
         categoryStatus: this.articleModel.get('category'),
         categories: categories,
-        citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,
         isDownVoted: this.voteModel.isDownVoted(),
