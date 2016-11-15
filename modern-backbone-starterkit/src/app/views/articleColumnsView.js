@@ -38,15 +38,16 @@ export default Backbone.View.extend({
 
       //this.$el.children().detach();
       this.$el.html(newHTMLString);
+
       if (this.columnViews) {
         _.forEach(this.columnViews, function(view) {
           view.destroyView();
         })
       }
-
       if (this.articleGetter) {
         this.articleGetter.destroy();
       }
+
       this.articleGetter = new ArticleGetter(this.articleCollection);
       this.columnViews = [];
       for (let i = 0; i < this.numColumns; i++) {
@@ -66,16 +67,6 @@ export default Backbone.View.extend({
           articleColumnView.getArticle();
         }
       }
-
-      //this.displayCategory = this.router.getCategory() === 'home';
-      //this.$columns = this.$el.find('.article-column');
-      //this.columnHeights = [];
-      //this.$columns.each(function(index) {
-      //  self.columnHeights[index] = 0;
-      //});
-      //this.articleCollection.each(function(model) {
-      //  self.addArticle(model);
-      //});
 
       return this;
     }, 16
@@ -135,8 +126,4 @@ export default Backbone.View.extend({
       this.reRenderWhenNumberOfColumnsShouldChange();
     }
   },
-
-  //unbindInfiniteScroll: function() {
-  //  $("#js-app").off("scroll", this.onScrollFunction);
-  //},
 });
