@@ -11,24 +11,40 @@ export default Backbone.View.extend({
   },
 
   initialize: function(options) {
-    const self = this;
     this.numColumns = options.numColumns;
     this.articleGetter = options.articleGetter;
     this.$el.addClass("article-column-1-of-" + this.numColumns);
 
-    for (let i=0; i < 5; i++) {
-      self.articleGetter.getNextArticle().then(function(articleModel) {
-        console.log("appending article card view");
-        const articleCardView = new ArticleCardView({
-          articleModel: articleModel
-        });
-        self.$el.append(articleCardView.el);
-      }).catch(function(err) {
-        console.log("in catch in initialize. error =");
-        console.log(err);
-      })
-    }
     this.infiniteScroll();
+  },
+
+  destroyView: function() {//http://stackoverflow.com/questions/6569704/destroy-or-remove-a-view-in-backbone-js
+
+    // COMPLETELY UNBIND THE VIEW
+    this.undelegateEvents();
+
+    this.$el.removeData().unbind();
+
+    // Remove view from DOM
+    this.remove();
+    Backbone.View.prototype.remove.call(this);
+
+    $("#js-app").off("scroll", this.scrollFunction);
+  },
+
+
+  getArticle: function() {
+    const self = this;
+    this.articleGetter.getNextArticle().then(function(articleModel) {
+      const articleCardView = new ArticleCardView({
+        articleModel: articleModel
+      });
+      self.$el.append(articleCardView.el);
+    }).catch(function(err) {
+      if (err !== "no more results") {
+        throw err;
+      }
+    });
   },
 
   infiniteScroll: function() {
@@ -38,20 +54,9 @@ export default Backbone.View.extend({
     }
     const $app = $("#js-app");
     this.scrollFunction = _.throttle(function() {
-      self.articleGetter.getNextArticle().then(function(articleModel) {
-        console.log("in then. article model = ");
-        console.log(articleModel);
-        const articleCardView = new ArticleCardView({
-          articleModel: articleModel
-        });
-        self.$el.append(articleCardView.el);
-      }).catch(function(err) {
-        console.log("in catch. err = ");
-        console.log(err);
-      });
-    }, 1000); //TODO don't throttle, only use once.
+      self.getArticle();
+    }, 500);
 
-    $app.scroll(this.scrollFunction);
-    //TODO de-register
+    $app.on("scroll", this.scrollFunction);
   },
 });

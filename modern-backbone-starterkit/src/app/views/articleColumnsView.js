@@ -6,7 +6,6 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
-//import Marionette from 'backbone.marionette';
 
 import template from 'TEMPLATESDIR/articleColumnsTemplate.hbs';
 import articleCardTemplate from 'TEMPLATESDIR/articleCardTemplate.hbs';
@@ -31,31 +30,42 @@ export default Backbone.View.extend({
 
   render: _.throttle(function() {
       this.numColumns = this.getNumColumns();
-      const self = this;
-      // num columns array is a hack so that we can loop a dynamic number of times in handlebars.
-      // The only way I saw to do this was to loop over each element in a dynamically sized array.
-
-      //const numColumnsArray = [];
-      //for (let i=1; i <= this.numColumns; i++) {
-      //  numColumnsArray.push(i);
-      //}
       const newHTMLString = template({
         fetchingMoreResults: this.articleCollection.getCurrentlyFetching(),
         noMoreResults: this.articleCollection.getNoMoreResults(),
         numColumns: this.numColumns,
-        //numColumnsArray: numColumnsArray,
       });
 
       //this.$el.children().detach();
       this.$el.html(newHTMLString);
+      if (this.columnViews) {
+        _.forEach(this.columnViews, function(view) {
+          view.destroyView();
+        })
+      }
 
-      const articleGetter = new ArticleGetter(this.articleCollection);
-      const articleColumnView = new ArticleColumnView({
-        articleGetter: articleGetter,
-        numColumns: this.numColumns
-      })
+      if (this.articleGetter) {
+        this.articleGetter.destroy();
+      }
+      this.articleGetter = new ArticleGetter(this.articleCollection);
+      this.columnViews = [];
+      for (let i = 0; i < this.numColumns; i++) {
+        const articleColumnView = new ArticleColumnView({
+          articleGetter: this.articleGetter,
+          numColumns: this.numColumns
+        })
+        this.columnViews.push(articleColumnView);
 
-      this.$('.columns-container').append(articleColumnView.el);
+        this.$('.columns-container').append(articleColumnView.el);
+      }
+
+      const INITIAL_NUM_ARTICLES_PER_COLUMN = 10;
+      for (let i=0; i < INITIAL_NUM_ARTICLES_PER_COLUMN; i++) {
+        for (let j=0; j < this.numColumns; j++) {
+          const articleColumnView = this.columnViews[j];
+          articleColumnView.getArticle();
+        }
+      }
 
       //this.displayCategory = this.router.getCategory() === 'home';
       //this.$columns = this.$el.find('.article-column');
@@ -71,43 +81,6 @@ export default Backbone.View.extend({
     }, 16
   ),
 
-  //addArticle: function(model) {
-  //  const article = model.toJSON();
-  //  const newArticleCard = $.parseHTML(
-  //    articleCardTemplate({
-  //      article: article,
-  //      displayCategory: this.displayCategory,
-  //    })
-  //  )[0];
-  //  const $newArticleCard = $(newArticleCard);
-  //  const shortestColumnIndex = utils.indexOfMin(this.columnHeights);
-  //  const shortestColumn = this.$columns.get(shortestColumnIndex);
-  //
-  //  shortestColumn.appendChild(newArticleCard);
-  //
-  //  const articleCardHeight = $newArticleCard.height();
-  //  const ghostWidth = $newArticleCard.find(".article-card-image-ghost").width();
-  //  const ghostHeight = $newArticleCard.find(".article-card-image-ghost").height();
-  //  const imageHeight = this.getImageHeight(article.imageWidth, article.imageHeight, ghostWidth)
-  //
-  //  // Subtracts away the ghostHeight because the image may or may not have loaded yet and therefore,
-  //  // the ghostHeight may or may not be 0. Therefore we compute the eventual height ourselves (imageHeight).
-  //  const newArticleHeight = articleCardHeight - ghostHeight + imageHeight;
-  //  this.columnHeights[shortestColumnIndex] += newArticleHeight;
-  //  parseFbElement(newArticleCard);
-  //},
-
-  //fetchMoreResults: function() {
-  //  this.articleCollection.fetchNextArticles();
-  //  // TODO why did we have this render again? it was so like the no more results thing would pop up or something.
-  //  //this.render();
-  //},
-
-  //getImageHeight(intrinsicWidth, intrinsicHeight, actualWidth) {
-  //  // This max height of 500 is duplicated in css for .article-card-image-ghost
-  //  return Math.min((intrinsicHeight/intrinsicWidth)*actualWidth, 500);
-  //},
-
   getNumColumns: function() {
     const windowWidth = $(window).width();
 
@@ -121,46 +94,27 @@ export default Backbone.View.extend({
     }
   },
 
-  //infiniteScroll: function() {
-  //  const self = this;
-  //  if (this.onScrollFunction !== undefined) {
-  //    throw "Attached infinite scroll handler twice."
-  //  }
-  //  const $app = $("#js-app");
-  //  this.onScrollFunction = _.throttle(function() {
-  //    if (self.articleCollection !== undefined) {
-  //      const distanceFromBottom = $app[0].scrollHeight - $app.scrollTop() - $app[0].clientHeight;
-  //      if (distanceFromBottom < 500)  {
-  //        self.articleCollection.fetchNextArticles();
-  //      }
-  //    }
-  //  }, 50);
-  //
-  //  $app.scroll(this.onScrollFunction);
-  //},
+  onDoneFetching: function() {
+    this.$(".js-article-columns-loading").addClass("kmw-hidden");
+  },
 
-  //onDoneFetching: function() {
-  //  this.$(".js-article-columns-loading").addClass("kmw-hidden");
-  //},
-  //
-  //onFetching: function() {
-  //  this.$(".js-article-columns-loading").removeClass("kmw-hidden");
-  //},
+  onFetching: function() {
+    this.$(".js-article-columns-loading").removeClass("kmw-hidden");
+  },
 
   onNoMoreResults: function() {
     this.$(".js-article-columns-no-more-results").removeClass("kmw-hidden");
   },
 
-  //TODO add this back in.
-  //reRenderWhenNumberOfColumnsShouldChange: function() {
-  //  const self = this;
-  //  $(window).resize(_.debounce(function() {
-  //    if (self.numColumns !== self.getNumColumns()) {
-  //      self.numColumns = self.getNumColumns();
-  //      self.render();
-  //    }
-  //  }, 30));
-  //},
+  reRenderWhenNumberOfColumnsShouldChange: function() {
+    this.rerenderingSet = true;
+    const self = this;
+    $(window).resize(_.debounce(function() {
+      if (self.numColumns !== self.getNumColumns()) {
+        self.render();
+      }
+    }, 30));
+  },
 
   setArticleCollection: function(articleCollection) {
     if (articleCollection === this.articleCollection) {
@@ -173,11 +127,13 @@ export default Backbone.View.extend({
     }
     this.articleCollection = articleCollection;
     //this.listenTo(this.articleCollection, 'add', this.addArticle);
-    //this.listenTo(this.articleCollection, 'fetching', this.onFetching);
-    //this.listenTo(this.articleCollection, 'doneFetching', this.onDoneFetching);
+    this.listenTo(this.articleCollection, 'fetching', this.onFetching);
+    this.listenTo(this.articleCollection, 'doneFetching', this.onDoneFetching);
     this.listenTo(this.articleCollection, 'noMoreResults', this.onNoMoreResults);
     this.render();
-    //this.reRenderWhenNumberOfColumnsShouldChange();
+    if (!this.rerenderingSet) {
+      this.reRenderWhenNumberOfColumnsShouldChange();
+    }
   },
 
   //unbindInfiniteScroll: function() {

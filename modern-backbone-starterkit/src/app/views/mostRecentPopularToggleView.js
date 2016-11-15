@@ -29,7 +29,7 @@ export default Backbone.View.extend({
     this.$el.children().detach();
     this.$el.html(template());
     this.update();
-    this.infiniteScroll();
+    //this.infiniteScroll();
   },
 
   beforeRoute: function() {
@@ -38,19 +38,19 @@ export default Backbone.View.extend({
     }
   },
 
-  infiniteScroll: function() {
-    const self = this;
-    const $app = $("#js-app");
-
-    const onScrollFunction = function() {
-      const distanceFromBottom = $app[0].scrollHeight - $app.scrollTop() - $app[0].clientHeight;
-      if (distanceFromBottom < 500)  {
-        self.articleGridView.fetchMoreResults();
-      }
-    };
-
-    $app.scroll(_.throttle(onScrollFunction, 50));
-  },
+  //infiniteScroll: function() {
+  //  const self = this;
+  //  const $app = $("#js-app");
+  //
+  //  const onScrollFunction = function() {
+  //    const distanceFromBottom = $app[0].scrollHeight - $app.scrollTop() - $app[0].clientHeight;
+  //    if (distanceFromBottom < 500)  {
+  //      self.articleGridView.fetchMoreResults();
+  //    }
+  //  };
+  //
+  //  $app.scroll(_.throttle(onScrollFunction, 50));
+  //},
 
   debouncedUpdate: _.debounce(function() {
       this.update();
