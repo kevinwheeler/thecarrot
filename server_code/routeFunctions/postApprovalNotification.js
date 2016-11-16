@@ -4,38 +4,9 @@
  *  email addresses to notify when the article gets approved/not approved.
  */
 
+
 const logError = require('../utils').logError;
 const isEmail = require('validator/lib/isEmail');
-
-function validateParams(articleId, emailAddress) {
-
-  let validationErrors = [];
-
-  if (typeof(articleId) === "number") {
-    if (isNaN(articleId) || articleId <= 0) {
-      validationErrors.push("article_id invalid");
-    }
-  } else {
-    validationErrors.push("article_id invalid");
-  }
-
-  if (typeof(emailAddress) === "string") {
-    if (!isEmail(emailAddress)) {
-      validationErrors.push("String doesn't represent a valid email address");
-    }
-  } else {
-    validationErrors.push("email_address invalid.");
-  }
-
-  if (validationErrors.length) {
-    validationErrors = new Error(JSON.stringify(validationErrors));
-    validationErrors.clientError = true;
-  } else {
-    validationErrors = null;
-  }
-
-  return validationErrors;
-}
 
 function getRouteFunction(db) {
 
@@ -54,9 +25,70 @@ function getRouteFunction(db) {
     return prom;
   }
 
+  let articleColl;
+  function getArticleColl() {
+    const prom = new Promise(function(resolve,reject) {
+      db.collection('article', (err, coll) => {
+        if (err !== null) {
+          reject(err);
+        } else {
+          articleColl = coll;
+          resolve();
+        }
+      });
+    });
+    return prom;
+  }
+
+  function validateParams(articleId, emailAddress) {
+
+    let validationErrors = [];
+
+
+    if (typeof(articleId) === "number") {
+      if (isNaN(articleId) || articleId <= 0) {
+        validationErrors.push("article_id invalid");
+      }
+    } else {
+      validationErrors.push("article_id invalid");
+    }
+
+
+    if (typeof(emailAddress) === "string") {
+      if (!isEmail(emailAddress)) {
+        validationErrors.push("String doesn't represent a valid email address");
+      }
+    } else {
+      validationErrors.push("email_address invalid.");
+    }
+
+
+    return getArticleColl().then(function() {
+      return articleColl.find({
+        _id: articleId
+      }).limit(1).next().then(function(article) {
+        if (article === null) {
+          validationErrors.push("Article Not Found.");
+        }
+
+        if (validationErrors.length) {
+          const errorObject = new Error(JSON.stringify(validationErrors));
+          errorObject.clientError = true;
+          return Promise.reject(errorObject);
+        } else {
+          return null;
+        }
+      });
+    });
+
+    return validationErrors;
+  }
+
+
   function setupNotifications(articleId, emailAddress) {
 
-    return getApprovalNotificationSubscribersColl(
+    return validateParams(articleId, emailAddress
+    ).then(getApprovalNotificationSubscribersColl
     ).then(function insertNotificationEntry() {
       return notificationsColl.updateOne(
         {
@@ -69,35 +101,49 @@ function getRouteFunction(db) {
         },
         {
           upsert: true,
-          w: 'majority'
         }
       )
+    }).catch(function(err) {
+      const duplicateKeyErrorCode = 11000;
+      if (err.code === duplicateKeyErrorCode) {
+        //Tried to upsert the same document. The user probably entered the same email twice,
+        //or there are already 10 email addresses on file to be notified. Swallow this error.
+        return null;
+      } else {
+        return Promise.reject(err);
+      }
+    }).then(getArticleColl
+    ).then(function() {
+      return articleColl.find({
+        _id: articleId
+      }).limit(1).next().then(function(article) {
+        if (article && article.approval !== 'pending') {
+          const errorObject = new Error("Article isn't pending approval.");
+          errorObject.notPendingApproval = true;
+          return Promise.reject(errorObject);
+        } else {
+          return Promise.resolve();
+        }
+      });
     });
-
-    return prom;
   };
 
   const routeFunction = function (req, res, next) {
     const articleId = parseInt(req.body['article_id'], 10);
     const emailAddress  = req.body['email_address'];
 
-    const validationErrors = validateParams(articleId, emailAddress);
-    if (validationErrors !== null) {
-      res.status(400).send("invalid parameters");
-    } else {
-      setupNotifications(articleId, emailAddress).then(function() {
-        res.status(200).send("OK");
-      }).catch(function(err) {
-        const duplicateKeyErrorCode = 11000;
-        if (err.code === duplicateKeyErrorCode) {
-          res.status(200).send("OK");
-        } else {
-          logError(err);
-          next(err);
-        }
-      });
-    }
-
+    setupNotifications(articleId, emailAddress).then(function() {
+      res.send();
+    }).catch(function(err) {
+       if (err.notPendingApproval) {
+        res.status(418).send();
+      }  else if (err.clientError) {
+        res.status(400).send();
+      } else {
+        logError(err);
+        next(err);
+      }
+    });
   };
 
   return routeFunction;

@@ -41,7 +41,7 @@ function getRouteFunction(db) {
             //TODO consider a compound index on approval, id.
             articleColl.find({
               _id: {$gte: minId},
-              approval: 'pending'
+              approval: {$in: ['pending', 'autoApproved']},
             }).sort([['_id', 1]]).limit(howMany).toArray().then(
               function (articles) {
                 articlesClosure = articles;

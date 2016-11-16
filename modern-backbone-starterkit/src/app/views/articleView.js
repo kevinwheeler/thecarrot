@@ -2,6 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import Backbone from 'backbone';
 
+import {categories} from 'ISOMORPHICDIR/categories';
 import isEmail from 'validator/lib/isEmail';
 import serviceProvider from 'UTILSDIR/serviceProvider';
 import Spinner from 'UTILSDIR/spin';
@@ -20,6 +21,7 @@ export default Backbone.View.extend({
     'click .kmw-js-downvote': 'downvoteClicked',
 
     'submit .approval-notification-form': 'notificationFormSubmitted',
+    'submit #patch-article': 'patchArticle',
   },
 
   initialize: function(options) {
@@ -34,15 +36,15 @@ export default Backbone.View.extend({
     this.listenTo(this.voteModel, 'change', this.render);
     this.listenTo(this.articleModel, 'change', this.render);
     this.listenTo(this.router, 'beforeRoute', this.remove);
-    this.socialPluginsCached = false;
+    //this.socialPluginsCached = false;
     this.socialPluginsParsed = false;
     this.render();
-    this.articleGridView.infiniteScroll();
+    //this.articleGridView.infiniteScroll();
   },
 
   render: _.throttle(function() {
       const viewerIsAuthor = this.articleModel.get('viewerIsAuthor');
-      const approved = this.articleModel.get('approval') === 'approved';
+      const approved = this.articleModel.get('approval') === 'approved' || this.articleModel.get('approval') === 'autoApproved' ;
       const approvalDenied = this.articleModel.get('approval') === 'denied';
       const approvalPending = this.articleModel.get('approval') === 'pending';
       const approvalPendingAndAuthor = approvalPending && viewerIsAuthor;
@@ -67,27 +69,30 @@ export default Backbone.View.extend({
         articleDoneFetching: articleDoneFetching,
         //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
         articleURL: articleURL,
-        citationURL: "http://www.chicagotribune.com/bluesky/technology/ct-share-this-link-without-reading-it-ap-bsi-20160618-story.html",
+        categoryStatus: this.articleModel.get('category'),
+        categories: categories,
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,
         isDownVoted: this.voteModel.isDownVoted(),
         isUpVoted: this.voteModel.isUpVoted(),
-        socialPluginsCached: this.socialPluginsCached,
+        listedStatus: this.articleModel.get('listed'),
+        //socialPluginsCached: this.socialPluginsCached,
         socialPluginsParsed: this.socialPluginsParsed,
         urlEncodedArticleURL: urlEncodedArticleURL,
       }));
+      parseFbElement(this.el, this.onSocialPluginsParsed);
       this.$("#article-id").val(serviceProvider.getRouter().getArticleIdOfCurrentRoute());
       this.attachSubViews();
-      if (approved && !this.socialPluginsCached) {
-        this.cacheSocialPlugins();
-      }
+      //if (approved && !this.socialPluginsCached) {
+      //  this.cacheSocialPlugins();
+      //}
 
       return this;
     }, 16
   ),
 
   remove: function() {
-    this.articleGridView.unbindInfiniteScroll();
+    //this.articleGridView.unbindInfiniteScroll();
     this.stopListening();
   },
 
@@ -98,23 +103,22 @@ export default Backbone.View.extend({
     const $articleGrid = this.$('.ARTICLE-GRID-STUB');
     $articleGrid.replaceWith(this.articleGridView.$el);
 
-    if (this.socialPluginsCached) {
-      let $fbLikeStub = this.$('.FB-LIKE-STUB');
-      $fbLikeStub.replaceWith(this.fbLikeEl);
-      let $fbShareStub= this.$('.FB-SHARE-STUB');
-      $fbShareStub.replaceWith(this.fbShareEl);
-      let $fbCommentsStub = this.$('.FB-COMMENTS-STUB');
-      $fbCommentsStub.replaceWith(this.fbCommentsEl);
-    }
+    //if (this.socialPluginsCached) {
+    //  let $fbLikeStub = this.$('.FB-LIKE-STUB');
+    //  $fbLikeStub.replaceWith(this.fbLikeEl);
+    //  let $fbShareStub= this.$('.FB-SHARE-STUB');
+    //  $fbShareStub.replaceWith(this.fbShareEl);
+    //  let $fbCommentsStub = this.$('.FB-COMMENTS-STUB');
+    //  $fbCommentsStub.replaceWith(this.fbCommentsEl);
+    //}
   },
 
-  cacheSocialPlugins: function() {
-    this.fbLikeEl = this.$('.fb-like').get(0);
-    this.fbShareEl = this.$('.fb-share-button').get(0);
-    this.fbCommentsEl= this.$('.fb-comments').get(0);
-    parseFbElement(this.el, this.onSocialPluginsParsed);
-    this.socialPluginsCached = true;
-  },
+  //cacheSocialPlugins: function() {
+  //  this.fbLikeEl = this.$('.fb-like').get(0);
+  //  this.fbShareEl = this.$('.fb-share-button').get(0);
+  //  this.fbCommentsEl= this.$('.fb-comments').get(0);
+  //  this.socialPluginsCached = true;
+  //},
 
   downvoteClicked: function() {
     this.voteModel.doVote("down");
@@ -186,13 +190,34 @@ export default Backbone.View.extend({
   emailNotificationRegistrationError: function(xhr, ajaxOptions, thrownError) {
     this.$("#approval-notification-loading-wheel").addClass("kmw-hidden");
     this.$(".approval-notification-success").addClass("kmw-hidden");
-    this.$(".approval-notification-error").removeClass("kmw-hidden");
+    if (xhr.status === 418) {
+      this.$(".approval-notification-error").addClass("kmw-hidden");
+      alert("This article has already been reviewed for approval. Please refresh the page.");
+    } else {
+      this.$(".approval-notification-error").removeClass("kmw-hidden");
+    }
   },
 
   onSocialPluginsParsed: function() {
     this.socialPluginsParsed = true;
-    console.log("asdfasdf");
+    this.$(".fb-comments > :first-child").css('background-color', 'rgba(255,255,255,0.9)');
     this.$(".kmw-loading-comments").css('display', 'none');
+  },
+
+  patchArticle: function(e) {
+    console.log("in patch article");
+      const $form = $(e.target);
+      const url = $form.attr('action');
+      const method = "PATCH";
+      $.ajax({
+        data: $form.serialize(),
+        error: function() {alert("Error updating article.")},
+        success: function() {window.location.reload();},
+        type: method,
+        url: url,
+      });
+
+    e.preventDefault();
   },
 
   spamFlagClicked: function() {

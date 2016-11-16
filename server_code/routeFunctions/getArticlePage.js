@@ -39,7 +39,7 @@ function getRouteFunction(db) {
              imageBaseUrl: process.env.IMAGE_BASE_URL
            };
 
-           if (article.approval === 'approved') {
+           if (article.approval === 'approved' || article.approval === 'autoApproved') {
              const description = article.subline;
 
              renderDoc.article = article;

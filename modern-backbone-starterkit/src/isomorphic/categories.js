@@ -35,7 +35,7 @@
       urlSlug: 'science-and-technology'
     },
     {
-      otherSlug: 'other',
+      otherSlug: 'other', //This value is hard coded as the default in postArticle
       prettyName: "Other",
       urlSlug: 'other',
       selected: true,

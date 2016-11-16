@@ -99,61 +99,39 @@ for (let i=1; i <= NUM_ARTICLES_TO_CREATE; i++) {
     }, 10*1000
   );
   driver.findElement(By.id('kmw-subline-input')).sendKeys("subline " + i);
-  driver.findElement(By.id('kmw-category-tab')).click();
-  driver.wait(function () {
-      return driver.findElement(By.id('kmw-category-select')).isDisplayed();
-    }, 10*1000
-  );
-  const selectList = driver.findElement(By.id('kmw-category-select'));
-  const optionsPromise = selectList.findElements(By.css('option'));
-  optionsPromise.then(function(options) {
-      // skip the first option because it isn't selectable.
-      // select between other options in round robin fashion.
-      const index = (i % (options.length - 1)) + 1;
-      console.log("index = " + index);
-      const elToSelect = options[index];
-      elToSelect.click();
-    }, function(err) {
-      logError(err);
-      process.exit(1);
-    }
-  ).then(function() {
-      driver.sleep(500);
-      driver.findElement(By.id('kmw-terms-tab')).click();
-      driver.wait(function () {
-          //var elementPresent = until.elementLocated(By.id("kmw-agree"));
-          return driver.findElement(By.id('kmw-agree')).isDisplayed();
-          //console.log("is element present? = ");
-          //console.log(elementPresent);
-          //return elementPresent;
-        }, 10*1000
-      );
-      driver.sleep(500);
-      driver.findElement(By.id('kmw-agree')).click();
-      const script = `
 
-        var kmwRecaptcha = document.getElementById("kmw-bypass-recaptcha-secret");
-        kmwRecaptcha.value= "${process.env.BYPASS_RECAPTCHA_SECRET}";
-        var $recaptcha = jQuery(kmwRecaptcha);
-        $recaptcha.trigger('kmwChange');
-        setInterval(function() {
-            if ($('#kmw-done-uploading').length !== 0) {
-              document.getElementById('kmw-article-upload-form').submit();
-            }
-          }, 1000
-        );
-        return null;
-      `
-      driver.executeScript(script).then(function(returnValue) {
-      });
-    }, function(err){
-    logError(err);
-    process.exit(1);
-    }
-  ).then(function(){}, function(err) {
-    logError(err);
-    process.exit(1);
-  });
+  driver.sleep(500);
+   driver.wait(function () {
+       return driver.findElement(By.id('kmw-terms-tab')).isDisplayed();
+     }, 10*1000
+   );
+   driver.findElement(By.id('kmw-terms-tab')).click();
+   driver.wait(function () {
+       //var elementPresent = until.elementLocated(By.id("kmw-agree"));
+       return driver.findElement(By.id('kmw-agree')).isDisplayed();
+       //console.log("is element present? = ");
+       //console.log(elementPresent);
+       //return elementPresent;
+     }, 10*1000
+   );
+   driver.sleep(500);
+   driver.findElement(By.id('kmw-agree')).click();
+   const script = `
+
+     var kmwRecaptcha = document.getElementById("kmw-bypass-recaptcha-secret");
+     kmwRecaptcha.value= "${process.env.BYPASS_RECAPTCHA_SECRET}";
+     var $recaptcha = jQuery(kmwRecaptcha);
+     $recaptcha.trigger('kmwChange');
+     setInterval(function() {
+         if ($('#kmw-done-uploading').length !== 0) {
+           document.getElementById('kmw-article-upload-form').submit();
+         }
+       }, 1000
+     );
+     return null;
+   `
+   driver.executeScript(script).then(function(returnValue) {
+   });
   driver.wait(function () {
       return driver.isElementPresent(By.className("kmw-article-view"));
     }, 10*1000

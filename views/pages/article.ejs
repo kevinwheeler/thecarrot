@@ -12,22 +12,24 @@
     <meta name="theme-color" content="#ffffff">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <%if (articleApproval === 'approved') { %>
+    <%if (articleApproval === 'approved' || articleApproval === 'autoApproved') { %>
       <title><%- title %></title>
       <meta name="description" content="<%- description %>">
 
       <meta property="og:url"           content="<%= url %>" />
       <meta property="og:type"          content="article" />
-    <meta property='article:author' content="https://www.facebook.com/nothingbutheadlines" />
-    <%if (article.authorId) { %>
-        <!--<meta property='article:author' content="<%= article.authorId %>" />-->
+      <%if (articleApproval === 'approved' || articleApproval === 'autoApproved') { %>
+        <meta property='article:author' content="https://www.facebook.com/nothingbutheadlines" />
+      <% } %>
+      <%if (article.authorId) { %>
+      <!--<meta property='article:author' content="<%= article.authorId %>" />-->
       <% } %>
       <meta property="og:title"         content="<%- article.headline %>" />
       <meta property="og:description"   content="<%- article.subline %>" />
       <meta property="og:image:width"   content="<%= article.imageWidth %>" />
       <meta property="og:image:height"  content="<%= article.imageHeight %>" />
       <meta property="og:image"         content="<%= imageURL %>" />
-      <meta property="fb:app_id"        content="<%= fbAppId %>" />
+    <meta property="fb:app_id"        content="<%= fbAppId %>" />
     <% } %>
   </head>
   <body>

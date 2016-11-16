@@ -14,7 +14,6 @@
       const pair = window.kmw.fbElementsToParseOnLoad[i];
       const el = pair[0];
       const cb = pair[1];
-      console.log("parsing from within func");
       window.FB.XFBML.parse(el, cb);
     }
   };

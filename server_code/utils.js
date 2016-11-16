@@ -187,6 +187,7 @@ const publicArticleFieldsProjection = {
   imageId: true,
   imageSlug: true,
   imageWidth: true,
+  listed: true,
   monthly_views: true,
   numDownvotes: true,
   numUpvotes: true,

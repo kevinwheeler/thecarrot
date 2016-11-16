@@ -34,6 +34,7 @@ function exportVal(app, db) {
             },
             function (err, user) {
               if (err !== null) {
+                logError(err);
                 done(err);
               } else {
                 done(null, user.value);
@@ -67,10 +68,6 @@ function exportVal(app, db) {
     });
   });
 
-
-
-// we will call this to start the GitHub Login process
-//  app.get('/auth/facebook', passport.authenticate('facebook'));
   app.get('/login', passport.authenticate('facebook', { scope: ['pages_show_list'] }));
 
   app.get('/auth/facebook/callback', passport.authenticate('facebook', {failureRedirect: '/auth-failure'}), //TODO

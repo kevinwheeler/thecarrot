@@ -95,7 +95,6 @@ function getRouteFunction(db) {
     const sess = req.session;
     const headline = req.body.headline;
     const subline = req.body.subline;
-    const category = req.body.category;
     const agreedToTerms = req.body.agreed_to_terms;
     const imageSelectionMethod = req.body.image_selection_method;
     const userAllowsImageReuse = req.body.user_allows_image_reuse;
@@ -110,7 +109,7 @@ function getRouteFunction(db) {
     //
     //if selectionmethod = uploadnew, make sure re-usable is true or false
 
-    const validationErrors = validations.validateEverything(headline, subline, category);
+    const validationErrors = validations.validateEverything(headline, subline);
     getImageColl(
     ).then(function() {return additionalValidations(agreedToTerms, imageSelectionMethod, imageId)}
     ).then(function(additionalValidationErrors) {
@@ -128,14 +127,12 @@ function getRouteFunction(db) {
             const articleURLSlug = getURLSlug(articleId, headline);
             const doc = {
               _id: articleId,
-              approval: 'pending',
               articleURLSlug: articleURLSlug,
-              category: category,
+              category: 'other',
               dateCreated: new Date(),
               flaginess: 0,
               headline: headline,
               imageId: imageId,
-              listed: true,
               numAuthenticatedFlags: 0,
               numUnauthenticatedFlags: 0,
               numDownvotes: 0,
@@ -146,6 +143,15 @@ function getRouteFunction(db) {
               subline: subline,
               upvoteScore: 0
             };
+            const AUTO_APPROVE_ARTICLES = true;
+            //const AUTO_APPROVE_ARTICLES = false;
+            if (AUTO_APPROVE_ARTICLES) {
+              doc.approval = "autoApproved";
+              doc.listed = false;
+            } else {
+              doc.approval = "pending";
+              doc.listed = true;
+            }
             const initialSummaryAttributes = updateSummaries.getInitialSummaryAttributes();
             _.merge(doc, initialSummaryAttributes);
 

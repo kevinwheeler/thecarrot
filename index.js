@@ -64,8 +64,6 @@ MongoClient.connect(MONGO_URI,
         });
       }
 
-
-
       app.get('/terms-and-conditions', function(req, res) {
         res.render('pages/termsAndConditions', {});
       });
@@ -98,7 +96,7 @@ MongoClient.connect(MONGO_URI,
         res.redirect('/');
       });
 
-      const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
+      //const approveArticles = require('./server_code/routeFunctions/approveArticles')(db);
       const approveImages = require('./server_code/routeFunctions/approveImages')(db);
       const bestArticlesJSON = require('./server_code/routeFunctions/bestArticlesJSON')(db);
       const getArticleJSON = require('./server_code/routeFunctions/getArticleJSON')(db);
@@ -115,6 +113,7 @@ MongoClient.connect(MONGO_URI,
       const postApprovalNotification = require('./server_code/routeFunctions/postApprovalNotification')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
       const getArticleFlags = require('./server_code/routeFunctions/getArticleFlags')(db);
+      const patchArticle = require('./server_code/routeFunctions/patchArticle')(db);
       const postFlagArticle = require('./server_code/routeFunctions/postFlagArticle')(db);
       const postFlaggedArticles = require('./server_code/routeFunctions/postFlaggedArticles')(db);
       const postImage = require('./server_code/routeFunctions/postImage')(db);
@@ -122,7 +121,7 @@ MongoClient.connect(MONGO_URI,
       const postVote = require('./server_code/routeFunctions/postVote')(db);
 
 
-      app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
+      //app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
       app.post('/approve-images', bodyParser.urlencoded({extended: true}), approveImages);
       app.post('/best-articles', bodyParser.json(), bestArticlesJSON);
       app.get('/article-flags', bodyParser.json(), getArticleFlags);
@@ -138,6 +137,7 @@ MongoClient.connect(MONGO_URI,
       //app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
+      app.patch('/article', bodyParser.urlencoded({extended: false}), patchArticle);
       app.post('/article-approval-notification', bodyParser.urlencoded({extended: false}), postApprovalNotification);
       app.post('/article', bodyParser.urlencoded({extended: false}), postArticle);
       app.post('/flag-article', bodyParser.urlencoded({extended: true}), postFlagArticle);
