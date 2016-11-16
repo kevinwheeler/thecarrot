@@ -38,8 +38,8 @@ export default Backbone.View.extend({
 
     "click .kmw-picture-next": "openHeadlineTab",
     "click #kmw-headline-next": "openSublineTab",
-    "click #kmw-subline-next": "openTermsTab",
-    //"click #kmw-category-next": "openTermsTab",
+    "click #kmw-subline-next": "openCreditTab",
+    "click #kmw-credit-next": "openTermsTab",
 
     "change #kmw-picture-input": "pictureInputChanged",
 
@@ -247,16 +247,16 @@ export default Backbone.View.extend({
     }
   },
 
+  openCreditTab: function() {
+    this.$("#kmw-post-anonymously-tab").click();
+  },
+
   openHeadlineTab: function() {
     this.$("#kmw-headline-tab").click();
   },
 
   openSublineTab: function() {
     this.$("#kmw-subline-tab").click();
-  },
-
-  openCategoryTab: function() {
-    this.$("#kmw-category-tab").click();
   },
 
   openTermsTab: function() {

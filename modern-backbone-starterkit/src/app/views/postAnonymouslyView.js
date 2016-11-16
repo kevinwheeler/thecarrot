@@ -29,6 +29,7 @@ export default Backbone.View.extend({
 
   render: _.throttle(function () {
       this.$el.html(template({
+        creditSrc: window.kmw.imageBaseUrl + 'static/article-credit.jpg',
         loggedIn: this.currentUserModel.get('loggedIn'),
       }));
 
