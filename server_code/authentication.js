@@ -7,7 +7,7 @@ function exportVal(app, db) {
   passport.use(new FacebookStrategy({
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: process.env.DOMAIN + "/auth/facebook/callback"
+      //callbackURL: process.env.DOMAIN + "/auth/facebook/callback"
     },
     function (accessToken, refreshToken, profile, done) {
       db.collection('user', (err, userColl) => {
@@ -68,13 +68,44 @@ function exportVal(app, db) {
     });
   });
 
-  app.get('/login', passport.authenticate('facebook', { scope: ['pages_show_list'] }));
+  // Next four routes use the technique found here:
+  // http://stackoverflow.com/questions/15513427/can-the-callback-for-facebook-pasport-be-dynamically-constructed
+  app.get('/login', function(request, response, next) {
+    passport.authenticate('facebook', {
+      callbackURL: process.env.DOMAIN + "/auth/facebook/callback",
+      scope: ['pages_show_list']
+    })(request, response, next);
+  });
 
-  app.get('/auth/facebook/callback', passport.authenticate('facebook', {failureRedirect: '/auth-failure'}), //TODO
-    function (req, res) {
-      res.redirect('/');
-    }
-  );
+  app.get('/auth/facebook/callback', function(request, response, next) {
+    passport.authenticate(
+      'facebook',
+      {
+        callbackURL: process.env.DOMAIN + "/auth/facebook/callback",
+        successRedirect:"/",
+        failureRedirect:"/auth-failure" //TODO
+      }
+    ) (request,response,next);
+  });
+
+
+  app.get('/upload-login', function(request, response, next) {
+    passport.authenticate('facebook', {
+      callbackURL: process.env.DOMAIN + "/auth/facebook/upload-callback",
+      scope: ['pages_show_list']
+    })(request, response, next);
+  });
+
+  app.get('/auth/facebook/upload-callback', function(request, response, next) {
+    passport.authenticate(
+      'facebook',
+      {
+        callbackURL: process.env.DOMAIN + "/auth/facebook/upload-callback",
+        successRedirect:"/after-upload-auth",
+        failureRedirect:"/auth-failure" //TODO
+      }
+    ) (request,response,next);
+  });
 }
 
 module.exports = exportVal;

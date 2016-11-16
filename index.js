@@ -74,6 +74,11 @@ MongoClient.connect(MONGO_URI,
         res.render('pages/dmcaInstructions', {});
       });
 
+      app.get('/after-upload-auth', function(req, res) {
+        res.render('pages/afterUploadAuth', {});
+      });
+
+
       // IMPORTANT: Routes are duplicated in client side code.
       // Namely the router and the nav template.
       app.get('/', sendIndex);
@@ -108,7 +113,7 @@ MongoClient.connect(MONGO_URI,
       const getNeedApprovalArticlesJSON = require('./server_code/routeFunctions/getNeedApprovalArticlesJSON')(db);
       const getNeedApprovalImagesJSON = require('./server_code/routeFunctions/getNeedApprovalImagesJSON')(db);
       const getTextSearchImages = require('./server_code/routeFunctions/getTextSearchImages')(db);
-      //const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON')(db);
+      const getUserInfo = require('./server_code/routeFunctions/getUserInfoJSON').getRouteFunction(db);
       const mostViewedArticlesJSON = require('./server_code/routeFunctions/mostViewedArticlesJSON')(db);
       const postApprovalNotification = require('./server_code/routeFunctions/postApprovalNotification')(db);
       const postArticle = require('./server_code/routeFunctions/postArticle')(db);
@@ -134,7 +139,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/text-search-images', getTextSearchImages);
       app.get('/articles-that-need-approval', getNeedApprovalArticlesJSON);
       app.get('/images-that-need-approval', getNeedApprovalImagesJSON);
-      //app.get('/userinfo', getUserInfo);
+      app.get('/userinfo', getUserInfo);
       // most-viewed-articles uses post instead of get to get over query string length limitations
       app.post('/most-viewed-articles', bodyParser.json(), mostViewedArticlesJSON);
       app.patch('/article', bodyParser.urlencoded({extended: false}), patchArticle);

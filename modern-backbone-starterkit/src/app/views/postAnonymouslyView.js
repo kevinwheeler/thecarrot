@@ -12,13 +12,19 @@ export default Backbone.View.extend({
   className: 'kmw-post-anonymously-view',
 
   events: {
-    //"click .picture-arrow-left": "displayPreviousImages",
+    "click .post-anonymously-login": "onLoginClicked",
   },
 
   initialize: function(options) {
+    const self = this;
     this.currentUserModel = options.currentUserModel;
-    //this.listenTo(this.imageCollection, 'sync', this.render);
     this.render();
+
+    $(window).on('focus', function() {
+      self.currentUserModel.fetchCurrentUser();
+    });
+
+    this.listenTo(this.currentUserModel, 'change', this.render);
   },
 
   render: _.throttle(function () {
@@ -29,4 +35,8 @@ export default Backbone.View.extend({
       return this;
     }, 16
   ),
+
+  onLoginClicked: function() {
+    window.open("/upload-login", "uploadLoginWindow");
+  }
 });
