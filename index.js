@@ -1,9 +1,10 @@
+const _ = require('lodash');
 const aws = require('aws-sdk');
+const articleRoute = require('./modern-backbone-starterkit/src/isomorphic/routes').articleRoute;
 const bodyParser = require('body-parser');
 const categories = require('./modern-backbone-starterkit/src/isomorphic/categories').categories;
 const escapeUserInfo = require('./modern-backbone-starterkit/src/isomorphic/utils').escapeUserInfo;
 const express = require('express');
-const articleRoute = require('./modern-backbone-starterkit/src/isomorphic/routes').articleRoute;
 const logError = require('./server_code/utils').logError;
 const MongoClient = require('mongodb').MongoClient;
 const multer = require('multer');
@@ -64,6 +65,10 @@ MongoClient.connect(MONGO_URI,
         });
       }
 
+
+
+
+
       app.get('/terms-and-conditions', function(req, res) {
         res.render('pages/termsAndConditions', {});
       });
@@ -78,6 +83,8 @@ MongoClient.connect(MONGO_URI,
         res.render('pages/afterUploadAuth', {});
       });
 
+      const refreshFacebookInfoOrLogout =  require('./server_code/updateUser')(db);
+
 
       // IMPORTANT: Routes are duplicated in client side code.
       // Namely the router and the nav template.
@@ -90,7 +97,7 @@ MongoClient.connect(MONGO_URI,
       app.get('/admin/upload', sendIndex);
       app.get('/flags/:articleId', sendIndex);
       app.get('/user/:userid', sendIndex);
-      app.get('/upload', sendIndex);
+      app.get('/upload', refreshFacebookInfoOrLogout, sendIndex);
 
       for (let i=0; i < categories.length; i++) {
         app.get('/' + categories[i].urlSlug, sendIndex);
@@ -124,7 +131,6 @@ MongoClient.connect(MONGO_URI,
       const postImage = require('./server_code/routeFunctions/postImage')(db);
       const postListArticles = require('./server_code/routeFunctions/postListArticles')(db);
       const postVote = require('./server_code/routeFunctions/postVote')(db);
-
 
       //app.post('/approve-articles', bodyParser.urlencoded({extended: true}), approveArticles);
       app.post('/approve-images', bodyParser.urlencoded({extended: true}), approveImages);
