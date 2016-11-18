@@ -68,6 +68,7 @@ MongoClient.connect(MONGO_URI,
 
 
 
+      const refreshFacebookInfoOrLogout =  require('./server_code/updateUser')(db);
 
       app.get('/terms-and-conditions', function(req, res) {
         res.render('pages/termsAndConditions', {});
@@ -79,11 +80,10 @@ MongoClient.connect(MONGO_URI,
         res.render('pages/dmcaInstructions', {});
       });
 
-      app.get('/after-upload-auth', function(req, res) {
+      app.get('/after-upload-auth', refreshFacebookInfoOrLogout, function(req, res) {
         res.render('pages/afterUploadAuth', {});
       });
 
-      const refreshFacebookInfoOrLogout =  require('./server_code/updateUser')(db);
 
 
       // IMPORTANT: Routes are duplicated in client side code.

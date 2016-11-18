@@ -18,11 +18,10 @@
 
       <meta property="og:url"           content="<%= url %>" />
       <meta property="og:type"          content="article" />
-      <%if (articleApproval === 'approved' || articleApproval === 'autoApproved') { %>
+      <%if (article.authorUrl) { %>
+        <meta property='article:author' content="<%= article.authorUrl %>" />
+      <% } else { %>
         <meta property='article:author' content="https://www.facebook.com/nothingbutheadlines" />
-      <% } %>
-      <%if (article.authorId) { %>
-      <!--<meta property='article:author' content="<%= article.authorId %>" />-->
       <% } %>
       <meta property="og:title"         content="<%- article.headline %>" />
       <meta property="og:description"   content="<%- article.subline %>" />
