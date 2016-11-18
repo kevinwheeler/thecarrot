@@ -4,17 +4,19 @@
       If you want credit for your headline, we will put a link to your page on our website and tell people they should
       like/follow you. Also, your headline may look something like this when shared on Facebook:
     </div>
-    <div class="row">
+    <div class="row post-anon-image-container">
       <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
         <img src="{{creditSrc}}" class="img-responsive">
       </div>
     </div>
   </div>
   {{#if loggedIn}}
-    <label for="post-anon-checkbox">Post Anonymously</label>
+    <label class="post-anon-checkbox-label" for="post-anon-checkbox">Post Anonymously?</label>
     <input id="post-anon-checkbox" name="post_anonymously" type="checkbox">
 
     <div class="post-anon-author-container">
+      <label></label>
+      Which page would you like to receive credit for this headline?
       <select id="post-anon-author-url" name="author_url">
         {{#each userPages}}
           <option value="{{this.link}}">{{this.name}}</option>

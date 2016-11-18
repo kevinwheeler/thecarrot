@@ -96,12 +96,12 @@ function getArticle(db, articleId, userFbId, userSid, userIp) {
         }
 
         joinArticleWithImage(db, article).then(function() {
+          // return article except with private fields omitted.
           const args = [article].concat(publicArticleFields);
           resolve(_.pick.apply(null, args));
         }).catch(function(err) {
           reject(err);
         });
-        // return article except with private fields omitted.
       }
     }).catch(function(err) {
       reject(err);

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 
 import template from 'TEMPLATESDIR/postAnonymouslyTemplate.hbs';
-//import 'STYLESDIR/stylus/pictureSelect.css';
+import 'STYLESDIR/stylus/postAnonymously.css';
 
 //export default Marionette.ItemView.extend({
 export default Backbone.View.extend({
