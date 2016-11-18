@@ -46,7 +46,8 @@ const getUserInfoJSON = function(db, userId, includeAccessToken) {
           _id: false,
           displayName: true,
           fbId: true,
-          userType: true
+          userType: true,
+          pages: true
         };
         if (includeAccessToken) {
           projection.fbAccessToken = true;

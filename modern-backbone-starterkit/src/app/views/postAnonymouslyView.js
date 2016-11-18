@@ -13,6 +13,7 @@ export default Backbone.View.extend({
 
   events: {
     "click .post-anonymously-login": "onLoginClicked",
+    "change #post-anon-checkbox": "onCheckboxChanged",
   },
 
   initialize: function(options) {
@@ -28,14 +29,30 @@ export default Backbone.View.extend({
   },
 
   render: _.throttle(function () {
-      this.$el.html(template({
+      const templateParameters = {
         creditSrc: window.kmw.imageBaseUrl + 'static/article-credit.jpg',
         loggedIn: this.currentUserModel.get('loggedIn'),
-      }));
+      }
+      if (this.currentUserModel.get('loggedIn')) {
+        templateParameters.userPages = this.currentUserModel.toJSON().pages;
+      } else {
+        templateParameters.userPages = [];
+      }
+      this.$el.html(template(templateParameters));
 
       return this;
     }, 16
   ),
+
+  onCheckboxChanged: function() {
+    const $container = $('.post-anon-author-container');
+    const isChecked = this.$('#post-anon-checkbox').is(':checked');
+    if (isChecked) {
+      $container.hide();
+    } else {
+      $container.show();
+    }
+  },
 
   onLoginClicked: function() {
     window.open("/upload-login", "uploadLoginWindow");

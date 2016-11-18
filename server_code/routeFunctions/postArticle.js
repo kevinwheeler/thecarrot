@@ -59,7 +59,8 @@ function getRouteFunction(db) {
     return prom;
   }
 
-  const additionalValidations = function(agreedToTerms, imageSelectionMethod, imageId) {
+  // Validations that are server-side only aka not isomorphic.
+  const additionalValidations = function(agreedToTerms, imageSelectionMethod, imageId, postAnonymously, authorUrl, user) {
     let validationErrors = [];
     if (agreedToTerms === undefined) {
       validationErrors.push("Must agree to terms.");
@@ -67,6 +68,26 @@ function getRouteFunction(db) {
 
     if (imageSelectionMethod !== 'uploadNew' && imageSelectionMethod !== 'previouslyUploaded') {
       validationErrors.push("imageSelectionMethod invalid.");
+    }
+
+    if (!postAnonymously) {
+      if (user) {
+        if (_.isArray(user.pages)) {
+          let found = false;
+          _.forEach(user.pages, function(page) {
+            if (authorUrl === page.link) {
+              found = true;
+            }
+          });
+          if (!found) {
+            validationErrors.push("Page url not found in the pages that the user owns.");
+          }
+        } else {
+          validationErrors.push("Not posting anonymously, but the user's page list isn't setup yet.");
+        }
+      } else {
+        validationErrors.push("Not posting anonymously, but the user isn't logged in.");
+      }
     }
 
     if (typeof(imageId) !== "number") {
@@ -95,6 +116,8 @@ function getRouteFunction(db) {
     const sess = req.session;
     const headline = req.body.headline;
     const subline = req.body.subline;
+    const postAnonymously = req.body.post_anonymously;
+    const authorUrl = req.body.author_url;
     const agreedToTerms = req.body.agreed_to_terms;
     const imageSelectionMethod = req.body.image_selection_method;
     const userAllowsImageReuse = req.body.user_allows_image_reuse;
@@ -111,7 +134,7 @@ function getRouteFunction(db) {
 
     const validationErrors = validations.validateEverything(headline, subline);
     getImageColl(
-    ).then(function() {return additionalValidations(agreedToTerms, imageSelectionMethod, imageId)}
+    ).then(function() {return additionalValidations(agreedToTerms, imageSelectionMethod, imageId, postAnonymously, authorUrl, req.user)}
     ).then(function(additionalValidationErrors) {
       if (validationErrors) {
         additionalValidationErrors.concat(validationErrors);
@@ -143,6 +166,20 @@ function getRouteFunction(db) {
               subline: subline,
               upvoteScore: 0
             };
+
+            if (!postAnonymously) {
+              let authorName;
+              _.forEach(req.user.pages, function(page) {
+                if (authorUrl === page.link) {
+                  authorName = page.name;
+                }
+              });
+              doc.authorUrl = authorUrl;
+              doc.authorName = authorName;
+              if (authorName === undefined) {
+                throw "authorName undefined";
+              }
+            }
             const AUTO_APPROVE_ARTICLES = true;
             //const AUTO_APPROVE_ARTICLES = false;
             if (AUTO_APPROVE_ARTICLES) {

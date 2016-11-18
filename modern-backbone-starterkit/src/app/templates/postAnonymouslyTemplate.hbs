@@ -11,11 +11,20 @@
     </div>
   </div>
   {{#if loggedIn}}
-   logged in
+    <label for="post-anon-checkbox">Post Anonymously</label>
+    <input id="post-anon-checkbox" name="post_anonymously" type="checkbox">
+
+    <div class="post-anon-author-container">
+      <select id="post-anon-author-url" name="author_url">
+        {{#each userPages}}
+          <option value="{{this.link}}">{{this.name}}</option>
+        {{/each}}
+      </select>
+    </div>
   {{else}}
-    not logged in<br>
-    <a class="post-anonymously-login kmw-hyperlink-styles" href="#">Log in</a>
+    <input name="post_anonymously" type="hidden" value="true">
+    You are not logged in, so you will be posting anonymously. If you want credit for your headline, please
+    <a class="post-anonymously-login kmw-hyperlink-styles" href="#">Log in</a>.
   {{/if}}
-  post anonymously template
   <br><button type="button" id="kmw-credit-next" class="btn btn-primary upload-next-button">Done</button>
 </div>
