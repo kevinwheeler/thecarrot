@@ -136,6 +136,12 @@
       {{else}}
         <div class='FB-LIKE-STUB'></div>
       {{/unless}}
+      {{#if displayAuthor}}
+        <div class="kmw-authored-by kmw-font-stuff kmw-align-with-comments">
+          <!-- class kmw-our-page -->
+          This headline was authored by <a target="_blank" class="kmw-authors-page" href="{{authorUrl}}">{{authorName}}</a>. Please like / follow them.
+        </div>
+      {{/if}}
       <br/>
       <div class="article-other-headlines">
         Other Headlines You May Like:

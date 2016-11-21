@@ -43,6 +43,8 @@ export default Backbone.View.extend({
   },
 
   render: _.throttle(function() {
+      const article = this.articleModel.toJSON();
+
       const viewerIsAuthor = this.articleModel.get('viewerIsAuthor');
       const approved = this.articleModel.get('approval') === 'approved' || this.articleModel.get('approval') === 'autoApproved' ;
       const approvalDenied = this.articleModel.get('approval') === 'denied';
@@ -54,23 +56,32 @@ export default Backbone.View.extend({
       const isAdmin = this.currentUserModel.get('userType') === 'admin';
       const authorOrApprovedOrAdmin = viewerIsAuthor || approved || isAdmin;
 
+
+      const displayAuthor = article.authorUrl !== undefined;
+      const authorUrl = article.authorUrl;
+      const authorName = article.authorName;
+
+
       const articleURL = [location.protocol, '//', location.host, location.pathname].join('');
       const urlEncodedArticleURL = encodeURIComponent(articleURL);
       this.$el.children().detach();
       this.$el.html(template({
+        authorName: authorName,
         authorOrApprovedOrAdmin: authorOrApprovedOrAdmin,
+        authorUrl: authorUrl,
         approved: approved,
         approvalDenied: approvalDenied,
         approvalPending: approvalPending,
         approvalPendingAndAuthor: approvalPendingAndAuthor,
         approvalPendingAndNotAuthor: approvalPendingAndNotAuthor,
         approvalStatus: approvalStatus,
-        article: this.articleModel.toJSON(),
+        article: article,
         articleDoneFetching: articleDoneFetching,
         //http://stackoverflow.com/questions/5817505/is-there-any-method-to-get-url-without-query-string-in-java-script
         articleURL: articleURL,
         categoryStatus: this.articleModel.get('category'),
         categories: categories,
+        displayAuthor: displayAuthor,
         imageURL: this.articleModel.get('imageURL'),
         isAdmin: isAdmin,
         isDownVoted: this.voteModel.isDownVoted(),

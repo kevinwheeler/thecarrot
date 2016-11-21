@@ -174,7 +174,8 @@ function getRouteFunction(db) {
                   authorName = page.name;
                 }
               });
-              doc.authorUrl = req.user.fbId;//TODO
+              //doc.authorUrl = req.user.fbId;
+              doc.authorUrl = authorUrl;
               doc.authorName = authorName;
               if (authorName === undefined) {
                 throw "authorName undefined";
