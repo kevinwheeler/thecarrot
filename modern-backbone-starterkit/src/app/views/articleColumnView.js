@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Backbone from 'backbone';
 
 import ArticleCardView from 'VIEWSDIR/articleCardView';
+import AdView from 'VIEWSDIR/adView300x250';
 import VoteModel from 'MODELSDIR/voteModel';
 
 export default Backbone.View.extend({
@@ -50,6 +51,10 @@ export default Backbone.View.extend({
       });
       self.$el.append(articleCardView.el);
       self.articleCardViews.push(articleCardView);
+
+      if (self.articleCardViews.length % 4 === 0 && window.kmw.chitikaCounter < 3) {
+        self.$el.append((new AdView()).el);
+      }
     }).catch(function(err) {
       if (err !== "no more results") {
         throw err;

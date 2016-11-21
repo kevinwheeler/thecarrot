@@ -75,10 +75,10 @@ export default Backbone.View.extend({
   getNumColumns: function() {
     const windowWidth = $(window).width();
 
-    if (windowWidth < 800) {
+    if (windowWidth < 850) {
       return 1
     }
-    else if (windowWidth < 1200) {
+    else if (windowWidth < 1300) {
       return 2
     } else {
       return 3;
