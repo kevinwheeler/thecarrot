@@ -1,7 +1,7 @@
 {
-  "name": "modern-backbone-starterkit",
-  "version": "0.3.0",
-  "description": "Lightweight starting point for a modern backbone web app.",
+  "name": "nothing-but-headlines",
+  "version": "1.0.0",
+  "description": "Create headlines to be displayed as articles on Facebook",
   "keywords": [
     "backbone",
     "starterkit",
@@ -16,11 +16,11 @@
     "start": "gulp",
     "test": "karma start"
   },
-  "author": "@sabarasaba <rivasign@gmail.com>",
-  "license": "MIT",
+  "author": "Kevin Wheeler",
+  "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "git://github.com/sabarasaba/modern-backbone-starterkit.git"
+    "url": "git://github.com/kevinwheeler/headlines"
   },
   "devDependencies": {
     "babel-core": "^6.1.2",

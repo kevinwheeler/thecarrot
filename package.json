@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.1.5",
-  "description": "A sample Node.js app using Express 4",
+  "name": "nothing-but-headlines",
+  "version": "1.0.0",
+  "description": "Create headlines to be displayed as articles on Facebook",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -35,14 +35,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/heroku/node-js-getting-started"
+    "url": "https://github.com/kevinwheeler/headlines"
   },
   "keywords": [
     "node",
     "heroku",
     "express"
   ],
-  "license": "MIT",
+  "license": "UNLICENSED",
   "devDependencies": {
     "dotenv": "^2.0.0",
     "jscs": "^2.10.1"
